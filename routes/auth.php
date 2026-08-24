@@ -16,6 +16,7 @@ Route::middleware('guest')->group(function () {
         ->name('register');
 
     Route::post('register', [RegisteredUserController::class, 'store']);
+    //stop register kita ga pake kamu yak
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
