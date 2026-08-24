@@ -12,19 +12,9 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    @if(Auth::user()->role === 'admin')
-                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                            {{ __('Dashboard Admin') }}
-                        </x-nav-link>
-                    @elseif(Auth::user()->role === 'petugas')
-                        <x-nav-link :href="route('petugas.dashboard')" :active="request()->routeIs('petugas.dashboard')">
-                            {{ __('Dashboard Petugas') }}
-                        </x-nav-link>
-                    @else
-                        <x-nav-link :href="route('nasabah.dashboard')" :active="request()->routeIs('nasabah.dashboard')">
-                            {{ __('Dashboard Nasabah') }}
-                        </x-nav-link>
-                    @endif
+                    <x-nav-link :href="route('operator.nasabah.index')" :active="request()->routeIs('operator.nasabah.*')">
+                        {{ __('Data Master Nasabah') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -77,19 +67,9 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            @if(Auth::user()->role === 'admin')
-                <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                    {{ __('Dashboard Admin') }}
-                </x-responsive-nav-link>
-            @elseif(Auth::user()->role === 'petugas')
-                <x-responsive-nav-link :href="route('petugas.dashboard')" :active="request()->routeIs('petugas.dashboard')">
-                    {{ __('Dashboard Petugas') }}
-                </x-responsive-nav-link>
-            @else
-                <x-responsive-nav-link :href="route('nasabah.dashboard')" :active="request()->routeIs('nasabah.dashboard')">
-                    {{ __('Dashboard Nasabah') }}
-                </x-responsive-nav-link>
-            @endif
+            <x-responsive-nav-link :href="route('operator.nasabah.index')" :active="request()->routeIs('operator.nasabah.*')">
+                {{ __('Data Master Nasabah') }}
+            </x-responsive-nav-link>
         </div>
 
         <!-- Responsive Settings Options -->

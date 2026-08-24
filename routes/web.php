@@ -1,6 +1,9 @@
 <?php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\NasabahController;
+use App\Http\Controllers\TabunganController;
+use App\Http\Controllers\AdminNasabahController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -10,24 +13,32 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
 
     // Admin
-    Route::middleware(['role:admin'])->group(function () {
-        Route::get('/admin/dashboard', function () {
-            return view ('dashboard');
-        })->name('admin.dashboard');
+    Route::middleware(['role:admin'])->prefix('admin')->group(function () {
+        Route::get('/dashboard', function () {
+            return redirect()->route('admin.nasabah.index');
+        });
+        Route::get('/nasabah', [AdminNasabahController::class, 'index'])->name('admin.nasabah.index');
     });
 
-    // Petugas
-    Route::middleware(['role:petugas'])->group(function () {
-        Route::get('/petugas/dashboard', function () {
-            return view ('dashboard');
-        })->name('petugas.dashboard');
+    // operator
+    Route::middleware(['role:operator'])->prefix('operator')->group(function () {
+        Route::get('/dashboard', function () {
+            return redirect()->route('operator.nasabah.index');
+        });
+
+        Route::resource('nasabah', NasabahController::class)->names([
+            'index'   => 'operator.nasabah.index',
+            'create'  => 'operator.nasabah.create',
+            'store'   => 'operator.nasabah.store',
+            'edit'    => 'operator.nasabah.edit',
+            'update'  => 'operator.nasabah.update',
+            'destroy' => 'operator.nasabah.destroy',
+        ]);
     });
 
     // Nasabah
     Route::middleware(['role:nasabah'])->group(function () {
-        Route::get('/nasabah/dashboard', function () {
-            return view ('dashboard');
-        })->name('nasabah.dashboard');
+        Route::get('/nasabah/dashboard', [TabunganController::class, 'index'])->name('nasabah.dashboard');
     });
 
         Route::middleware('auth')->group(function () {

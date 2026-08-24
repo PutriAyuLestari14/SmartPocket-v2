@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('detail_tabungans', function (Blueprint $table) {
+        Schema::create('detail_tabungan', function (Blueprint $table) {
             $table->id();
             $table->string('no_rek');
             $table->foreign('no_rek')->references('no_rek')->on('rekening_tabungan')->onDelete('cascade');

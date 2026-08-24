@@ -7,10 +7,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next, ...$roles): Response
+    public function handle(Request $request, Closure $next, ...$roles)
     {
-        if (! $request->user() || ! in_array($request->user()->role, $roles)) {
-            abort(403, 'Akses Ditolak: Kamu tidak memiliki izin.');
+        // Cek apakah role user yang login ada di dalam daftar role yang diizinkan
+        if (!in_array($request->user()->role, $roles)) {
+            abort(403, 'Kamu tidak memiliki akses ke halaman ini.');
         }
 
         return $next($request);
