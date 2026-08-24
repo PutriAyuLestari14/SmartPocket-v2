@@ -291,7 +291,7 @@
                     <!-- Sign Up -->
                     <p class="text-center text-sm text-slate-600 mt-6">
                         Belum memiliki akun? 
-                        <a href="#" class="font-bold text-brand-600 hover:text-brand-700 transition">Daftar di Kantor Bank Mini</a>
+                        <a href="#" class="font-bold text-brand-600 hover:text-brand-700 transition">Daftar di Bank Mini Terpadu</a>
                     </p>
 
                 </div>
