@@ -31,9 +31,12 @@ class NasabahController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama' => 'required|string|max:255',
-            'alamat' => 'required|string',
             'username' => 'required|string|unique:users,username',
+            'nama' => 'required|string|max:255',
+            'kategori' => 'required|in:siswa,guru,staf',
+            'kelas' => 'nullable|string',
+            'alamat' => 'required|string',
+            'saldo' => 'nullable|numeric|min:0',
             'password' => 'required|string|min:6',
             'tanggal_daftar' => 'required|date',
             'status' => 'required|in:aktif,nonaktif',
@@ -49,9 +52,10 @@ class NasabahController extends Controller
             ]);
 
             $nasabah = Nasabah::create([
-                'id_user' => $user->id,
+            'id_user' => $user->id,
                 'nama' => $request->nama,
-                'password' => $request->password,
+                'kategori' => $request->kategori,
+                'kelas' => $request->kelas,
                 'alamat' => $request->alamat,
                 'tanggal_daftar' => $request->tanggal_daftar,
                 'status' => $request->status,

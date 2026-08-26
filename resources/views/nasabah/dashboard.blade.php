@@ -110,6 +110,15 @@
                     <i class="fas fa-plus text-xs"></i> Transaksi Baru
                 </button>
             </div>
+
+            <div class="p-4 border-t border-gray-100">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                        <i class="fas fa-sign-out-alt text-xs"></i> Logout
+                    </button>
+                </form>
+            </div>
         </aside>
 
         <!-- Main Content -->
@@ -118,7 +127,7 @@
             <header class="flex justify-between items-center mb-10">
                 <div>
                     <h2 class="text-xl font-bold text-slate-900">Selamat datang 👋</h2>
-                    <p class="text-sm text-slate-500 mt-1">Ahmad Fauzi</p>
+                    <p class="text-sm text-slate-500 mt-1">{{ auth()->user()->name }}</p>
                 </div>
                 <div class="flex items-center gap-4">
                     <button class="w-9 h-9 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-700 hover:border-gray-300 transition-colors relative">
@@ -127,7 +136,7 @@
                     </button>
                     <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
                         <div class="text-right">
-                            <p class="text-sm font-semibold text-slate-900">Ahmad Fauzi</p>
+                            <p class="text-sm font-semibold text-slate-900">{{ auth()->user()->name }}</p>
                             <p class="text-xs text-slate-500">Siswa</p>
                         </div>
                         <div class="w-9 h-9 bg-emerald-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">

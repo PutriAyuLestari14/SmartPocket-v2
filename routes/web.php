@@ -4,12 +4,13 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NasabahController;
 use App\Http\Controllers\TabunganController;
 use App\Http\Controllers\AdminNasabahController;
+use App\Http\Controllers\OperatorController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Route yang wajib login
+
 Route::middleware(['auth'])->group(function () {
 
     // Admin
@@ -22,9 +23,7 @@ Route::middleware(['auth'])->group(function () {
 
     // operator
     Route::middleware(['role:operator'])->prefix('operator')->group(function () {
-        Route::get('/dashboard', function () {
-            return redirect()->route('operator.nasabah.index');
-        });
+        Route::get('/dashboard', [OperatorController::class, 'index'])->name('operator.dashboard');
 
         Route::resource('nasabah', NasabahController::class)->names([
             'index'   => 'operator.nasabah.index',
@@ -33,6 +32,21 @@ Route::middleware(['auth'])->group(function () {
             'edit'    => 'operator.nasabah.edit',
             'update'  => 'operator.nasabah.update',
             'destroy' => 'operator.nasabah.destroy',
+        ]);
+
+        Route::resource('setoran', SetoranController::class)->names([
+            'create' => 'operator.setoran.create',
+            'store' => 'operator.setoran.store',
+        ]);
+
+        Route::resource('penarikan', PenarikanController::class)->names([
+            'create' => 'operator.penarikan.create',
+            'store' => 'operator.penarikan.store',
+        ]);
+
+        Route::resource('pembayaran', PembayaranController::class)->names([
+            'create' => 'operator.pembayaran.create',
+            'store' => 'operator.pembayaran.store',
         ]);
     });
 

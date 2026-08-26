@@ -13,7 +13,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. ADMIN (Login di users, data di petugas)
         $adminUser = User::firstOrCreate(['username' => 'admin123'], [
             'name' => 'Admin BMT',
             'password' => Hash::make('admin123'),
@@ -25,19 +24,17 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin', // <-- Role di tabel petugas
         ]);
 
-        // 2. OPERATOR (Login di users, data di petugas)
         $operatorUser = User::firstOrCreate(['username' => 'operator123'], [
             'name' => 'Operator BMT',
             'password' => Hash::make('operator123'),
-            'role' => 'operator', // <-- Role di users
+            'role' => 'operator',
         ]);
         Petugas::firstOrCreate(['id_user' => $operatorUser->id], [
             'Username' => 'operator123',
             'Password' => 'operator123',
-            'role' => 'operator', // <-- Role di tabel petugas
+            'role' => 'operator', 
         ]);
 
-        // 3. NASABAH (Login di users, data di nasabah)
         $nasabahUser = User::firstOrCreate(['username' => '12345678'], [
             'name' => 'Siswa Nasabah',
             'password' => Hash::make('nasabah123'),
@@ -51,7 +48,6 @@ class DatabaseSeeder extends Seeder
             'status' => 'aktif',
         ]);
 
-        // 4. REKENING
         RekeningTabungan::firstOrCreate(['id_nasabah' => $nasabah->id_nasabah], [
             'no_rek' => 'RK-' . str_pad($nasabahUser->id, 4, '0', STR_PAD_LEFT),
             'saldo' => 500000,
