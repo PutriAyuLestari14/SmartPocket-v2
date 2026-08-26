@@ -32,7 +32,8 @@
             </div>
             
             <nav class="p-4 space-y-1 flex-1 overflow-y-auto">
-                <a href="{{ route('operator.dashboard') }}" class="flex items-center gap-3 px-4 py-3 bg-yellow-400 text-slate-900 rounded-lg text-sm font-semibold transition-colors">
+
+                <a href="{{ route('operator.dashboard') }}" class="flex items-center gap-3 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium transition-colors">
                     <i class="fas fa-home w-5 text-center"></i> Dashboard
                 </a>
                 

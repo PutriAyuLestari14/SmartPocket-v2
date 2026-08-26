@@ -34,7 +34,7 @@
                 </a>
                 
                 <div class="pt-2">
-                    <a href="{{ route('operator.nasabah.index') }}" class="flex items-center gap-3 px-4 py-3 bg-yellow-400 text-slate-900 rounded-lg text-sm font-semibold transition-colors">
+                    <a href="{{ route('operator.nasabah.index') }}" class="flex items-center gap-3 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium transition-colors">
                         <i class="fas fa-users w-5 text-center"></i> Data Nasabah
                     </a>
                 </div>
@@ -73,7 +73,7 @@
             <div class="p-4 border-t border-gray-100">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                         <i class="fas fa-sign-out-alt text-xs"></i> Logout
                     </button>
                 </form>
@@ -189,7 +189,7 @@
                                         <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
                                             <span class="text-xs font-bold text-emerald-600">{{ substr($n->nama, 0, 2) }}</span>
                                         </div>
-                                        <span class="font-semibold text-slate-900">{{ $n->nama }}</span>
+                                        <span class="font-semibold text-slate-800">{{ $n->nama }}</span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-slate-600">XI RPL 1</td>
@@ -201,10 +201,19 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex justify-center gap-2">
-                                        <a href="#" class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 transition-colors">
-                                            <i class="fas fa-eye text-sm"></i>
-                                        </a>
-                                        <a href="{{ route('operator.nasabah.edit', $n->id_nasabah) }}" class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 transition-colors">
+                                        <form action="{{ route('operator.nasabah.destroy', $n->id_nasabah) }}" 
+                                            method="POST" 
+                                            onsubmit="return confirm('Yakin mau hapus data nasabah?')"
+                                            class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" 
+                                                    class="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center text-red-600 transition-colors" 
+                                                    title="Hapus">
+                                                <i class="fas fa-trash text-sm"></i>
+                                            </button>
+                                        </form>
+                                        <a href="{{ route('operator.nasabah.edit', $n->id_nasabah) }}" class="w-8 h-8 bg-green-100 hover:bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 transition-colors">
                                             <i class="fas fa-edit text-sm"></i>
                                         </a>
                                     </div>
