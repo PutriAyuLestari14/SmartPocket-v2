@@ -20,7 +20,7 @@
 <body class="bg-gray-50 text-slate-800 antialiased">
     <div class="flex min-h-screen">
         
-        <!-- Sidebar (Sama seperti Dashboard) -->
+        <!-- Sidebar (Sudah Diperbaiki) -->
         <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-screen z-20">
             <div class="p-6 border-b border-gray-100">
                 <div class="flex items-center gap-3">
@@ -36,18 +36,26 @@
             
             <nav class="p-4 space-y-1 flex-1">
                 <p class="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Menu Utama</p>
+                
+                <!-- PERBAIKAN: Link Dashboard -->
                 <a href="{{ route('nasabah.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
                     <i class="fas fa-home w-5 text-center"></i> Dashboard
                 </a>
+                
                 <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
                     <i class="fas fa-wallet w-5 text-center"></i> Saldo
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
+                
+                <!-- PERBAIKAN: Link Tarik -->
+                <a href="{{ route('nasabah.penarikan.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
                     <i class="fas fa-money-bill-wave w-5 text-center"></i> Tarik
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
+                
+                <!-- PERBAIKAN: Link Pinjam -->
+                <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
                     <i class="fas fa-hand-holding-usd w-5 text-center"></i> Pinjam
                 </a>
+                
                 <!-- Menu Aktif: Riwayat -->
                 <a href="{{ route('nasabah.riwayat') }}" class="flex items-center gap-3 px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium">
                     <i class="fas fa-history w-5 text-center"></i> Riwayat
@@ -69,7 +77,7 @@
             </div>
         </aside>
 
-        <!-- Main Content -->
+        <!-- Main Content (Tetap Sama) -->
         <main class="flex-1 ml-64 p-4 lg:p-8">
             <!-- Header -->
             <header class="mb-6 lg:mb-8">
