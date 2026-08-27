@@ -6,8 +6,11 @@ use App\Http\Controllers\NasabahController;
 use App\Http\Controllers\TabunganController;
 use App\Http\Controllers\AdminNasabahController;
 use App\Http\Controllers\OperatorController;
-use App\Http\Controllers\TransaksiController;
-use App\Http\Controllers\OperatorPeminjamanController; 
+use App\Http\Controllers\SetoranController;
+use App\Http\Controllers\PenarikanController;
+use App\Http\Controllers\PembayaranController;
+use App\Http\Controllers\NasabahPenarikanController;
+use App\Http\Controllers\NasabahPeminjamanController; // Pastikan controller ini ada!
 
 Route::get('/', function () {
     return view('welcome');
@@ -26,47 +29,37 @@ Route::middleware(['auth'])->group(function () {
     // OPERATOR
     Route::middleware(['role:operator'])->prefix('operator')->group(function () {
         Route::get('/dashboard', [OperatorController::class, 'index'])->name('operator.dashboard');
-
         Route::resource('nasabah', NasabahController::class)->names([
-            'index'   => 'operator.nasabah.index',
-            'create'  => 'operator.nasabah.create',
-            'store'   => 'operator.nasabah.store',
-            'edit'    => 'operator.nasabah.edit',
-            'update'  => 'operator.nasabah.update',
-            'destroy' => 'operator.nasabah.destroy',
+            'index' => 'operator.nasabah.index', 'create' => 'operator.nasabah.create',
+            'store' => 'operator.nasabah.store', 'edit' => 'operator.nasabah.edit',
+            'update' => 'operator.nasabah.update', 'destroy' => 'operator.nasabah.destroy',
         ]);
-
-        // Route untuk tabungan
-        Route::get('/transaksi', [TransaksiController::class, 'index'])->name('operator.transaksi.index');
-        Route::get('/transaksi/riwayat', [TransaksiController::class, 'history'])->name('operator.transaksi.riwayat');
-
-        Route::get('/transaksi/setoran', [TransaksiController::class, 'index'])->name('operator.setoran.create');
-        Route::post('/transaksi/setoran', [TransaksiController::class, 'storeDeposit'])->name('operator.setoran.store');
-        
-        Route::get('/transaksi/penarikan', [TransaksiController::class, 'index'])->name('operator.penarikan.create');
-        Route::post('/transaksi/penarikan', [TransaksiController::class, 'storeWithdrawal'])->name('operator.penarikan.store');
-
-        //Route untuk peminjaman dan pembayaran
-        Route::get('/peminjaman', [OperatorPeminjamanController::class, 'index'])->name('operator.peminjaman.index');
-        Route::get('/peminjaman/create', [OperatorPeminjamanController::class, 'create'])->name('operator.peminjaman.create');
-        Route::post('/peminjaman', [OperatorPeminjamanController::class, 'store'])->name('operator.peminjaman.store');
-        
-        Route::get('/peminjaman/pembayaran', [OperatorPeminjamanController::class, 'pembayaranIndex'])->name('operator.pembayaran.create');
-        Route::post('/peminjaman/pembayaran', [OperatorPeminjamanController::class, 'storePembayaran'])->name('operator.pembayaran.store');
+        Route::resource('setoran', SetoranController::class)->names(['create' => 'operator.setoran.create', 'store' => 'operator.setoran.store']);
+        Route::resource('penarikan', PenarikanController::class)->names(['create' => 'operator.penarikan.create', 'store' => 'operator.penarikan.store']);
+        Route::resource('pembayaran', PembayaranController::class)->names(['create' => 'operator.pembayaran.create', 'store' => 'operator.pembayaran.store']);
     });
 
-    // NASABAH
+    // NASABAH (PASTIKAN BAGIAN INI LENGKAP)
     Route::middleware(['role:nasabah'])->group(function () {
         Route::get('/nasabah/dashboard', [TabunganController::class, 'index'])->name('nasabah.dashboard');
+        
         Route::get('/nasabah/riwayat', function () {
             return view('nasabah.riwayat'); 
         })->name('nasabah.riwayat');
+
+        Route::get('/nasabah/penarikan', [NasabahPenarikanController::class, 'create'])->name('nasabah.penarikan.create');
+        Route::post('/nasabah/penarikan', [NasabahPenarikanController::class, 'store'])->name('nasabah.penarikan.store');
+
+        Route::get('/nasabah/peminjaman', [NasabahPeminjamanController::class, 'create'])->name('nasabah.peminjaman.create');
+        Route::post('/nasabah/peminjaman', [NasabahPeminjamanController::class, 'store'])->name('nasabah.peminjaman.store');
     });
 
     // PROFILE
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::middleware('auth')->group(function () {
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    });
 
 });
 
