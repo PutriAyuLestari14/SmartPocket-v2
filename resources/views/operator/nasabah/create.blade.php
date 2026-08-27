@@ -40,11 +40,11 @@
                     <i class="fas fa-users w-5 text-center"></i> Data Nasabah
                 </a>
 
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
+                <a href="{{ route('operator.transaksi.index') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
                     <i class="fas fa-exchange-alt w-5 text-center"></i> Transaksi
                 </a>
 
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
+                <a href="{{ route('operator.peminjaman.index') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
                     <i class="fas fa-hand-holding-usd w-5 text-center"></i> Peminjaman
                 </a>
 
@@ -128,27 +128,6 @@
                                 <option value="">Pilih Jenis Nasabah</option>
                                 <option value="siswa" {{ old('kategori') == 'siswa' ? 'selected' : '' }}>Siswa</option>
                                 <option value="guru" {{ old('kategori') == 'guru' ? 'selected' : '' }}>Guru</option>
-                                <option value="staf" {{ old('kategori') == 'staf' ? 'selected' : '' }}>Staf</option>
-                            </select>
-                        </div>
-
-                        <!-- Kelas/Jurusan -->
-                        <div>
-                            <label class="block text-xs lg:text-sm font-semibold text-slate-700 mb-2">Kelas / Jurusan</label>
-                            <select name="kelas" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm">
-                                <option value="">Pilih Kelas & Jurusan</option>
-                                <option value="X RPL 1">X RPL 1</option>
-                                <option value="X RPL 2">X RPL 2</option>
-                                <option value="X TKJ 1">X TKJ 1</option>
-                                <option value="X TKJ 2">X TKJ 2</option>
-                                <option value="XI RPL 1">XI RPL 1</option>
-                                <option value="XI RPL 2">XI RPL 2</option>
-                                <option value="XI TKJ 1">XI TKJ 1</option>
-                                <option value="XI TKJ 2">XI TKJ 2</option>
-                                <option value="XII RPL 1">XII RPL 1</option>
-                                <option value="XII RPL 2">XII RPL 2</option>
-                                <option value="XII TKJ 1">XII TKJ 1</option>
-                                <option value="XII TKJ 2">XII TKJ 2</option>
                             </select>
                         </div>
                     </div>

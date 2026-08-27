@@ -2,28 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Nasabah extends Model
 {
-    use HasFactory;
-
     protected $table = 'nasabah';
     protected $primaryKey = 'id_nasabah';
 
+    // PASTIKAN 'kategori' ADA DI SINI!
     protected $fillable = [
-        'id_user', 'nama', 'password', 'alamat', 'tanggal_daftar', 'status', 'photo',
+        'id_user',
+        'nama',
+        'password',
+        'alamat',
+        'tanggal_daftar',
+        'status',
+        'photo',
+        'kategori', 
     ];
 
-    public function rekening()
-    {
-        return $this->hasOne(RekeningTabungan::class, 'id_nasabah', 'id_nasabah');
-    }
-
-    public function user()
-    {
+    public function user() {
         return $this->belongsTo(User::class, 'id_user');
     }
 
+    public function rekening() {
+        return $this->hasOne(RekeningTabungan::class, 'id_nasabah', 'id_nasabah');
     }
+}

@@ -11,8 +11,25 @@ use Illuminate\Support\Facades\DB;
 
 class NasabahController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $query = Nasabah::with(['user', 'rekening']);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('username', 'like', "%{$search}%");
+            })->orWhere('nama', 'like', "%{$search}%");
+        } // search data
+
+        if ($request->filled('status_filter')) {
+            $query->where('status', $request->status_filter);
+        } // filter status 
+
+        $totalNasabah = Nasabah::where('status', 'aktif')->count();
+        $nasabahBaru = Nasabah::whereMonth('created_at', now()->month)->count(); // entah
+
+        $totalSaldo = \App\Models\RekeningTabungan::sum('saldo'); // entah
         #urutan no rek
         $nasabahs = Nasabah::with('rekening', 'user')
         ->join('rekening_tabungan', 'nasabah.id_nasabah', '=', 'rekening_tabungan.id_nasabah')
@@ -20,7 +37,7 @@ class NasabahController extends Controller
         ->select('nasabah.*')
         ->paginate(10);
 
-        return view('operator.nasabah.index', compact('nasabahs'));
+        return view('operator.nasabah.index', compact('nasabahs', 'totalNasabah', 'nasabahBaru', 'totalSaldo'));
     }
 
     public function create()
@@ -33,9 +50,8 @@ class NasabahController extends Controller
         $request->validate([
             'username' => 'required|string|unique:users,username',
             'nama' => 'required|string|max:255',
-            //'kategori' => 'required|in:siswa,guru,staf',
+            'kategori' => 'required|in:siswa,guru',
             'password' => 'required|string|min:6',
-            'kelas' => 'nullable|string',
             'alamat' => 'required|string',
             'saldo' => 'nullable|numeric|min:0',
             'tanggal_daftar' => 'required|date',
@@ -55,7 +71,7 @@ class NasabahController extends Controller
             'id_user' => $user->id,
                 'nama' => $request->nama,
                 'password' => $request->password,
-                'kelas' => $request->kelas,
+                'kategori' => $request->kategori,
                 'alamat' => $request->alamat,
                 'tanggal_daftar' => $request->tanggal_daftar,
                 'status' => $request->status,
@@ -146,6 +162,8 @@ class NasabahController extends Controller
 
     public function destroy(Nasabah $nasabah)
     {
+        RekeningTabungan::where('id_nasabah', $nasabah->id_nasabah)->delete();
+        User::where('id', $nasabah->id_user)->delete();
         $nasabah->delete();
         return redirect()->route('operator.nasabah.index')->with('success', 'Data Nasabah berhasil dihapus!');
     }

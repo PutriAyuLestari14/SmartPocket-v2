@@ -40,7 +40,7 @@
                     <i class="fas fa-users w-5 text-center"></i> Data Nasabah
                 </a>
 
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
+                <a href="{{ route('operator.transaksi.index') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
                     <i class="fas fa-exchange-alt w-5 text-center"></i> Transaksi
                 </a>
 
@@ -153,6 +153,7 @@
                     <div class="bg-white rounded-xl p-4 lg:p-5 border border-gray-200 shadow-sm">
                         <h3 class="text-sm lg:text-base font-bold text-slate-900 mb-4">Aksi Cepat</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
+                            
                             <a href="{{ route('operator.setoran.create') ?? '#' }}" class="group bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 rounded-xl p-4 text-center transition-all">
                                 <div class="w-12 h-12 bg-emerald-500 group-hover:bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 transition-colors">
                                     <i class="fas fa-plus-circle text-white text-lg"></i>
@@ -169,7 +170,7 @@
                                 <p class="text-[10px] text-slate-500 mt-1">Tarik tunai nasabah</p>
                             </a>
 
-                            <a href="{{ route('operator.pembayaran.create') ?? '#' }}" class="group bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 rounded-xl p-4 text-center transition-all">
+                            <a href="#" class="group bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 rounded-xl p-4 text-center transition-all">
                                 <div class="w-12 h-12 bg-blue-500 group-hover:bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-2 transition-colors">
                                     <i class="fas fa-hand-holding-usd text-white text-lg"></i>
                                 </div>

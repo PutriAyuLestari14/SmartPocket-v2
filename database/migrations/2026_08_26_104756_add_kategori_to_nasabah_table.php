@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::table('nasabah', function (Blueprint $table) {
             $table->enum('kategori', ['siswa', 'guru'])->default('siswa')->after('status');
-            $table->string('Jk')->nullable()->after('kategori');
         });
     }
 

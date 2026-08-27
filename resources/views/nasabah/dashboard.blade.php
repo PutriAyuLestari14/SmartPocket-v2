@@ -118,7 +118,7 @@
                     <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
                         <div class="text-right hidden sm:block">
                             <p class="text-sm font-semibold text-slate-900">{{ auth()->user()->name }}</p>
-                            <p class="text-xs text-slate-500">Siswa</p>
+                            <p class="text-xs text-slate-500">{{ ucfirst(auth()->user()->nasabah->kategori ?? 'Siswa') }}</p>
                         </div>
                         <div class="w-9 h-9 bg-emerald-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                             {{ substr(auth()->user()->name, 0, 1) }}
@@ -148,7 +148,7 @@
                         <!-- Middle: Saldo -->
                         <div class="mb-4 lg:mb-5 relative z-10">
                             <p class="text-[8px] lg:text-[9px] text-emerald-100 uppercase tracking-widest font-semibold mb-1">Saldo BMT Anda</p>
-                            <p class="text-xl lg:text-2xl font-bold tracking-tight">Rp 1.250.000</p>
+                            <p class="text-xl lg:text-2xl font-bold tracking-tight">Rp {{ number_format($n->rekening->saldo ?? 0, 0, ',', '.') }}</p>
                         </div>
                         
                         <!-- Bottom Row: Nomor Kartu + Nama + Berlaku -->
@@ -157,7 +157,7 @@
                                 <p class="text-[8px] lg:text-[9px] text-emerald-100 uppercase tracking-widest font-semibold mb-0.5">Nomor Kartu</p>
                                 <p class="text-xs lg:text-sm font-mono tracking-[0.2em] mb-2">•••• •••• •••• 4521</p>
                                 <p class="text-[8px] lg:text-[9px] text-emerald-100 uppercase tracking-widest font-semibold mb-0.5">Pemegang Kartu</p>
-                                <p class="text-[10px] lg:text-[11px] font-bold uppercase tracking-wide">Ahmad Fauzi</p>
+                                <p class="text-[10px] lg:text-[11px] font-bold uppercase tracking-wide">{{ auth()->user()->name }}</p>
                             </div>
                             <div class="text-right">
                                 <p class="text-[8px] lg:text-[9px] text-emerald-100 uppercase tracking-widest font-semibold mb-0.5">Berlaku</p>
@@ -188,7 +188,8 @@
                         </div>
                     </div>
 
-                    <!-- Ajukan Peminjaman -->
+                    <!-- Ajukan Peminjaman wat guru aja -->
+                    @if(auth()->user()->nasabah->kategori === 'guru')
                     <div class="bg-white rounded-xl p-3 lg:p-4 border border-gray-200 shadow-sm hover-lift flex-1 flex flex-col cursor-pointer group">
                         <div class="flex items-start gap-3 mb-3">
                             <div class="w-9 h-9 lg:w-10 lg:h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition-colors">
@@ -206,6 +207,7 @@
                             </button>
                         </div>
                     </div>
+                    @endif
                 </div>
             </div>
 
@@ -219,7 +221,7 @@
                         <div>
                             <h3 class="text-sm font-bold text-slate-900 mb-0.5">Status Peminjaman</h3>
                             <p class="text-xs text-slate-500">
-                                @if((auth()->user()->role ?? 'siswa') === 'guru')
+                                @if(auth()->user()->nasabah->kategori === 'guru')
                                     Anda memiliki akses penuh untuk mengajukan peminjaman.
                                 @else
                                     Fitur peminjaman hanya tersedia untuk guru dan staff.
@@ -229,7 +231,7 @@
                     </div>
                     
                     <div class="flex items-center gap-2">
-                        @if((auth()->user()->role ?? 'siswa') === 'guru')
+                        @if(auth()->user()->nasabah->kategori === 'guru')
                             <div class="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full">
                                 <span class="relative flex h-2 w-2">
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
