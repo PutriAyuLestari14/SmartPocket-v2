@@ -122,7 +122,7 @@
                     <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
                         <div class="text-right hidden sm:block">
                             <p class="text-sm font-semibold text-slate-900">{{ auth()->user()->name }}</p>
-                            <p class="text-xs text-slate-500">Siswa</p>
+                            <p class="text-xs text-slate-500">{{ ucfirst(auth()->user()->nasabah->kategori ?? 'siswa') }}</p>
                         </div>
                         <div class="w-9 h-9 bg-emerald-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                             {{ substr(auth()->user()->name, 0, 1) }}
@@ -131,13 +131,12 @@
                 </div>
             </header>
 
-            <!-- Row 1: ATM Card + Penarikan & Peminjaman -->
+            <!-- ATM Card + Penarikan & Peminjaman -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 mb-4 lg:mb-6">
                 
-                <!-- ATM Card (Responsif & Proporsional) -->
+                <!-- ATM Card -->
                 <div class="lg:col-span-7">
                     <div class="atm-card rounded-xl p-4 lg:p-5 text-white relative z-10">
-                        <!-- Top Row: Chip + Logo -->
                         <div class="flex justify-between items-start mb-4 lg:mb-5 relative z-10">
                             <div class="flex items-center gap-2 lg:gap-3">
                                 <div class="chip w-9 h-6 lg:w-10 lg:h-7"></div>
@@ -161,7 +160,7 @@
                                 <p class="text-[8px] lg:text-[9px] text-emerald-100 uppercase tracking-widest font-semibold mb-0.5">Nomor Kartu</p>
                                 <p class="text-xs lg:text-sm font-mono tracking-[0.2em] mb-2">•••• •••• •••• 4521</p>
                                 <p class="text-[8px] lg:text-[9px] text-emerald-100 uppercase tracking-widest font-semibold mb-0.5">Pemegang Kartu</p>
-                                <p class="text-[10px] lg:text-[11px] font-bold uppercase tracking-wide">Ari Nurjaman</p>
+                                <p class="text-[10px] lg:text-[11px] font-bold uppercase tracking-wide">{{ auth()->user()->name }}</p>
                             </div>
                             <div class="text-right">
                                 <p class="text-[8px] lg:text-[9px] text-emerald-100 uppercase tracking-widest font-semibold mb-0.5">Berlaku</p>
@@ -193,7 +192,7 @@
                         </div>
                     </a>
 
-                    <!-- UBAHAN: Kartu Ajukan Peminjaman sekarang bisa diklik (menggunakan tag <a>) -->
+                    <!-- Kartu Ajukan Peminjaman  -->
                     <a href="{{ route('nasabah.peminjaman.create') }}" class="bg-white rounded-xl p-3 lg:p-4 border border-gray-200 shadow-sm hover-lift flex-1 flex flex-col group block">
                         <div class="flex items-start gap-3 mb-3">
                             <div class="w-9 h-9 lg:w-10 lg:h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition-colors">
