@@ -143,6 +143,7 @@ class NasabahController extends Controller
 
             // Update Data Nasabah
             $nasabah->update([
+                'username' => 'nullable',       
                 'nama'           => $request->nama,
                 'alamat'         => $request->alamat,
                 'tanggal_daftar' => $request->tanggal_daftar,

@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NasabahController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminLaporanController;
 use App\Http\Controllers\TabunganController;
 use App\Http\Controllers\AdminNasabahController;
 use App\Http\Controllers\OperatorController;
@@ -15,6 +17,9 @@ use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\OperatorPeminjamanController; 
 use App\Http\Controllers\OperatorVerifikasiController; 
 use App\Http\Controllers\OperatorLaporanController; 
+use App\Http\Controllers\OperatorSetoranController; 
+use App\Http\Controllers\OperatorPenarikanController; 
+use App\Http\Controllers\OperatorPembayaranController; 
 
 Route::get('/', function () {
     return view('welcome');
@@ -24,10 +29,9 @@ Route::middleware(['auth'])->group(function () {
 
     // ADMIN
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
-        Route::get('/dashboard', function () {
-            return redirect()->route('admin.nasabah.index');
-        });
+        Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
         Route::get('/nasabah', [AdminNasabahController::class, 'index'])->name('admin.nasabah.index');
+        Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('admin.laporan.index');
     });
 
     // OPERATOR
@@ -49,9 +53,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/peminjaman/create', [OperatorPeminjamanController::class, 'create'])->name('operator.peminjaman.create');
         Route::post('/peminjaman', [OperatorPeminjamanController::class, 'store'])->name('operator.peminjaman.store');
 
-        Route::resource('setoran', SetoranController::class)->names(['create' => 'operator.setoran.create', 'store' => 'operator.setoran.store']);
-        Route::resource('penarikan', PenarikanController::class)->names(['create' => 'operator.penarikan.create', 'store' => 'operator.penarikan.store']);
-        Route::resource('pembayaran', PembayaranController::class)->names(['create' => 'operator.pembayaran.create', 'store' => 'operator.pembayaran.store']);
+        Route::get('/setoran/create', [OperatorSetoranController::class, 'create'])->name('operator.setoran.create');
+        Route::post('/setoran', [OperatorSetoranController::class, 'store'])->name('operator.setoran.store');
+        
+        Route::get('/penarikan/create', [OperatorPenarikanController::class, 'create'])->name('operator.penarikan.create');
+        Route::post('/penarikan', [OperatorPenarikanController::class, 'store'])->name('operator.penarikan.store');
+
+        Route::get('/pembayaran/create', [OperatorPembayaranController::class, 'create'])->name('operator.pembayaran.create');
+        Route::post('/pembayaran', [OperatorPembayaranController::class, 'store'])->name('operator.pembayaran.store');
+
     });
 
     // NASABAH 

@@ -68,7 +68,6 @@
             </div>
         </aside>
 
-        <!-- Main Content (SUDAH DIPERBAIKI LAYOUT & STRUKTUR TAG-NYA) -->
 <!-- Main Content -->
         <main class="flex-1 ml-64 p-6 lg:p-8">
             <!-- Page Header -->
@@ -148,12 +147,19 @@
                                             class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
                                     </div>
 
+                                    <form action="{{ route('operator.nasabah.update', $nasabah->id_nasabah) }}" method="POST">
+                                        @csrf
+                                        @method('PUT')
+                                        
+                                        <input type="hidden" name="username" value="{{ $nasabah->user->username ?? '' }}">
+                                        <input type="hidden" name="tanggal_daftar" value="{{ $nasabah->tanggal_daftar ?? date('Y-m-d') }}">
+                                    </form>
                                     <!-- Alamat -->
                                     <div class="md:col-span-2">
                                         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Alamat</label>
                                         <textarea name="alamat" rows="3" required
                                             class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all resize-y">{{ old('alamat', $nasabah->alamat) }}</textarea>
-                                    </div>
+                                    </div>                                
                                 </div>
                             </div>
 

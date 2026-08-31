@@ -154,7 +154,7 @@
                         <h3 class="text-sm lg:text-base font-bold text-slate-900 mb-4">Aksi Cepat</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
                             
-                            <a href="{{ route('operator.setoran.create') ?? '#' }}" class="group bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 rounded-xl p-4 text-center transition-all">
+                            <a href="{{ route('operator.setoran.create')}}" class="group bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 rounded-xl p-4 text-center transition-all">
                                 <div class="w-12 h-12 bg-emerald-500 group-hover:bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 transition-colors">
                                     <i class="fas fa-plus-circle text-white text-lg"></i>
                                 </div>
@@ -162,7 +162,7 @@
                                 <p class="text-[10px] text-slate-500 mt-1">Setor tunai nasabah</p>
                             </a>
 
-                            <a href="{{ route('operator.penarikan.create') ?? '#' }}" class="group bg-red-50 hover:bg-red-100 border-2 border-red-200 rounded-xl p-4 text-center transition-all">
+                            <a href="{{ route('operator.penarikan.create')}}" class="group bg-red-50 hover:bg-red-100 border-2 border-red-200 rounded-xl p-4 text-center transition-all">
                                 <div class="w-12 h-12 bg-red-500 group-hover:bg-red-600 rounded-full flex items-center justify-center mx-auto mb-2 transition-colors">
                                     <i class="fas fa-minus-circle text-white text-lg"></i>
                                 </div>
@@ -170,7 +170,7 @@
                                 <p class="text-[10px] text-slate-500 mt-1">Tarik tunai nasabah</p>
                             </a>
 
-                            <a href="#" class="group bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 rounded-xl p-4 text-center transition-all">
+                            <a href="{{route('operator.pembayaran.create')}}" class="group bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 rounded-xl p-4 text-center transition-all">
                                 <div class="w-12 h-12 bg-blue-500 group-hover:bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-2 transition-colors">
                                     <i class="fas fa-hand-holding-usd text-white text-lg"></i>
                                 </div>
