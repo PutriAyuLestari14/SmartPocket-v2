@@ -57,6 +57,7 @@ class OperatorSetoranController extends Controller
                 'id_petugas' => auth()->id(),
                 'id_jenis_transaksi' => $jenisTransaksi->id_jenis_transaksi,
                 'jumlah' => $request->jumlah,
+                'status' => 'berhasil',
                 'tanggal_transaksi' => now(),
             ]);
 

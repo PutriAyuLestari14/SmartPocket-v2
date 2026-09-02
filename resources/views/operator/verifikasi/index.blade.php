@@ -130,12 +130,12 @@
                                     <tr class="hover:bg-gray-50 transition-colors">
                                         <td class="px-6 py-4 text-xs font-semibold text-slate-900">{{ $pengajuan->firstItem() + $index }}</td>
                                         <td class="px-6 py-4">
-                                            <p class="text-xs font-semibold text-slate-900">{{ $item->created_at->format('d M Y') }}</p>
-                                            <p class="text-[10px] text-slate-400">{{ $item->created_at->format('H:i') }} WIB</p>
+                                            <p class="text-xs font-semibold text-slate-900">{{ \Carbon\Carbon::parse($item->tanggal_transaksi)->format('d M Y') }}</p>
+                                            <p class="text-[10px] text-slate-400">{{ \Carbon\Carbon::parse($item->tanggal_transaksi)->format('H:i') }} WIB</p>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <p class="text-sm font-semibold text-slate-900">{{ $item->user->nasabah->nama }}</p>
-                                            <p class="text-[10px] text-slate-500">NIS: {{ $item->user->username }}</p>
+                                            <p class="text-sm font-semibold text-slate-900">{{ $item->rekening->nasabah->nama ?? 'Data tidak tersedia' }}</p>
+                                            <p class="text-[10px] text-slate-500">NIS: {{ $item->rekening->nasabah->user->username ?? '-' }}</p>
                                         </td>
                                         <td class="px-6 py-4">
                                             <span class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-semibold">Penarikan Tunai</span>

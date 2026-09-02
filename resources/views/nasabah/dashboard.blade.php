@@ -77,7 +77,7 @@
                     <i class="fas fa-money-bill-wave w-5 text-center"></i> Tarik
                 </a>
 
-                <!-- UBAHAN: Link Pinjam sudah terhubung ke route -->
+                <!-- Link Pinjam -->
                 <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
                     <i class="fas fa-hand-holding-usd w-5 text-center"></i> Pinjam
                 </a>
@@ -194,7 +194,7 @@
                         </div>
                     </a>
 
-                    <!-- Kartu Ajukan Peminjaman  -->
+                    <!-- Kartu Ajukan Peminjaman -->
                     <a href="{{ route('nasabah.peminjaman.create') }}" class="bg-white rounded-xl p-3 lg:p-4 border border-gray-200 shadow-sm hover-lift flex-1 flex flex-col group block">
                         <div class="flex items-start gap-3 mb-3">
                             <div class="w-9 h-9 lg:w-10 lg:h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition-colors">
@@ -259,49 +259,63 @@
                 </div>
             </div>
 
-            <!-- Row 3: Transaksi Terbaru -->
+            <!-- Row 3: Transaksi Terbaru (SUDAH DIPERBAIKI) -->
             <div class="bg-white rounded-xl p-4 lg:p-5 border border-gray-200 shadow-sm">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-sm font-bold text-slate-900">Transaksi Terbaru</h3>
                     <a href="{{ route('nasabah.riwayat') }}" class="text-xs text-emerald-600 hover:text-emerald-700 font-medium">Lihat semua</a>
                 </div>
 
-                <!-- Ganti seluruh div text-center dengan ini: -->
-        @if($transaksiTerbaru->count() > 0)
-    @foreach($transaksiTerbaru as $transaksi)
-    <div class="flex items-center justify-between p-4 border-b border-gray-100 last:border-0">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 {{ $transaksi->jenis == 'setoran' ? 'bg-emerald-50' : 'bg-red-50' }} rounded-lg flex items-center justify-center">
-                <i class="fas fa-{{ $transaksi->jenis == 'setoran' ? 'arrow-down' : 'arrow-up' }} text-{{ $transaksi->jenis == 'setoran' ? 'emerald' : 'red' }}-600"></i>
-            </div>
-            <div>
-                <p class="text-sm font-semibold text-slate-900">{{ ucfirst($transaksi->jenis) }}</p>
-                <p class="text-xs text-slate-500">{{ $transaksi->created_at->format('d M Y, H:i') }}</p>
-            </div>
-        </div>
-        <div class="text-right">
-            <p class="text-sm font-bold {{ $transaksi->jenis == 'setoran' ? 'text-emerald-600' : 'text-red-600' }}">
-                {{ $transaksi->jenis == 'setoran' ? '+' : '-' }} Rp {{ number_format($transaksi->jumlah, 0, ',', '.') }}
-            </p>
-            <span class="text-xs px-2 py-0.5 rounded-full {{ $transaksi->status == 'berhasil' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
-                {{ ucfirst($transaksi->status) }}
-            </span>
-        </div>
-    </div>
-    @endforeach
-@else
-    <div class="text-center py-8 lg:py-10">
-        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-            <i class="fas fa-receipt text-gray-400 text-xl lg:text-2xl"></i>
-        </div>
-        <h4 class="text-sm font-semibold text-slate-900 mb-1">Belum ada transaksi</h4>
-        <p class="text-xs text-slate-500 max-w-sm mx-auto">
-            Transaksi akan muncul setelah operator memproses penarikan atau peminjaman.
-        </p>
-    </div>
-@endif
+                @if($transaksiTerbaru->count() > 0)
+                    @foreach($transaksiTerbaru as $transaksi)
+                        @php
+                            // Cek id_jenis_transaksi (1 = Setoran, 2 = Penarikan)
+                            $isSetoran = $transaksi->id_jenis_transaksi == 1;
+                            
+                            // Tentukan warna badge status
+                            $statusClass = 'bg-slate-100 text-slate-700';
+                            if ($transaksi->status == 'berhasil') {
+                                $statusClass = 'bg-emerald-100 text-emerald-700';
+                            } elseif ($transaksi->status == 'pending') {
+                                $statusClass = 'bg-amber-100 text-amber-700';
+                            } elseif (in_array($transaksi->status, ['ditolak', 'gagal'])) {
+                                $statusClass = 'bg-red-100 text-red-700';
+                            }
+                        @endphp
+
+                        <div class="flex items-center justify-between p-4 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 {{ $isSetoran ? 'bg-emerald-50' : 'bg-red-50' }} rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-{{ $isSetoran ? 'arrow-down' : 'arrow-up' }} text-{{ $isSetoran ? 'emerald' : 'red' }}-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900">{{ $isSetoran ? 'Setoran' : 'Penarikan' }}</p>
+                                    <p class="text-xs text-slate-500">{{ $transaksi->tanggal_transaksi->format('d M Y, H:i') }}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-bold {{ $isSetoran ? 'text-emerald-600' : 'text-red-600' }}">
+                                    {{ $isSetoran ? '+' : '-' }} Rp {{ number_format($transaksi->jumlah, 0, ',', '.') }}
+                                </p>
+                                <span class="text-xs px-2 py-0.5 rounded-full {{ $statusClass }}">
+                                    {{ ucfirst($transaksi->status) }}
+                                </span>
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    <div class="text-center py-8 lg:py-10">
+                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-receipt text-gray-400 text-xl lg:text-2xl"></i>
+                        </div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-1">Belum ada transaksi</h4>
+                        <p class="text-xs text-slate-500 max-w-sm mx-auto">
+                            Transaksi akan muncul setelah ada aktivitas setoran atau penarikan.
+                        </p>
+                    </div>
+                @endif
             </div>
         </main>
     </div>
 </body>
-</html> 
+</html>

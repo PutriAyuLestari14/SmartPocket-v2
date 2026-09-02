@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\RekeningTabungan;
-use App\Models\Transaksi;
+use App\Models\DetailTabungan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class TabunganController extends Controller
 {
@@ -16,9 +15,11 @@ class TabunganController extends Controller
         // Ambil data rekening nasabah
         $rekening = RekeningTabungan::where('id_nasabah', $user->nasabah->id_nasabah)->first();
         
-        // Ambil 5 transaksi terbaru
-        $transaksiTerbaru = Transaksi::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
+        // PERBAIKAN: whereHas('rekening.nasabah', ...) BUKAN whereHas('nasabah', ...)
+        $transaksiTerbaru = DetailTabungan::whereHas('rekening.nasabah', function($query) use ($user) {
+                $query->where('id_user', $user->id);
+            })
+            ->orderBy('tanggal_transaksi', 'desc')
             ->limit(5)
             ->get();
 
@@ -29,9 +30,11 @@ class TabunganController extends Controller
     {
         $user = auth()->user();
         
-        // Ambil semua transaksi dengan pagination
-        $transaksi = Transaksi::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
+        // PERBAIKAN: whereHas('rekening.nasabah', ...) BUKAN whereHas('nasabah', ...)
+        $transaksi = DetailTabungan::whereHas('rekening.nasabah', function($query) use ($user) {
+                $query->where('id_user', $user->id);
+            })
+            ->orderBy('tanggal_transaksi', 'desc')
             ->paginate(10);
 
         return view('nasabah.riwayat', compact('transaksi'));

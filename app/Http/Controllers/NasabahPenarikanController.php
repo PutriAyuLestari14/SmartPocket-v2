@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\RekeningTabungan;
-use App\Models\Transaksi;
+use App\Models\DetailTabungan; // ← GANTI DARI Transaksi JADI DetailTabungan
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -36,13 +36,13 @@ class NasabahPenarikanController extends Controller
         DB::beginTransaction();
         try {
             // SIMPAN SEBAGAI PENDING (Saldo belum berkurang)
-            Transaksi::create([
-                'user_id' => $user->id,
-                'jenis' => 'penarikan',
+            DetailTabungan::create([
+                'no_rek' => $rekening->no_rek,
+                'id_petugas' => null,
+                'id_jenis_transaksi' => 2, // sesuaikan ID jenis transaksi
                 'jumlah' => $request->jumlah,
-                'keterangan' => $request->keterangan,
-                'status' => 'pending', // ← KUNCI UTAMA
-                'operator_id' => null,
+                'status' => 'pending', // sekarang bisa pakai status!
+                'tanggal_transaksi' => now(),
             ]);
 
             DB::commit();
