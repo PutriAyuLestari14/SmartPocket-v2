@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Data Nasabah - SMKN 11 Banking</title>
+    <title>Edit Data Nasabah - Smart Pocket</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,7 +14,7 @@
 <body class="bg-slate-50">
     <div class="flex min-h-screen">
         
-        <!-- Sidebar (TIDAK DIUBAH SAMA SEKALI) -->
+        <!-- Sidebar -->
         <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-screen">
             <div class="p-6 border-b border-gray-100">
                 <div class="flex items-center gap-3">
@@ -68,7 +68,7 @@
             </div>
         </aside>
 
-<!-- Main Content -->
+        <!-- Main Content -->
         <main class="flex-1 ml-64 p-6 lg:p-8">
             <!-- Page Header -->
             <div class="mb-6">
@@ -134,10 +134,10 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <!-- NIS/NIP -->
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">NIS / NIP</label>
+                                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">NISN / NIP</label>
                                         <input type="text" value="{{ $nasabah->user->username ?? '' }}" readonly
                                             class="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-slate-50 text-slate-500 text-sm cursor-not-allowed">
-                                        <p class="text-[11px] text-slate-400 mt-1">NIS tidak dapat diubah</p>
+                                        <p class="text-[11px] text-slate-400 mt-1">NISN tidak dapat diubah</p>
                                     </div>
 
                                     <!-- Nama Lengkap -->
@@ -147,13 +147,9 @@
                                             class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
                                     </div>
 
-                                    <form action="{{ route('operator.nasabah.update', $nasabah->id_nasabah) }}" method="POST">
-                                        @csrf
-                                        @method('PUT')
-                                        
-                                        <input type="hidden" name="username" value="{{ $nasabah->user->username ?? '' }}">
-                                        <input type="hidden" name="tanggal_daftar" value="{{ $nasabah->tanggal_daftar ?? date('Y-m-d') }}">
-                                    </form>
+                                    <input type="hidden" name="username" value="{{ $nasabah->user->username ?? '' }}">
+                                    <input type="hidden" name="tanggal_daftar" value="{{ $nasabah->tanggal_daftar ?? date('Y-m-d') }}">
+
                                     <!-- Alamat -->
                                     <div class="md:col-span-2">
                                         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Alamat</label>

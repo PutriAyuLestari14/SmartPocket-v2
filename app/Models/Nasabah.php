@@ -8,7 +8,7 @@ class Nasabah extends Model
 {
     protected $table = 'nasabah';
     protected $primaryKey = 'id_nasabah';
-
+    
     // PASTIKAN 'kategori' ADA DI SINI!
     protected $fillable = [
         'id_user',

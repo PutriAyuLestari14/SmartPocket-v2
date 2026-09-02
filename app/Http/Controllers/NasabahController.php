@@ -120,10 +120,11 @@ class NasabahController extends Controller
     {
         $request->validate([
             'nama'           => 'required|string|max:255',
-            'username'       => 'required|string|unique:users,username,' . $nasabah->id_user,
-            'alamat'         => 'required|string',
-            'tanggal_daftar' => 'required|date',
+            'username'       => 'nullable|string|unique:users,username,' . $nasabah->id_user,
+            'alamat'         => 'nullable|string',
+            'tanggal_daftar' => 'nullable|date',
             'status'         => 'required|in:aktif,nonaktif',
+            'reset_password' => 'nullable|boolean',
         ]);
 
         DB::beginTransaction();
@@ -142,8 +143,7 @@ class NasabahController extends Controller
             $nasabah->user->update($userData);
 
             // Update Data Nasabah
-            $nasabah->update([
-                'username' => 'nullable',       
+            $nasabah->update([      
                 'nama'           => $request->nama,
                 'alamat'         => $request->alamat,
                 'tanggal_daftar' => $request->tanggal_daftar,

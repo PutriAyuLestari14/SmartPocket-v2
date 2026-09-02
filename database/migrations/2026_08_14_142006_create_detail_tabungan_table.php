@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('id_jenis_transaksi')->constrained('jenis_transaksi', 'id_jenis_transaksi')->onDelete('cascade');
             $table->bigInteger('jumlah');
             $table->dateTime('tanggal_transaksi');
-            $table->timestamps();
+            $table->timestamps();   
         });
     }
 

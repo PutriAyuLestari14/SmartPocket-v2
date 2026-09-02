@@ -53,6 +53,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/peminjaman/create', [OperatorPeminjamanController::class, 'create'])->name('operator.peminjaman.create');
         Route::post('/peminjaman', [OperatorPeminjamanController::class, 'store'])->name('operator.peminjaman.store');
 
+        Route::get('/setoran/search', [OperatorSetoranController::class, 'searchNasabah'])->name('operator.setoran.search');
         Route::get('/setoran/create', [OperatorSetoranController::class, 'create'])->name('operator.setoran.create');
         Route::post('/setoran', [OperatorSetoranController::class, 'store'])->name('operator.setoran.store');
         

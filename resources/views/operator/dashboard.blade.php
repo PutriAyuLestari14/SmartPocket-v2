@@ -115,7 +115,7 @@
                             </div>
                         </div>
                         <p class="text-xs text-emerald-100 mb-1">Total Saldo Kas</p>
-                        <p class="text-xl lg:text-2xl font-bold text-white mb-1">Rp 84.500.000</p>
+                        <p class="text-xl lg:text-2xl font-bold text-white mb-1">Rp {{ number_format($totalSaldo ?? 0, 0, ',', '.') }}</p>
                         <p class="text-[10px] text-emerald-200">Terakhir diperbarui 10:42</p>
                     </div>
                 </div>
@@ -140,7 +140,7 @@
                         </div>
                     </div>
                     <p class="text-xs text-slate-500 mb-1">Transaksi Pending</p>
-                    <p class="text-xl lg:text-2xl font-bold text-slate-900">{{ $penarikanMenunggu ?? 8 }}</p>
+                    <p class="text-xl lg:text-2xl font-bold text-slate-900">{{ $penarikanPending ?? 8 }}</p>
                     <p class="text-[10px] text-red-500 font-semibold mt-1">⚡ Butuh tindakan segera</p>
                 </div>
             </div>
@@ -198,58 +198,47 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
+                                    @forelse($transaksiTerkini as $trx)
                                     <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-3 text-xs text-slate-600">10:42</td>
+                                        <td class="px-4 py-3 text-xs text-slate-600">
+                                            {{ \Carbon\Carbon::parse($trx->tanggal_transaksi)->format('H:i') }}
+                                        </td>
                                         <td class="px-4 py-3">
                                             <div>
-                                                <p class="text-sm font-semibold text-slate-900">Ahmad Fauzi</p>
-                                                <p class="text-[10px] text-slate-500">NIS: 123456</p>
+                                                <p class="text-sm font-semibold text-slate-900">
+                                                    {{ $trx->rekening->nasabah->nama ?? 'Nasabah Tidak Ditemukan' }}
+                                                </p>
+                                                <p class="text-[10px] text-slate-500">
+                                                    {{ $trx->rekening->nasabah->kategori ?? '-' }}
+                                                </p>
                                             </div>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-semibold">Setoran</span>
+                                            @if($trx->jenisTransaksi->setoran == 'setoran')
+                                                <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-semibold">Setoran</span>
+                                            @elseif($trx->jenisTransaksi->setoran == 'penarikan')
+                                                <span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-[10px] font-semibold">Penarikan</span>
+                                            @else
+                                                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-semibold">Lainnya</span>
+                                            @endif
                                         </td>
-                                        <td class="px-4 py-3 text-sm font-semibold text-slate-900">+ Rp 150.000</td>
+                                        <td class="px-4 py-3 text-sm font-semibold text-slate-900">
+                                            {{ $trx->jenisTransaksi->setoran == 'penarikan' ? '- ' : '+ ' }} 
+                                            Rp {{ number_format($trx->jumlah, 0, ',', '.') }}
+                                        </td>
                                         <td class="px-4 py-3">
                                             <span class="flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
                                                 <i class="fas fa-check-circle"></i> Sukses
                                             </span>
                                         </td>
                                     </tr>
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-3 text-xs text-slate-600">10:35</td>
-                                        <td class="px-4 py-3">
-                                            <div>
-                                                <p class="text-sm font-semibold text-slate-900">Siti Putri</p>
-                                                <p class="text-[10px] text-slate-500">NIS: 123412</p>
-                                            </div>
-                                        </td>
-                                        <td class="px-4 py-3">
-                                            <span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-[10px] font-semibold">Penarikan</span>
-                                        </td>
-                                        <td class="px-4 py-3 text-sm font-semibold text-slate-900">- Rp 50.000</td>
-                                        <td class="px-4 py-3">
-                                            <span class="flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
-                                                <i class="fas fa-check-circle"></i> Sukses
-                                            </span>
+                                    @empty
+                                    <tr>
+                                        <td colspan="5" class="px-4 py-8 text-center text-sm text-slate-500">
+                                            Belum ada transaksi
                                         </td>
                                     </tr>
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-3 text-xs text-slate-600">10:15</td>
-                                        <td class="px-4 py-3">
-                                            <div>
-                                                <p class="text-sm font-semibold text-slate-900">Budi Prakoso</p>
-                                                <p class="text-[10px] text-slate-500">Guru</p>
-                                            </div>
-                                        </td>
-                                        <td class="px-4 py-3">
-                                            <span class="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] font-semibold">Peminjaman</span>
-                                        </td>
-                                        <td class="px-4 py-3 text-sm font-semibold text-slate-900">+ Rp 500.000</td>
-                                        <td class="px-4 py-3">
-                                            <span class="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] font-semibold">Proses</span>
-                                        </td>
-                                    </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
