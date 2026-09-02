@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajukan Penarikan - Smart Pocket</title>
+    <!-- Tambahkan SweetAlert2 CDN untuk Popup Cantik -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,19 +15,14 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        /* Animasi halus untuk focus */
-        .input-premium {
-            transition: all 0.2s ease-in-out;
-        }
-        .input-premium:focus {
-            transform: translateY(-1px);
-        }
+        .input-premium { transition: all 0.2s ease-in-out; }
+        .input-premium:focus { transform: translateY(-1px); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
     <div class="flex min-h-screen">
         
-        <!-- Sidebar Nasabah (Konsisten) -->
+        <!-- Sidebar Nasabah -->
         <aside class="w-64 bg-white border-r border-slate-200 flex flex-col fixed h-screen z-20">
             <div class="p-6 border-b border-slate-100">
                 <div class="flex items-center gap-3">
@@ -44,7 +41,7 @@
                 <a href="{{ route('nasabah.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
                     <i class="fas fa-home w-5 text-center"></i> Dashboard
                 </a>
-                <a href="{}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
+                <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
                     <i class="fas fa-wallet w-5 text-center"></i> Saldo
                 </a>
                 <a href="{{ route('nasabah.penarikan.create') }}" class="flex items-center gap-3 px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-semibold transition-colors">
@@ -87,17 +84,18 @@
                 <p class="text-sm text-slate-500 mt-1.5">Isi formulir di bawah ini. Permintaan akan diverifikasi oleh operator dalam 1x24 jam.</p>
             </div>
 
-            <!-- Layout 2 Kolom: Kiri (Info) & Kanan (Form) -->
+            <!-- Layout 2 Kolom -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
                 
-                <!-- KOLOM KIRI: Ringkasan & Aturan (1/3 Lebar) -->
+                <!-- KOLOM KIRI: Ringkasan & Aturan -->
                 <div class="space-y-6">
-                    <!-- Kartu Saldo -->
+                    <!-- Kartu Saldo (Dinamis dari Database) -->
                     <div class="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl p-6 text-white shadow-lg shadow-emerald-500/20 relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-xl"></div>
                         <div class="relative z-10">
                             <p class="text-xs font-medium text-emerald-100 uppercase tracking-wider mb-1">Sisa Saldo Anda</p>
-                            <p class="text-3xl font-bold tracking-tight">Rp 1.250.000</p>
+                            <!-- PERBAIKAN: Menampilkan saldo real dari database -->
+                            <p class="text-3xl font-bold tracking-tight">Rp {{ number_format($rekening->saldo ?? 0, 0, ',', '.') }}</p>
                             <div class="mt-4 pt-4 border-t border-white/20 flex items-center gap-2 text-xs text-emerald-100">
                                 <i class="fas fa-shield-alt"></i>
                                 <span>Saldo aman & terenkripsi</span>
@@ -121,43 +119,17 @@
                             </li>
                             <li class="flex items-start gap-3 text-xs text-slate-600">
                                 <i class="fas fa-check-circle text-emerald-500 mt-0.5 flex-shrink-0"></i>
-                                <span>Dana akan diproses oleh operator dan masuk ke saldo setelah disetujui.</span>
+                                <span>Dana akan diproses oleh operator dan status berubah setelah disetujui.</span>
                             </li>
                         </ul>
                     </div>
                 </div>
 
-                <!-- KOLOM KANAN: Formulir (2/3 Lebar) -->
+                <!-- KOLOM KANAN: Formulir -->
                 <div class="lg:col-span-2">
                     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 lg:p-8">
                         
-                        <!-- Notifikasi Error -->
-                        @if ($errors->any())
-                            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-                                <i class="fas fa-exclamation-circle text-red-500 text-lg mt-0.5"></i>
-                                <div>
-                                    <p class="text-sm font-semibold text-red-800">Mohon periksa kembali data Anda</p>
-                                    <ul class="mt-1.5 list-disc list-inside text-xs text-red-700 space-y-1">
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            </div>
-                        @endif
-
-                        <!-- Notifikasi Sukses -->
-                        @if (session('success'))
-                            <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3">
-                                <i class="fas fa-check-circle text-emerald-500 text-lg mt-0.5"></i>
-                                <div>
-                                    <p class="text-sm font-semibold text-emerald-800">Pengajuan Berhasil!</p>
-                                    <p class="text-xs text-emerald-700 mt-1">{{ session('success') }}</p>
-                                </div>
-                            </div>
-                        @endif
-
-                        <form action="{{ route('nasabah.penarikan.store') }}" method="POST">
+                        <form action="{{ route('nasabah.penarikan.store') }}" method="POST" id="formPenarikan">
                             @csrf
 
                             <!-- Input Jumlah -->
@@ -212,9 +184,10 @@
                                 <a href="{{ route('nasabah.dashboard') }}" class="w-full sm:w-auto px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-semibold hover:bg-slate-50 hover:text-slate-800 transition-all text-sm text-center">
                                     Batal
                                 </a>
-                                <button type="submit" class="w-full sm:w-auto px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 text-sm">
-                                    <i class="fas fa-paper-plane text-xs"></i> 
-                                    Ajukan Penarikan
+                                <!-- Tambahkan ID untuk efek loading -->
+                                <button type="submit" id="btnSubmit" class="w-full sm:w-auto px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 text-sm">
+                                    <i class="fas fa-paper-plane text-xs" id="btnIcon"></i> 
+                                    <span id="btnText">Ajukan Penarikan</span>
                                 </button>
                             </div>
                         </form>
@@ -225,20 +198,66 @@
         </main>
     </div>
 
-    <!-- Script Kecil untuk Detail UX -->
+    <!-- Script untuk UX & Notifikasi -->
     <script>
-        // 1. Hitung karakter textarea
+        // 1. POPUP NOTIFIKASI SUKSES (SweetAlert2)
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Pengajuan Berhasil! 🎉',
+                text: '{{ session('success') }}',
+                confirmButtonColor: '#059669',
+                confirmButtonText: 'OK, Lihat Riwayat',
+                timer: 4000,
+                timerProgressBar: true
+            }).then((result) => {
+                // Jika user klik OK, arahkan ke halaman riwayat
+                if (result.isConfirmed) {
+                    window.location.href = "{{ route('nasabah.riwayat') }}";
+                }
+            });
+        @endif
+
+        // 2. POPUP NOTIFIKASI ERROR
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal Mengajukan',
+                text: '{{ session('error') }}',
+                confirmButtonColor: '#dc2626',
+                confirmButtonText: 'OK'
+            });
+        @endif
+
+        // 3. EFEK LOADING SAAT TOMBOL DIKLIK
+        const form = document.getElementById('formPenarikan');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const btnText = document.getElementById('btnText');
+        const btnIcon = document.getElementById('btnIcon');
+
+        if (form && btnSubmit) {
+            form.addEventListener('submit', function() {
+                btnSubmit.disabled = true;
+                btnSubmit.classList.add('opacity-75', 'cursor-not-allowed');
+                btnText.textContent = 'Mengirim Pengajuan...';
+                btnIcon.className = 'fas fa-spinner fa-spin text-xs';
+            });
+        }
+
+        // 4. Hitung karakter textarea
         const textarea = document.getElementById('keterangan');
         const charCount = document.getElementById('charCount');
-        textarea.addEventListener('input', function() {
-            charCount.textContent = this.value.length;
-            if(this.value.length > 255) {
-                this.value = this.value.substring(0, 255);
-                charCount.textContent = 255;
-            }
-        });
+        if (textarea && charCount) {
+            textarea.addEventListener('input', function() {
+                charCount.textContent = this.value.length;
+                if(this.value.length > 255) {
+                    this.value = this.value.substring(0, 255);
+                    charCount.textContent = 255;
+                }
+            });
+        }
 
-        // 2. Validasi angka minimal
+        // 5. Validasi angka minimal
         function validasiAngka(input) {
             if (input.value < 0) input.value = 0;
         }

@@ -63,6 +63,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/pembayaran/create', [OperatorPembayaranController::class, 'create'])->name('operator.pembayaran.create');
         Route::post('/pembayaran', [OperatorPembayaranController::class, 'store'])->name('operator.pembayaran.store');
 
+        Route::get('/verifikasi', [OperatorVerifikasiController::class, 'index'])->name('operator.verifikasi.index');
+        Route::post('/verifikasi/{id}/approve', [OperatorVerifikasiController::class, 'approve'])->name('operator.verifikasi.approve');
+        Route::post('/verifikasi/{id}/reject', [OperatorVerifikasiController::class, 'reject'])->name('operator.verifikasi.reject');
+
     });
 
     // NASABAH 

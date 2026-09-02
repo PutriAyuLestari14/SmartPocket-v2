@@ -2,31 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Transaksi;
+use App\Models\Nasabah;
 use Illuminate\Http\Request;
-use App\Models\Transaction;
-
 
 class TransaksiController extends Controller
 {
-
     public function index()
     {
-        return view('operator.transaksi.index');
-    }
-    
-    public function storeDeposit(Request $request) //setoran
-    {
+        // Ambil semua transaksi dengan relasi user dan nasabah
+        $transaksi = Transaksi::with(['user.nasabah', 'operator'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
 
-    }
-    
-    public function storeWithdrawal(Request $request) //penarikan
-    {
+        // Kirim data nasabah untuk dropdown filter
+        $nasabah = Nasabah::with('user')
+            ->where('status', 'aktif')
+            ->orderBy('nama', 'asc')
+            ->get();
 
-    }
-    
-    public function history()
-    {
-        $transactions = Transaction::latest()->get(); // riwayat
-        return view('transaksi.history', compact('transactions'));
+        return view('operator.transaksi.index', compact('transaksi', 'nasabah'));
     }
 }

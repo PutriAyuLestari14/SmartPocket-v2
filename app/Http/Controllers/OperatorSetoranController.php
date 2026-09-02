@@ -12,58 +12,62 @@ class OperatorSetoranController extends Controller
 {
     public function create()
     {
-        return view('operator.setoran.create');
-    }
-
-    // Cari Nasabah 
-    public function searchNasabah(Request $request)
-    {
-        $keyword = $request->get('q');
-        
         $nasabah = Nasabah::with(['user', 'rekening'])
             ->where('status', 'aktif')
-            ->where(function($query) use ($keyword) {
-                $query->where('nama', 'like', "%{$keyword}%")
-                      ->orWhereHas('user', function($u) use ($keyword) {
-                          $u->where('username', 'like', "%{$keyword}%");
-                      });
-            })->first();
+            ->orderBy('nama', 'asc')
+            ->get();
 
-        return response()->json($nasabah);
+        return view('operator.setoran.create', compact('nasabah'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'no_rek' => 'required|exists:rekening_tabungan,no_rek',
-            'jumlah' => 'required|numeric|min:1000', 
-            'tanggal_transaksi' => 'required|date',
+            'id_nasabah' => 'required|exists:nasabah,id_nasabah',
+            'jumlah' => 'required|numeric|min:1000',
+            'keterangan' => 'required|string|max:255',
+        ], [
+            'jumlah.min' => 'Minimal setoran adalah Rp 1.000',
         ]);
 
         DB::beginTransaction();
         try {
-            // 1. Update Saldo Rekening
-            $rekening = RekeningTabungan::where('no_rek', $request->no_rek)->first();
+            $rekening = RekeningTabungan::where('id_nasabah', $request->id_nasabah)->first();
+
+            if (!$rekening) {
+                return back()->with('error', 'Nasabah belum memiliki rekening tabungan')->withInput();
+            }
+
+            // Update Saldo
             $rekening->saldo += $request->jumlah;
             $rekening->save();
 
-            // 2. Simpan ke Detail Tabungan
+            // Cari ID Jenis Transaksi untuk Setoran
+            $jenisTransaksi = DB::table('jenis_transaksi')
+                ->where('setoran', 'setoran')
+                ->first();
+
+            if (!$jenisTransaksi) {
+                return back()->with('error', 'Jenis transaksi Setoran tidak ditemukan')->withInput();
+            }
+
+            // Simpan ke Detail Tabungan
             DetailTabungan::create([
-                'no_rek' => $request->no_rek,
-                'id_petugas' => auth()->id(), 
-                'id_jenis_transaksi' => 1, 
+                'no_rek' => $rekening->no_rek,
+                'id_petugas' => auth()->id(),
+                'id_jenis_transaksi' => $jenisTransaksi->id_jenis_transaksi,
                 'jumlah' => $request->jumlah,
-                'tanggal_transaksi' => $request->tanggal_transaksi,
+                'tanggal_transaksi' => now(),
             ]);
 
             DB::commit();
 
             return redirect()->route('operator.setoran.create')
-                ->with('success', 'Setoran sebesar Rp ' . number_format($request->jumlah, 0, ',', '.') . ' berhasil diproses!');
+                ->with('success', 'Setoran Rp ' . number_format($request->jumlah, 0, ',', '.') . ' berhasil untuk a.n ' . $rekening->nasabah->nama);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors(['error' => 'Gagal memproses setoran: ' . $e->getMessage()])->withInput();
+            return back()->with('error', 'Gagal: ' . $e->getMessage())->withInput();
         }
     }
 }
