@@ -104,7 +104,7 @@
                         </div>
                         <div>
                             <p class="text-xs text-slate-500 mb-0.5">Total Pemasukan</p>
-                            <p class="text-lg font-bold text-slate-900">Rp 450.000</p>
+                            <p class="text-lg font-bold text-slate-900">Rp {{ number_format($totalPemasukan ?? 0, 0, ',', '.') }}</p>
                         </div>
                     </div>
                 </div>
@@ -116,24 +116,23 @@
                         </div>
                         <div>
                             <p class="text-xs text-slate-500 mb-0.5">Total Pengeluaran</p>
-                            <p class="text-lg font-bold text-slate-900">Rp 150.000</p>
+                            <p class="text-lg font-bold text-slate-900">Rp {{ number_format($totalPengeluaran ?? 0, 0, ',', '.') }}</p>
                         </div>
                     </div>
                 </div>
                 
                 <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-clock text-amber-600"></i>
+                        <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-receipt text-blue-600"></i>
                         </div>
                         <div>
-                            <p class="text-xs text-slate-500 mb-0.5">Transaksi Pending</p>
-                            <p class="text-lg font-bold text-slate-900">2</p>
+                            <p class="text-xs text-slate-500 mb-0.5">Total Transaksi</p>
+                            <p class="text-lg font-bold text-slate-900">{{ $transaksi->total() }} Transaksi</p>
                         </div>
                     </div>
                 </div>
             </div>
-
             <!-- Filters & Search -->
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-6">
                 <div class="p-4 flex flex-col sm:flex-row gap-4">
@@ -173,114 +172,51 @@
             <!-- Transaction List -->
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
                 <div class="divide-y divide-gray-100">
-                    
-                    <!-- Transaction Item 1 - Success -->
+                    @forelse($transaksi as $trx)
                     <div class="p-4 hover:bg-gray-50 transition-colors group">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-4">
-                                <div class="w-11 h-11 bg-emerald-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-arrow-down text-emerald-600"></i>
-                                </div>
+                                @if($trx->jenisTransaksi->setoran == 'setoran')
+                                    <div class="w-11 h-11 bg-emerald-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-arrow-down text-emerald-600"></i>
+                                    </div>
+                                @else
+                                    <div class="w-11 h-11 bg-red-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-arrow-up text-red-600"></i>
+                                    </div>
+                                @endif
                                 <div>
-                                    <p class="text-sm font-bold text-slate-900 mb-0.5">Setoran Tunai</p>
-                                    <p class="text-xs text-slate-500">26 Agustus 2026 • 08:00 WIB</p>
-                                    <p class="text-xs text-slate-500 mt-0.5">Operator: Admin BMT</p>
+                                    <p class="text-sm font-bold text-slate-900 mb-0.5">
+                                        {{ $trx->jenisTransaksi->setoran == 'setoran' ? 'Setoran Tunai' : 'Penarikan Tunai' }}
+                                    </p>
+                                    <p class="text-xs text-slate-500">
+                                        {{ \Carbon\Carbon::parse($trx->tanggal_transaksi)->format('d F Y • H:i') }} WIB
+                                    </p>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm font-bold text-emerald-600 mb-1">+ Rp 50.000</p>
+                                <p class="text-sm font-bold {{ $trx->jenisTransaksi->setoran == 'setoran' ? 'text-emerald-600' : 'text-red-600' }} mb-1">
+                                    {{ $trx->jenisTransaksi->setoran == 'setoran' ? '+ ' : '- ' }} Rp {{ number_format($trx->jumlah, 0, ',', '.') }}
+                                </p>
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                     <span class="text-[10px] font-bold text-emerald-700">Berhasil</span>
                                 </span>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Transaction Item 2 - Success -->
-                    <div class="p-4 hover:bg-gray-50 transition-colors group">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-4">
-                                <div class="w-11 h-11 bg-red-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-arrow-up text-red-600"></i>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-bold text-slate-900 mb-0.5">Penarikan Tunai</p>
-                                    <p class="text-xs text-slate-500">25 Agustus 2026 • 14:30 WIB</p>
-                                    <p class="text-xs text-slate-500 mt-0.5">Operator: Admin BMT</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-sm font-bold text-red-600 mb-1">- Rp 100.000</p>
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                    <span class="text-[10px] font-bold text-emerald-700">Disetujui</span>
-                                </span>
-                            </div>
+                    @empty
+                    <div class="p-12 text-center">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-receipt text-2xl text-gray-400"></i>
                         </div>
+                        <h3 class="text-base font-semibold text-slate-900 mb-1">Belum Ada Transaksi</h3>
+                        <p class="text-sm text-slate-500">Riwayat transaksi Anda akan muncul di sini.</p>
                     </div>
-
-                    <!-- Transaction Item 3 - Pending -->
-                    <div class="p-4 hover:bg-gray-50 transition-colors group">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-4">
-                                <div class="w-11 h-11 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-clock text-amber-600"></i>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-bold text-slate-900 mb-0.5">Pengajuan Penarikan</p>
-                                    <p class="text-xs text-slate-500">25 Agustus 2026 • 10:15 WIB</p>
-                                    <p class="text-xs text-slate-500 mt-0.5">Menunggu persetujuan operator</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-sm font-bold text-slate-700 mb-1">- Rp 20.000</p>
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                    <span class="text-[10px] font-bold text-amber-700">Pending</span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Transaction Item 4 - Rejected -->
-                    <div class="p-4 hover:bg-gray-50 transition-colors group">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-4">
-                                <div class="w-11 h-11 bg-red-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-times text-red-600"></i>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-bold text-slate-900 mb-0.5">Pengajuan Pinjaman</p>
-                                    <p class="text-xs text-slate-500">24 Agustus 2026 • 16:45 WIB</p>
-                                    <p class="text-xs text-red-500 mt-0.5">Alasan: Saldo tidak mencukupi</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-sm font-bold text-slate-400 mb-1">Rp 500.000</p>
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 border border-red-200">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                                    <span class="text-[10px] font-bold text-red-700">Ditolak</span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
+                    @endforelse
                 </div>
-
-                <!-- Pagination -->
-                <div class="p-4 border-t border-gray-100 flex items-center justify-between">
-                    <p class="text-xs text-slate-500">Menampilkan 1-4 dari 4 transaksi</p>
-                    <div class="flex items-center gap-2">
-                        <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-slate-400 hover:bg-gray-50 transition-colors" disabled>
-                            <i class="fas fa-chevron-left text-xs"></i>
-                        </button>
-                        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-emerald-500 text-white text-sm font-semibold">1</button>
-                        <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-slate-600 hover:bg-gray-50 transition-colors">
-                            <i class="fas fa-chevron-right text-xs"></i>
-                        </button>
-                    </div>
-                </div>
+                @if($transaksi->hasPages())
+                <div class="p-4 border-t border-gray-100">{{ $transaksi->links() }}</div>
+                @endif
             </div>
         </main>
     </div>

@@ -72,17 +72,14 @@
                     <i class="fas fa-wallet w-5 text-center"></i> Saldo
                 </a>
                 
-                <!-- Link Tarik -->
                 <a href="{{ route('nasabah.penarikan.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
                     <i class="fas fa-money-bill-wave w-5 text-center"></i> Tarik
                 </a>
 
-                <!-- Link Pinjam -->
                 <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
                     <i class="fas fa-hand-holding-usd w-5 text-center"></i> Pinjam
                 </a>
                 
-                <!-- Link Riwayat -->
                 <a href="{{ route('nasabah.riwayat') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
                     <i class="fas fa-history w-5 text-center"></i> Riwayat
                 </a>
@@ -93,10 +90,7 @@
                 </a>
             </nav>
 
-            <div class="p-4 border-t border-gray-100 space-y-3">
-                <button class="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
-                    <i class="fas fa-plus text-xs"></i> Transaksi Baru
-                </button>
+            <div>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="w-full bg-white border border-gray-200 hover:bg-red-50 hover:text-red-600 text-slate-600 text-sm font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
@@ -134,7 +128,6 @@
             <!-- ATM Card + Penarikan & Peminjaman -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 mb-4 lg:mb-6">
                 
-                <!-- ATM Card -->
                 <div class="lg:col-span-7">
                     <div class="atm-card rounded-xl p-4 lg:p-5 text-white relative z-10">
                         <div class="flex justify-between items-start mb-4 lg:mb-5 relative z-10">
@@ -148,7 +141,7 @@
                             </div>
                         </div>
                         
-                        <!-- Middle: Saldo -->
+                        <!-- Saldo -->
                         <div class="mb-4 lg:mb-5 relative z-10">
                             <p class="text-[8px] lg:text-[9px] text-emerald-100 uppercase tracking-widest font-semibold mb-1">Saldo BMT Anda</p>
                             <p class="text-xl lg:text-2xl font-bold tracking-tight">
@@ -156,11 +149,11 @@
                             </p>
                         </div>
                         
-                        <!-- Bottom Row: Nomor Kartu + Nama + Berlaku -->
+                        <!-- Nomor Kartu + Nama + Berlaku -->
                         <div class="flex justify-between items-end relative z-10 pt-3 border-t border-white/20">
                             <div class="flex-1">
                                 <p class="text-[8px] lg:text-[9px] text-emerald-100 uppercase tracking-widest font-semibold mb-0.5">Nomor Kartu</p>
-                                <p class="text-xs lg:text-sm font-mono tracking-[0.2em] mb-2">•••• •••• •••• 4521</p>
+                                <p class="text-xs lg:text-sm font-mono tracking-[0.2em] mb-2">{{ auth()->user()->nasabah->rekening->no_rek ?? '-' }}</p>
                                 <p class="text-[8px] lg:text-[9px] text-emerald-100 uppercase tracking-widest font-semibold mb-0.5">Pemegang Kartu</p>
                                 <p class="text-[10px] lg:text-[11px] font-bold uppercase tracking-wide">{{ auth()->user()->name }}</p>
                             </div>

@@ -12,10 +12,8 @@ class TabunganController extends Controller
     {
         $user = auth()->user();
         
-        // Ambil data rekening nasabah
         $rekening = RekeningTabungan::where('id_nasabah', $user->nasabah->id_nasabah)->first();
         
-        // PERBAIKAN: whereHas('rekening.nasabah', ...) BUKAN whereHas('nasabah', ...)
         $transaksiTerbaru = DetailTabungan::whereHas('rekening.nasabah', function($query) use ($user) {
                 $query->where('id_user', $user->id);
             })
@@ -27,16 +25,27 @@ class TabunganController extends Controller
     }
 
     public function riwayat()
-    {
-        $user = auth()->user();
-        
-        // PERBAIKAN: whereHas('rekening.nasabah', ...) BUKAN whereHas('nasabah', ...)
-        $transaksi = DetailTabungan::whereHas('rekening.nasabah', function($query) use ($user) {
-                $query->where('id_user', $user->id);
-            })
-            ->orderBy('tanggal_transaksi', 'desc')
-            ->paginate(10);
+{
+    $user = auth()->user();
+    
+    $baseQuery = DetailTabungan::whereHas('rekening.nasabah', function($query) use ($user) {
+        $query->where('id_user', $user->id);
+    })->with(['jenisTransaksi', 'rekening.nasabah']);
 
-        return view('nasabah.riwayat', compact('transaksi'));
-    }
+    $totalPemasukan = (clone $baseQuery)->whereHas('jenisTransaksi', function($q) {
+        $q->where('setoran', 'setoran');
+    })->sum('jumlah');
+
+    $totalPengeluaran = (clone $baseQuery)->whereHas('jenisTransaksi', function($q) {
+        $q->where('setoran', 'penarikan');
+    })->sum('jumlah');
+
+    $transaksi = $baseQuery->orderBy('tanggal_transaksi', 'desc')->paginate(10);
+
+    return view('nasabah.riwayat', compact(
+        'transaksi', 
+        'totalPemasukan', 
+        'totalPengeluaran'
+    ));
+}
 }

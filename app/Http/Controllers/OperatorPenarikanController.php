@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Nasabah;
 use App\Models\RekeningTabungan;
-use App\Models\Transaksi;
+use App\Models\DetailTabungan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -45,13 +45,12 @@ class OperatorPenarikanController extends Controller
             $rekening->saldo -= $request->jumlah;
             $rekening->save();
 
-            Transaksi::create([
-                'user_id' => $rekening->nasabah->id_user,
-                'jenis' => 'penarikan',
+            DetailTabungan::create([
+                'no_rek' => $rekening->no_rek,
+                'id_petugas' => auth()->id(),
+                'id_jenis_transaksi' => 2, 
                 'jumlah' => $request->jumlah,
-                'keterangan' => $request->keterangan,
-                'status' => 'berhasil',
-                'operator_id' => auth()->id(),
+                'tanggal_transaksi' => now(),
             ]);
 
             DB::commit();

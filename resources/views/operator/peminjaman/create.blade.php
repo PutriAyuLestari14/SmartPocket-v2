@@ -50,9 +50,6 @@
                 <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
                     <i class="fas fa-chart-bar w-5 text-center"></i> Laporan
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
-                    <i class="fas fa-cog w-5 text-center"></i> Pengaturan
-                </a>
             </nav>
 
             <div class="p-4 border-t border-gray-100 space-y-3">

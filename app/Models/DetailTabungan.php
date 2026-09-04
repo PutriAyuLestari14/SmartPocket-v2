@@ -21,13 +21,11 @@ class DetailTabungan extends Model
         'tanggal_transaksi' => 'datetime',
     ];
 
-    // Relasi ke RekeningTabungan
     public function rekening()
     {
         return $this->belongsTo(RekeningTabungan::class, 'no_rek', 'no_rek');
     }
 
-    // Relasi ke Petugas (User) - optional
     public function petugas()
     {
         return $this->belongsTo(User::class, 'id_petugas');

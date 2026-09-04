@@ -17,7 +17,6 @@
 <body class="bg-slate-50 text-slate-800 antialiased">
     <div class="flex min-h-screen">
         
-        <!-- Sidebar (Sama seperti sebelumnya) -->
         <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-screen">
             <div class="p-6 border-b border-gray-100">
                 <div class="flex items-center gap-3">
@@ -49,9 +48,6 @@
                 </a>
                 <a href="{{ route('operator.laporan.index') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
                     <i class="fas fa-chart-bar w-5 text-center"></i> Laporan
-                </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
-                    <i class="fas fa-cog w-5 text-center"></i> Pengaturan
                 </a>
             </nav>
 
