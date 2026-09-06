@@ -10,11 +10,23 @@ class NasabahPeminjamanController extends Controller
 {
     public function create()
     {
-        return view('nasabah.peminjaman.create');
+        //cek ini guru bukan sie 
+        if (auth()->user()->nasabah->kategori !== 'guru') {
+            return redirect()->route('nasabah.dashboard')
+                ->with('error', 'Fitur peminjaman hanya tersedia untuk guru.');
+        }
+
+         return view('nasabah.peminjaman.create');
     }
 
+    // proses data saat "AJUKAN" di klik nasabah
     public function store(Request $request)
     {
+        if (auth()->user()->nasabah->kategori !== 'guru') {
+            return redirect()->route('nasabah.dashboard')
+                ->with('error', 'Fitur peminjaman hanya tersedia untuk guru.');
+        }
+
         $request->validate([
             'jumlah' => 'required|numeric|min:50000',
             'tanggal_pengembalian' => 'required|date|after:today',
@@ -25,17 +37,7 @@ class NasabahPeminjamanController extends Controller
             'tanggal_pengembalian.after' => 'Tanggal pengembalian harus di masa depan.',
         ]);
 
-        // Nanti simpan ke database di sini, contoh:
-        // Peminjaman::create([
-        //     'user_id' => Auth::id(),
-        //     'jumlah' => $request->jumlah,
-        //     'tanggal_pengembalian' => $request->tanggal_pengembalian,
-        //     'metode_pembayaran' => $request->metode_pembayaran,
-        //     'keterangan' => $request->keterangan,
-        //     'status' => 'pending',
-        // ]);
-
         return redirect()->route('nasabah.peminjaman.create')
-                         ->with('success', 'Pengajuan peminjaman sebesar Rp ' . number_format($request->jumlah, 0, ',', '.') . ' berhasil dikirim! Menunggu persetujuan operator.');
+            ->with('success', 'Pengajuan peminjaman sebesar Rp ' . number_format($request->jumlah, 0, ',', '.') . ' berhasil dikirim! Menunggu persetujuan operator.');
     }
 }

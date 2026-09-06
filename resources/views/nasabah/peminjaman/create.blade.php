@@ -43,23 +43,21 @@
                 <a href="{{ route('nasabah.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
                     <i class="fas fa-home w-5 text-center"></i> Dashboard
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
-                    <i class="fas fa-wallet w-5 text-center"></i> Saldo
-                </a>
                 <a href="{{ route('nasabah.penarikan.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
-                    <i class="fas fa-money-bill-wave w-5 text-center"></i> Tarik
+                    <i class="fas fa-money-bill-wave w-5 text-center"></i> Penarikan
                 </a>
-                <!-- Menu Aktif: Pinjam -->
-                <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-semibold transition-colors">
-                    <i class="fas fa-hand-holding-usd w-5 text-center"></i> Pinjam
-                </a>
+                @if(auth()->user()->nasabah->kategori == 'guru')
+                    <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
+                        <i class="fas fa-hand-holding-usd w-5 text-center"></i> Peminjaman
+                    </a>
+                @endif
                 <a href="{{ route('nasabah.riwayat') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
-                    <i class="fas fa-history w-5 text-center"></i> Riwayat
+                    <i class="fas fa-history w-5 text-center"></i> Riwayat Transaksi
                 </a>
                 
                 <p class="px-4 py-2 mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lainnya</p>
                 <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
-                    <i class="fas fa-cog w-5 text-center"></i> Pengaturan
+                    <i class="fas fa-cog w-5 text-center"></i> Profile
                 </a>
             </nav>
 
@@ -160,7 +158,7 @@
                         <form action="{{ route('nasabah.peminjaman.store') }}" method="POST">
                             @csrf
 
-                            <!-- 1. Jumlah Pinjaman -->
+                            <!-- Jumlah Pinjaman -->
                             <div class="mb-6">
                                 <label for="jumlah" class="block text-sm font-semibold text-slate-700 mb-2">
                                     Jumlah Pinjaman (Rp) <span class="text-red-500">*</span>
@@ -188,7 +186,7 @@
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                <!-- 2. Jangka Waktu (Tanggal) -->
+                                <!-- Jangka Waktu (Tanggal) -->
                                 <div>
                                     <label for="tanggal_pengembalian" class="block text-sm font-semibold text-slate-700 mb-2">
                                         Target Lunas (Sampai Kapan) <span class="text-red-500">*</span>
@@ -205,7 +203,7 @@
                                     <p class="text-xs text-slate-500 mt-2">Pilih tanggal rencana pelunasan.</p>
                                 </div>
 
-                                <!-- 3. Metode Pembayaran (Dropdown) -->
+                                <!-- Metode Pembayaran -->
                                 <div>
                                     <label for="metode_pembayaran" class="block text-sm font-semibold text-slate-700 mb-2">
                                         Metode Pembayaran <span class="text-red-500">*</span>
@@ -215,8 +213,7 @@
                                             name="metode_pembayaran" 
                                             id="metode_pembayaran" 
                                             class="input-premium w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm text-slate-900 appearance-none cursor-pointer" 
-                                            required
-                                        >
+                                            required>
                                             <option value="" disabled selected>Pilih metode pembayaran</option>
                                             <option value="tunai" {{ old('metode_pembayaran') == 'tunai' ? 'selected' : '' }}>Tunai di Kantor BMT</option>
                                             <option value="potong_gaji" {{ old('metode_pembayaran') == 'potong_gaji' ? 'selected' : '' }}>Potong Gaji (Khusus Guru/Staf)</option>
@@ -231,7 +228,7 @@
                                 </div>
                             </div>
 
-                            <!-- 4. Keterangan / Tujuan (Opsional tapi disarankan) -->
+                            <!-- Keterangan / Tujuan (Opsional si) -->
                             <div class="mb-8">
                                 <label for="keterangan" class="block text-sm font-semibold text-slate-700 mb-2">
                                     Tujuan Peminjaman <span class="text-slate-400 font-normal">(Opsional)</span>
@@ -258,7 +255,6 @@
                         </form>
                     </div>
                 </div>
-
             </div>
         </main>
     </div>

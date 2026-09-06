@@ -69,7 +69,6 @@
 
         <!-- Main Content -->
         <main class="flex-1 ml-64 p-4 lg:p-8">
-            <!-- Breadcrumb -->
             <nav class="flex items-center gap-2 text-sm text-slate-500 mb-4 lg:mb-6">
                 <a href="{{ route('operator.nasabah.index') }}" class="hover:text-emerald-600">Data Nasabah</a>
                 <i class="fas fa-chevron-right text-xs"></i>
@@ -97,7 +96,7 @@
             <form action="{{ route('operator.nasabah.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 
-                <!-- Informasi Dasar -->
+                <!-- Informasi -->
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 lg:p-6 mb-4 lg:mb-6">
                     <h3 class="text-sm lg:text-base font-bold text-slate-900 mb-4">Informasi Dasar</h3>
                     
@@ -146,7 +145,7 @@
                             <label class="block text-xs lg:text-sm font-semibold text-slate-700 mb-2">Saldo Awal (Rp)</label>
                             <input type="number" name="saldo" value="{{ old('saldo', 0) }}" placeholder="Rp 0" 
                                 class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm">
-                            <p class="text-[10px] text-slate-500 mt-1">Minimal setoran awal Rp 10.000</p>
+                            <p class="text-[10px] text-slate-500 mt-1">Masukan setoran awal</p>
                         </div>
 
                         <!-- Password -->

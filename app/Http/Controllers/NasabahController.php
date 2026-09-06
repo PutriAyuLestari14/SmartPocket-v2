@@ -11,35 +11,40 @@ use Illuminate\Support\Facades\DB;
 
 class NasabahController extends Controller
 {
+
+    // tampil daftar nasabah di tabel
     public function index(Request $request)
     {
         $query = Nasabah::with(['user', 'rekening']);
 
+        // search
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('user', function($q) use ($search) {
-                $q->where('username', 'like', "%{$search}%");
-            })->orWhere('nama', 'like', "%{$search}%");
-        } // search data
+            $query->where(function($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($uq) use ($search) {
+                      $uq->where('username', 'like', "%{$search}%");
+                  });
+            });
+        }
 
+        // Filter Status
         if ($request->filled('status_filter')) {
             $query->where('status', $request->status_filter);
-        } // filter status 
+        }
 
+        // Hitung container 
         $totalNasabah = Nasabah::where('status', 'aktif')->count();
-        $nasabahBaru = Nasabah::whereMonth('created_at', now()->month)->count(); // entah
+        $nasabahBaru = Nasabah::whereMonth('created_at', now()->month)->count();
+        $totalSaldo = RekeningTabungan::sum('saldo');
 
-        $totalSaldo = \App\Models\RekeningTabungan::sum('saldo'); // entah
-        #urutan no rek
-        $nasabahs = Nasabah::with('rekening', 'user')
-        ->join('rekening_tabungan', 'nasabah.id_nasabah', '=', 'rekening_tabungan.id_nasabah')
-        ->orderBy('rekening_tabungan.no_rek', 'asc')
-        ->select('nasabah.*')
-        ->paginate(10);
+        // gaskan eksekusi QUERY 
+        $nasabahs = $query->orderBy('nama', 'asc')->paginate(10);
 
         return view('operator.nasabah.index', compact('nasabahs', 'totalNasabah', 'nasabahBaru', 'totalSaldo'));
     }
 
+    // tambah nasabah 
     public function create()
     {
         return view('operator.nasabah.create');
@@ -70,7 +75,6 @@ class NasabahController extends Controller
             $nasabah = Nasabah::create([
             'id_user' => $user->id,
                 'nama' => $request->nama,
-                'password' => $request->password,
                 'kategori' => $request->kategori,
                 'alamat' => $request->alamat,
                 'tanggal_daftar' => $request->tanggal_daftar,
@@ -78,11 +82,10 @@ class NasabahController extends Controller
                 'photo' => null,
             ]);
 
-            // Cek rekening terakhir dari database
+            // cek rekening terakhir dari database
             $lastRekening = RekeningTabungan::latest('no_rek')->first();
 
             if ($lastRekening) {
-                // Mengambil angka di belakang 'RK-'
                 $lastNumber = (int) substr($lastRekening->no_rek, 3);
                 $nextNumber = $lastNumber + 1;
             } else {
@@ -90,14 +93,14 @@ class NasabahController extends Controller
                 $nextNumber = 1;
             }
 
-            // Format nomor rekening baru 
+            // format nomor rekening baru 
             $noRek = 'RK-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
 
-            // Simpan ke tabel rekening_tabungan
+            // Simpan ke tabel rek
             RekeningTabungan::create([
                 'no_rek' => $noRek,
                 'id_nasabah' => $nasabah->id_nasabah,
-                'saldo' => 0,
+                'saldo' => $request->saldo ?? 0, 
             ]);
 
             DB::commit();
@@ -111,6 +114,7 @@ class NasabahController extends Controller
         }
     }
 
+    // edit nasabah dan update 
     public function edit(Nasabah $nasabah)
     {
         return view('operator.nasabah.edit', compact('nasabah'));
@@ -161,6 +165,7 @@ class NasabahController extends Controller
         }
     }
 
+    // delete nasabah yah ok deh 
     public function destroy(Nasabah $nasabah)
     {
         RekeningTabungan::where('id_nasabah', $nasabah->id_nasabah)->delete();

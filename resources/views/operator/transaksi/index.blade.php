@@ -76,12 +76,13 @@
                 <div class="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
                     <h3 class="text-sm font-bold text-slate-900">Riwayat Transaksi Terbaru</h3>
                     <div class="flex gap-2">
-                        <select class="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                            <option>Semua Jenis</option>
-                            <option>Setoran</option>
-                            <option>Penarikan</option>
-                        </select>
-                        <input type="date" class="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                        <form method="GET" action="{{ route('operator.transaksi.index') }}" class="flex gap-2">
+                            <select name="jenis" onchange="this.form.submit()" class="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                                <option value="">Semua Jenis</option>
+                                <option value="setoran" {{ request('jenis') == 'setoran' ? 'selected' : '' }}>Setoran</option>
+                                <option value="penarikan" {{ request('jenis') == 'penarikan' ? 'selected' : '' }}>Penarikan</option>
+                                <input type="date" name="tanggal" value="{{ request('tanggal') }}" onchange="this.form.submit()" class="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                            </select>
                     </div>
                 </div>
 

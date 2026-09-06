@@ -23,12 +23,13 @@ class OperatorController extends Controller
         
         $penarikanPending = 0; 
 
+        // ambil 8 transaksi terbaru wat di dsahboard 
         $transaksiTerkini = DetailTabungan::with(['jenisTransaksi', 'rekening.nasabah'])
             ->orderBy('tanggal_transaksi', 'desc')
             ->take(8)
             ->get();
 
-        // whereHas untuk filter lewattabel 'jenis'
+        // itung total Setoran & Penarikan bulan ini
         $totalSetoranBulanIni = DetailTabungan::whereMonth('tanggal_transaksi', now()->month)
             ->whereHas('jenisTransaksi', function($q) {
                 $q->where('setoran', 'setoran');

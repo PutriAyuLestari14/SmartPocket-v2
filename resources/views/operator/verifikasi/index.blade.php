@@ -193,7 +193,6 @@
 
                 <!-- Right Sidebar -->
                 <div class="lg:col-span-1 space-y-4">
-                    <!-- Ringkasan Hari Ini -->
                     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
                         <h3 class="text-sm font-bold text-slate-900 mb-4">Ringkasan Hari Ini</h3>
                         
@@ -240,7 +239,7 @@
                         <div class="space-y-3">
                             <div class="flex gap-3">
                                 <span class="w-5 h-5 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold">1</span>
-                                <p class="text-xs text-slate-600 leading-relaxed">Penarikan > Rp 250.000 wajib persetujuan Kepala Sekolah</p>
+                                <p class="text-xs text-slate-600 leading-relaxed">Penarikan wajib persetujuan Pihak BMT</p>
                             </div>
                             <div class="flex gap-3">
                                 <span class="w-5 h-5 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold">2</span>

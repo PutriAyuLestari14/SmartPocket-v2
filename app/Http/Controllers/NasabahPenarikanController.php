@@ -39,9 +39,9 @@ class NasabahPenarikanController extends Controller
             DetailTabungan::create([
                 'no_rek' => $rekening->no_rek,
                 'id_petugas' => null,
-                'id_jenis_transaksi' => 2, // sesuaikan ID jenis transaksi
-                'jumlah' => $request->jumlah,
-                'status' => 'pending', // sekarang bisa pakai status!
+                'id_jenis_transaksi' => 2, // sesuaikan yh ID jenis transaksi
+                'jumlah' => $request->jumlah, 
+                'status' => 'pending', 
                 'tanggal_transaksi' => now(),
             ]);
 

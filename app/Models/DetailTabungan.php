@@ -32,7 +32,7 @@ class DetailTabungan extends Model
     }
 
     public function jenisTransaksi()
-{
-    return $this->belongsTo(JenisTransaksi::class, 'id_jenis_transaksi', 'id_jenis_transaksi');
-}
+    {
+        return $this->belongsTo(JenisTransaksi::class, 'id_jenis_transaksi', 'id_jenis_transaksi');
+    }
 }

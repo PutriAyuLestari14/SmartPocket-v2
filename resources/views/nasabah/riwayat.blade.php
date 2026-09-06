@@ -42,28 +42,25 @@
                     <i class="fas fa-home w-5 text-center"></i> Dashboard
                 </a>
                 
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
-                    <i class="fas fa-wallet w-5 text-center"></i> Saldo
-                </a>
-                
                 <!-- PERBAIKAN: Link Tarik -->
                 <a href="{{ route('nasabah.penarikan.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
-                    <i class="fas fa-money-bill-wave w-5 text-center"></i> Tarik
+                    <i class="fas fa-money-bill-wave w-5 text-center"></i> TPenarikan
                 </a>
                 
-                <!-- PERBAIKAN: Link Pinjam -->
-                <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
-                    <i class="fas fa-hand-holding-usd w-5 text-center"></i> Pinjam
-                </a>
+                @if(auth()->user()->nasabah->kategori == 'guru')
+                    <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
+                        <i class="fas fa-hand-holding-usd w-5 text-center"></i> Peminjaman
+                    </a>
+                @endif
                 
                 <!-- Menu Aktif: Riwayat -->
                 <a href="{{ route('nasabah.riwayat') }}" class="flex items-center gap-3 px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium">
-                    <i class="fas fa-history w-5 text-center"></i> Riwayat
+                    <i class="fas fa-history w-5 text-center"></i> Riwayat Transaksi
                 </a>
                 
                 <p class="px-4 py-2 mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lainnya</p>
                 <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
-                    <i class="fas fa-cog w-5 text-center"></i> Pengaturan
+                    <i class="fas fa-cog w-5 text-center"></i> Profile
                 </a>
             </nav>
 

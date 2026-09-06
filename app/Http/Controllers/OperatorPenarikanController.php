@@ -20,6 +20,7 @@ class OperatorPenarikanController extends Controller
         return view('operator.penarikan.create', compact('nasabah'));
     }
 
+    // Memproses data "Simpan"
     public function store(Request $request)
     {
         $request->validate([
@@ -30,8 +31,11 @@ class OperatorPenarikanController extends Controller
             'jumlah.min' => 'Minimal penarikan adalah Rp 1.000',
         ]);
 
+        // jika ada 1 langkah yang gagal, semua perubahan dibatalkan (jadi data ga ada yg rusak)    
         DB::beginTransaction();
         try {
+
+            // cari rek 
             $rekening = RekeningTabungan::where('id_nasabah', $request->id_nasabah)->first();
             
             if (!$rekening) {
@@ -42,6 +46,7 @@ class OperatorPenarikanController extends Controller
                 return back()->with('error', 'Saldo nasabah tidak mencukupi. Saldo saat ini: Rp ' . number_format($rekening->saldo, 0, ',', '.'))->withInput();
             }
 
+            // potong saldo
             $rekening->saldo -= $request->jumlah;
             $rekening->save();
 
@@ -51,8 +56,10 @@ class OperatorPenarikanController extends Controller
                 'id_jenis_transaksi' => 2, 
                 'jumlah' => $request->jumlah,
                 'tanggal_transaksi' => now(),
+                'status' => 'berhasil',
             ]);
 
+            // simpen perubahan
             DB::commit();
             return redirect()->route('operator.penarikan.create')
                 ->with('success', 'Penarikan berhasil! Saldo a.n ' . $rekening->nasabah->nama . ' berkurang sebesar Rp ' . number_format($request->jumlah, 0, ',', '.'));

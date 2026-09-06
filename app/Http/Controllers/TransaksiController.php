@@ -3,23 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Models\DetailTabungan;
-use App\Models\Nasabah;
 use Illuminate\Http\Request;
 
 class TransaksiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // PERBAIKAN: dengan(['rekening.nasabah.user']) bukan ['nasabah.user']
-        $transaksi = DetailTabungan::with(['rekening.nasabah.user'])
-            ->orderBy('tanggal_transaksi', 'desc')
-            ->paginate(15);
+        $query = DetailTabungan::with(['jenisTransaksi', 'rekening.nasabah'])
+            ->orderBy('tanggal_transaksi', 'desc');
 
-        $nasabah = Nasabah::with('user')
-            ->where('status', 'aktif')
-            ->orderBy('nama', 'asc')
-            ->get();
+        // Filter Jenis
+        if ($request->filled('jenis')) {
+            if ($request->jenis == 'setoran') {
+                $query->whereHas('jenisTransaksi', fn($q) => $q->where('setoran', 'setoran'));
+            } elseif ($request->jenis == 'penarikan') {
+                $query->whereHas('jenisTransaksi', fn($q) => $q->where('setoran', 'penarikan'));
+            }
+        }
 
-        return view('operator.transaksi.index', compact('transaksi', 'nasabah'));
+        // Filter Tanggal
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal_transaksi', $request->tanggal);
+        }
+
+        $transaksi = $query->paginate(10);
+
+        return view('operator.transaksi.index', compact('transaksi'));
     }
 }

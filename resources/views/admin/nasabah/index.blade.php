@@ -69,8 +69,10 @@
                     <p class="text-sm text-slate-500 mt-1">Kelola dan pantau data seluruh nasabah BMT.</p>
                 </div>
 
-                <button class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
-                    <i class="fas fa-plus text-xs"></i> Update saldo nasabah
+                <button>
+                    <a href="{{ route('admin.saldo.index') }}" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
+                        <i class="fas fa-plus text-xs"></i> Update saldo nasabah
+                    </a>
                 </button>
             </div>
 

@@ -41,22 +41,21 @@
                 <a href="{{ route('nasabah.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
                     <i class="fas fa-home w-5 text-center"></i> Dashboard
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
-                    <i class="fas fa-wallet w-5 text-center"></i> Saldo
-                </a>
                 <a href="{{ route('nasabah.penarikan.create') }}" class="flex items-center gap-3 px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-semibold transition-colors">
-                    <i class="fas fa-money-bill-wave w-5 text-center"></i> Tarik
+                    <i class="fas fa-money-bill-wave w-5 text-center"></i> Penarikan
                 </a>
-                <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
-                    <i class="fas fa-hand-holding-usd w-5 text-center"></i> Pinjam
-                </a>
+                @if(auth()->user()->nasabah->kategori == 'guru')
+                    <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
+                        <i class="fas fa-hand-holding-usd w-5 text-center"></i> Peminjaman
+                    </a>
+                @endif
                 <a href="{{ route('nasabah.riwayat') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
-                    <i class="fas fa-history w-5 text-center"></i> Riwayat
+                    <i class="fas fa-history w-5 text-center"></i> Riwayat Transaksi
                 </a>
                 
                 <p class="px-4 py-2 mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lainnya</p>
                 <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
-                    <i class="fas fa-cog w-5 text-center"></i> Pengaturan
+                    <i class="fas fa-cog w-5 text-center"></i> Profile
                 </a>
             </nav>
 
@@ -89,12 +88,12 @@
                 
                 <!-- KOLOM KIRI: Ringkasan & Aturan -->
                 <div class="space-y-6">
-                    <!-- Kartu Saldo (Dinamis dari Database) -->
+                    <!-- Kartu Saldo (dari Database) -->
                     <div class="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl p-6 text-white shadow-lg shadow-emerald-500/20 relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-xl"></div>
                         <div class="relative z-10">
                             <p class="text-xs font-medium text-emerald-100 uppercase tracking-wider mb-1">Sisa Saldo Anda</p>
-                            <!-- PERBAIKAN: Menampilkan saldo real dari database -->
+                            <!-- Menampilkan saldo real dari database -->
                             <p class="text-3xl font-bold tracking-tight">Rp {{ number_format($rekening->saldo ?? 0, 0, ',', '.') }}</p>
                             <div class="mt-4 pt-4 border-t border-white/20 flex items-center gap-2 text-xs text-emerald-100">
                                 <i class="fas fa-shield-alt"></i>
@@ -200,7 +199,7 @@
 
     <!-- Script untuk UX & Notifikasi -->
     <script>
-        // 1. POPUP NOTIFIKASI SUKSES (SweetAlert2)
+        // popup notif sukses
         @if(session('success'))
             Swal.fire({
                 icon: 'success',
@@ -211,14 +210,14 @@
                 timer: 4000,
                 timerProgressBar: true
             }).then((result) => {
-                // Jika user klik OK, arahkan ke halaman riwayat
+                // user klik OK, arah ke halaman riwayat
                 if (result.isConfirmed) {
                     window.location.href = "{{ route('nasabah.riwayat') }}";
                 }
             });
         @endif
 
-        // 2. POPUP NOTIFIKASI ERROR
+        // popup notif error
         @if(session('error'))
             Swal.fire({
                 icon: 'error',
@@ -229,7 +228,7 @@
             });
         @endif
 
-        // 3. EFEK LOADING SAAT TOMBOL DIKLIK
+        // efek loading pas di klik
         const form = document.getElementById('formPenarikan');
         const btnSubmit = document.getElementById('btnSubmit');
         const btnText = document.getElementById('btnText');
@@ -244,7 +243,7 @@
             });
         }
 
-        // 4. Hitung karakter textarea
+        // Hitung karakter textarea
         const textarea = document.getElementById('keterangan');
         const charCount = document.getElementById('charCount');
         if (textarea && charCount) {
@@ -257,7 +256,7 @@
             });
         }
 
-        // 5. Validasi angka minimal
+        // Validasi angka minimal
         function validasiAngka(input) {
             if (input.value < 0) input.value = 0;
         }

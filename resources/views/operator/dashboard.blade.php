@@ -101,7 +101,7 @@
                     <p class="text-xl lg:text-2xl font-bold text-slate-900">{{ $totalNasabah ?? 3 }}</p>
                 </div>
 
-                <!-- Total Saldo (Hijau Besar) -->
+                <!-- Total Saldo -->
                 <div class="bg-emerald-600 rounded-xl p-4 lg:p-5 shadow-lg relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-24 h-24 bg-white opacity-5 rounded-full -mr-8 -mt-8"></div>
                     <div class="relative z-10">
@@ -143,7 +143,7 @@
 
             <!-- Content Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-                <!-- Left Content (2/3) -->
+                <!-- Left Content-->
                 <div class="lg:col-span-2 space-y-4 lg:space-y-6">
                     <!-- Aksi Cepat -->
                     <div class="bg-white rounded-xl p-4 lg:p-5 border border-gray-200 shadow-sm">
@@ -241,60 +241,31 @@
                     </div>
                 </div>
 
-                <!-- Right Sidebar (1/3) -->
+                <!-- Right Sidebar   -->
                 <div class="space-y-4 lg:space-y-6">
-                    <!-- Target Kas Hari Ini -->
-                    <div class="bg-white rounded-xl p-4 lg:p-5 border border-gray-200 shadow-sm">
-                        <h3 class="text-sm lg:text-base font-bold text-slate-900 mb-4">Target Kas Hari Ini</h3>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-xs font-semibold text-slate-700">Pemasukan Setoran</span>
-                                    <span class="text-xs font-bold text-emerald-600">75%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-emerald-500 h-2 rounded-full" style="width: 75%"></div>
-                                </div>
-                                <p class="text-[10px] text-slate-500 mt-1">Rp 1.5jt / Rp 2jt</p>
-                            </div>
-
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-xs font-semibold text-slate-700">Pencairan Pinjaman</span>
-                                    <span class="text-xs font-bold text-blue-600">40%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-blue-500 h-2 rounded-full" style="width: 40%"></div>
-                                </div>
-                                <p class="text-[10px] text-slate-500 mt-1">Rp 400rb / Rp 1jt</p>
-                            </div>
-                        </div>
-                    </div>
-
+    
                     <!-- Statistik Singkat -->
                     <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 lg:p-5 text-white shadow-lg">
                         <h3 class="text-sm lg:text-base font-bold mb-4">Statistik Bulan Ini</h3>
                         <div class="space-y-3">
                             <div class="flex justify-between items-center pb-3 border-b border-blue-400">
                                 <span class="text-xs text-blue-100">Total Transaksi</span>
-                                <span class="text-sm font-bold">1,247</span>
+                                <span class="text-sm font-bold">{{ \App\Models\DetailTabungan::whereMonth('tanggal_transaksi', now()->month)->count() }}</span>
                             </div>
                             <div class="flex justify-between items-center pb-3 border-b border-blue-400">
                                 <span class="text-xs text-blue-100">Total Setoran</span>
-                                <span class="text-sm font-bold">Rp 45.2jt</span>
+                                <span class="text-sm font-bold">Rp {{ number_format($totalSetoranBulanIni ?? 0, 0, ',', '.') }}</span>
                             </div>
                             <div class="flex justify-between items-center pb-3 border-b border-blue-400">
                                 <span class="text-xs text-blue-100">Total Penarikan</span>
-                                <span class="text-sm font-bold">Rp 32.8jt</span>
+                                <span class="text-sm font-bold">Rp {{ number_format($totalPenarikanBulanIni ?? 0, 0, ',', '.') }}</span>
                             </div>
                             <div class="flex justify-between items-center pt-1">
                                 <span class="text-xs text-blue-100">Saldo Akhir</span>
-                                <span class="text-sm font-bold text-emerald-300">Rp 12.4jt</span>
+                                <span class="text-sm font-bold text-emerald-300">Rp {{ number_format($totalSaldo ?? 0, 0, ',', '.') }}</span>
                             </div>
                         </div>
                     </div>
-                </div>
             </div>
         </main>
     </div>

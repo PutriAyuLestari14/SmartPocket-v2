@@ -68,25 +68,24 @@
                 <a href="{{ route('nasabah.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium">
                     <i class="fas fa-home w-5 text-center"></i> Dashboard
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
-                    <i class="fas fa-wallet w-5 text-center"></i> Saldo
-                </a>
                 
                 <a href="{{ route('nasabah.penarikan.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
-                    <i class="fas fa-money-bill-wave w-5 text-center"></i> Tarik
+                    <i class="fas fa-money-bill-wave w-5 text-center"></i> Penarikan
                 </a>
 
-                <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
-                    <i class="fas fa-hand-holding-usd w-5 text-center"></i> Pinjam
-                </a>
+                @if(auth()->user()->nasabah->kategori == 'guru')
+                    <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
+                        <i class="fas fa-hand-holding-usd w-5 text-center"></i> Peminjaman
+                    </a>
+                @endif
                 
                 <a href="{{ route('nasabah.riwayat') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
-                    <i class="fas fa-history w-5 text-center"></i> Riwayat
+                    <i class="fas fa-history w-5 text-center"></i> Riwayat Transaksi
                 </a>
                 
                 <p class="px-4 py-2 mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lainnya</p>
                 <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
-                    <i class="fas fa-cog w-5 text-center"></i> Pengaturan
+                    <i class="fas fa-cog w-5 text-center"></i> Profile
                 </a>
             </nav>
 
@@ -188,23 +187,25 @@
                     </a>
 
                     <!-- Kartu Ajukan Peminjaman -->
-                    <a href="{{ route('nasabah.peminjaman.create') }}" class="bg-white rounded-xl p-3 lg:p-4 border border-gray-200 shadow-sm hover-lift flex-1 flex flex-col group block">
-                        <div class="flex items-start gap-3 mb-3">
-                            <div class="w-9 h-9 lg:w-10 lg:h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition-colors">
-                                <i class="fas fa-hand-holding-usd text-blue-600 text-sm lg:text-base"></i>
+                    @if(auth()->user()->nasabah->kategori == 'guru')    
+                        <a href="{{ route('nasabah.peminjaman.create') }}" class="bg-white rounded-xl p-3 lg:p-4 border border-gray-200 shadow-sm hover-lift flex-1 flex flex-col group block">
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="w-9 h-9 lg:w-10 lg:h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition-colors">
+                                    <i class="fas fa-hand-holding-usd text-blue-600 text-sm lg:text-base"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-sm font-bold text-slate-900 mb-0.5">Ajukan Peminjaman</h3>
+                                    <p class="text-xs text-slate-500 leading-relaxed">Pinjaman bunga rendah.</p>
+                                </div>
                             </div>
-                            <div class="flex-1">
-                                <h3 class="text-sm font-bold text-slate-900 mb-0.5">Ajukan Peminjaman</h3>
-                                <p class="text-xs text-slate-500 leading-relaxed">Pinjaman bunga rendah.</p>
+                            <div class="mt-auto">
+                                <div class="w-full bg-blue-500 group-hover:bg-blue-600 text-white font-semibold text-xs py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-sm text-center">
+                                    <i class="fas fa-hand-holding-usd text-[10px]"></i>
+                                    Ajukan
+                                </div>
                             </div>
-                        </div>
-                        <div class="mt-auto">
-                            <div class="w-full bg-blue-500 group-hover:bg-blue-600 text-white font-semibold text-xs py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-sm text-center">
-                                <i class="fas fa-hand-holding-usd text-[10px]"></i>
-                                Ajukan
-                            </div>
-                        </div>
-                    </a>
+                        </a>
+                     @endif
                 </div>
             </div>
 
@@ -218,7 +219,7 @@
                         <div>
                             <h3 class="text-sm font-bold text-slate-900 mb-0.5">Status Peminjaman</h3>
                             <p class="text-xs text-slate-500">
-                                @if((auth()->user()->role ?? 'siswa') === 'guru')
+                                @if(auth()->user()->nasabah->kategori == 'guru')
                                     Anda memiliki akses penuh untuk mengajukan peminjaman.
                                 @else
                                     Fitur peminjaman hanya tersedia untuk guru dan staff.
@@ -228,7 +229,7 @@
                     </div>
                     
                     <div class="flex items-center gap-2">
-                        @if((auth()->user()->role ?? 'siswa') === 'guru')
+                        @if(auth()->user()->nasabah->kategori == 'guru')
                             <div class="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full">
                                 <span class="relative flex h-2 w-2">
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -236,13 +237,13 @@
                                 </span>
                                 <span class="text-xs font-semibold text-emerald-700">Aktif</span>
                             </div>
-                            <button class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold py-1.5 px-3 rounded-lg transition-colors shadow-sm">
+                            <a href="{{ route('nasabah.peminjaman.create') }}" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold py-1.5 px-3 rounded-lg transition-colors shadow-sm">
                                 Ajukan
-                            </button>
+                            </a>
                         @else
                             <div class="flex items-center gap-1.5 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full">
                                 <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-                                <span class="text-xs font-semibold text-slate-600">Nonaktif</span>
+                                <span class="text-xs font-semibold text-slate-600">Khusus Guru</span>
                             </div>
                             <button disabled class="bg-slate-200 text-slate-400 text-xs font-semibold py-1.5 px-3 rounded-lg cursor-not-allowed">
                                 Tidak Tersedia
@@ -252,7 +253,7 @@
                 </div>
             </div>
 
-            <!-- Row 3: Transaksi Terbaru (SUDAH DIPERBAIKI) -->
+            <!-- Row 3: Transaksi Terbaru -->
             <div class="bg-white rounded-xl p-4 lg:p-5 border border-gray-200 shadow-sm">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-sm font-bold text-slate-900">Transaksi Terbaru</h3>
@@ -262,10 +263,10 @@
                 @if($transaksiTerbaru->count() > 0)
                     @foreach($transaksiTerbaru as $transaksi)
                         @php
-                            // Cek id_jenis_transaksi (1 = Setoran, 2 = Penarikan)
+                            // Cek id_jenis_transaksi 
                             $isSetoran = $transaksi->id_jenis_transaksi == 1;
                             
-                            // Tentukan warna badge status
+                            //  warna badge status
                             $statusClass = 'bg-slate-100 text-slate-700';
                             if ($transaksi->status == 'berhasil') {
                                 $statusClass = 'bg-emerald-100 text-emerald-700';

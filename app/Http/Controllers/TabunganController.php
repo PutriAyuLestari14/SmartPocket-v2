@@ -12,8 +12,10 @@ class TabunganController extends Controller
     {
         $user = auth()->user();
         
+        // Cari rekening punya user yang login
         $rekening = RekeningTabungan::where('id_nasabah', $user->nasabah->id_nasabah)->first();
         
+        // 5 transaksi baru punya si user
         $transaksiTerbaru = DetailTabungan::whereHas('rekening.nasabah', function($query) use ($user) {
                 $query->where('id_user', $user->id);
             })
@@ -25,27 +27,30 @@ class TabunganController extends Controller
     }
 
     public function riwayat()
-{
-    $user = auth()->user();
-    
-    $baseQuery = DetailTabungan::whereHas('rekening.nasabah', function($query) use ($user) {
-        $query->where('id_user', $user->id);
-    })->with(['jenisTransaksi', 'rekening.nasabah']);
+    {
+        $user = auth()->user();
+        
+        // transaksi punya si user
+        $baseQuery = DetailTabungan::whereHas('rekening.nasabah', function($query) use ($user) {
+            $query->where('id_user', $user->id);
+        })->with(['jenisTransaksi', 'rekening.nasabah']);
 
-    $totalPemasukan = (clone $baseQuery)->whereHas('jenisTransaksi', function($q) {
-        $q->where('setoran', 'setoran');
-    })->sum('jumlah');
+        // hitung total pemasukan
+        $totalPemasukan = (clone $baseQuery)->whereHas('jenisTransaksi', function($q) {
+            $q->where('setoran', 'setoran');
+        })->sum('jumlah');
 
-    $totalPengeluaran = (clone $baseQuery)->whereHas('jenisTransaksi', function($q) {
-        $q->where('setoran', 'penarikan');
-    })->sum('jumlah');
+        //hitung total pengeluaran
+        $totalPengeluaran = (clone $baseQuery)->whereHas('jenisTransaksi', function($q) {
+            $q->where('setoran', 'penarikan');
+        })->sum('jumlah');
 
-    $transaksi = $baseQuery->orderBy('tanggal_transaksi', 'desc')->paginate(10);
+        $transaksi = $baseQuery->orderBy('tanggal_transaksi', 'desc')->paginate(10);
 
-    return view('nasabah.riwayat', compact(
-        'transaksi', 
-        'totalPemasukan', 
-        'totalPengeluaran'
-    ));
-}
+        return view('nasabah.riwayat', compact(
+            'transaksi', 
+            'totalPemasukan', 
+            'totalPengeluaran'
+        ));
+    }
 }
