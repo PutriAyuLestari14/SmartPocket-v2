@@ -68,7 +68,7 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <h1 class="text-xl lg:text-2xl font-bold text-slate-900">Data Nasabah</h1>
-                        <p class="text-sm text-slate-500 mt-1">Kelola data siswa, guru, dan staf SMKN 11.</p>
+                        <p class="text-sm text-slate-500 mt-1">Kelola data siswa dan guru SMKN 11.</p>
                     </div>
                     <a href="{{ route('operator.nasabah.create') }}" class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
                         <i class="fas fa-plus text-xs"></i> 
