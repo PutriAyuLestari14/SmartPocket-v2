@@ -93,8 +93,8 @@
                                 <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider" style="min-width: 140px;">Waktu</th>
                                 <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Nasabah</th>
                                 <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Jenis</th>
-                                <th class="px-6 py-4 text-right text-[10px] font-semibold text-slate-500 uppercase tracking-wider" style="min-width: 130px;">Debit (Tarik)</th>
-                                <th class="px-6 py-4 text-right text-[10px] font-semibold text-slate-500 uppercase tracking-wider" style="min-width: 130px;">Kredit (Setor)</th>
+                                <th class="px-6 py-4 text-right text-[10px] font-semibold text-slate-500 uppercase tracking-wider" style="min-width: 130px;">  Tarik</th>
+                                <th class="px-6 py-4 text-right text-[10px] font-semibold text-slate-500 uppercase tracking-wider" style="min-width: 130px;">Setor</th>
                                 <th class="px-6 py-4 text-center text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Status</th>
                             </tr>
                         </thead>

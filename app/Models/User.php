@@ -10,6 +10,10 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    protected $primaryKey = 'username'; 
+    public $incrementing = false;       
+    protected $keyType = 'string'; 
+
     protected $fillable = [
         'name',
         'username', 
@@ -32,6 +36,6 @@ class User extends Authenticatable
 
     public function nasabah()
     {
-        return $this->hasOne(Nasabah::class, 'id_user');
+        return $this->hasOne(Nasabah::class, 'username', 'username');
     }
 }

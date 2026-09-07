@@ -18,39 +18,60 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('admin123'),
             'role' => 'admin', // <-- Role di users
         ]);
-        Petugas::firstOrCreate(['id_user' => $adminUser->id], [
-            'Username' => 'admin123',
-            'Password' => 'admin123',
-            'role' => 'admin', // <-- Role di tabel petugas
-        ]);
+
+        Petugas::firstOrCreate(
+            ['username' => $adminUser->username], 
+
+            [
+                'role' => 'admin',
+                'nama_lengkap' => 'Bapak Ade',
+            ]
+        );
 
         $operatorUser = User::firstOrCreate(['username' => 'operator123'], [
             'name' => 'Operator BMT',
             'password' => Hash::make('operator123'),
             'role' => 'operator',
         ]);
-        Petugas::firstOrCreate(['id_user' => $operatorUser->id], [
-            'Username' => 'operator123',
-            'Password' => 'operator123',
-            'role' => 'operator', 
-        ]);
+
+        Petugas::firstOrCreate(
+            ['username' => $operatorUser->username], 
+
+            [
+                'role' => 'operator',
+                'nama_lengkap' => 'Teller BMT',
+            ]
+        );
+
+        $siswaUser = User::firstOrCreate(
+            ['username' => '12345678'], 
+            [
+                'name' => 'Siswa Nasabah',
+                'password' => Hash::make('nasabah123'),
+                'role' => 'nasabah'
+            ]
+        );
 
         $nasabahUser = User::firstOrCreate(['username' => '12345678'], [
             'name' => 'Siswa Nasabah',
             'password' => Hash::make('nasabah123'),
             'role' => 'nasabah',
         ]);
-        $nasabah = Nasabah::firstOrCreate(['id_user' => $nasabahUser->id], [
-            'nama' => 'Siswa Nasabah',
-            'password' => 'nasabah123',
-            'alamat' => 'Jl. Sekolah No. 1',
-            'tanggal_daftar' => now(),
-            'status' => 'aktif',
-        ]);
 
-        RekeningTabungan::firstOrCreate(['id_nasabah' => $nasabah->id_nasabah], [
-            'no_rek' => 'RK-' . str_pad($nasabahUser->id, 4, '0', STR_PAD_LEFT),
-            'saldo' => 500000,
-        ]);
+        $nasabah = Nasabah::firstOrCreate(
+            ['username' => $siswaUser->username], 
+            [
+                'nama' => 'Siswa Nasabah',
+                'kategori' => 'siswa',
+                'alamat' => 'Jl. Sekolah No. 1',
+                'tanggal_daftar' => now(),
+                'status' => 'aktif',
+            ]
+        );
+
+        RekeningTabungan::firstOrCreate(
+            ['id_nasabah' => $nasabah->id_nasabah],
+            ['no_rek' => 'RK-0001', 'saldo' => 500000]
+        );
     }
 }

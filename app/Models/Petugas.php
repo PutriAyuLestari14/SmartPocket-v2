@@ -10,9 +10,13 @@ class Petugas extends Model
     protected $primaryKey = 'id_petugas';
 
     protected $fillable = [
-        'id_user',
-        'Username',
-        'Password',
+        'username',
+        'nama_lengkap',
         'role',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'username', 'username');
+    }
 }

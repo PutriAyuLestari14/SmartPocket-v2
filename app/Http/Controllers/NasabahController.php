@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Nasabah;
 use App\Models\RekeningTabungan;
+use App\Models\DetailTabungan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -66,14 +67,14 @@ class NasabahController extends Controller
         DB::beginTransaction();
         try {
             $user = User::create([
-                'name' => $request->nama,
                 'username' => $request->username,
+                'name' => $request->nama,
                 'password' => Hash::make($request->password),
                 'role' => 'nasabah',
             ]);
 
             $nasabah = Nasabah::create([
-            'id_user' => $user->id,
+                'username' => $request->username,
                 'nama' => $request->nama,
                 'kategori' => $request->kategori,
                 'alamat' => $request->alamat,
@@ -170,7 +171,7 @@ class NasabahController extends Controller
     {
         RekeningTabungan::where('id_nasabah', $nasabah->id_nasabah)->delete();
         User::where('id', $nasabah->id_user)->delete();
-        $nasabah->delete();
+        $nasabah->user->pdelete();
         return redirect()->route('operator.nasabah.index')->with('success', 'Data Nasabah berhasil dihapus!');
     }
 }

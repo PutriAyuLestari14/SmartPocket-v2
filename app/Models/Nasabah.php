@@ -10,9 +10,9 @@ class Nasabah extends Model
     protected $primaryKey = 'id_nasabah';
     
     protected $fillable = [
-        'id_user',
+        'username',
         'nama',
-        'password',
+        'kategori', 
         'alamat',
         'tanggal_daftar',
         'status',
@@ -21,7 +21,7 @@ class Nasabah extends Model
     ];
 
     public function user() {
-        return $this->belongsTo(User::class, 'id_user');
+        return $this->belongsTo(User::class, 'username', 'username');
     }
 
     public function rekening() {

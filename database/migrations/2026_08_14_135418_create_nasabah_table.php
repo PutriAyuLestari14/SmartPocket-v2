@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('nasabah', function (Blueprint $table) {
             $table->id('id_nasabah');
+            $table->string('username');
+            $table->foreign('username')->references('username')->on('users')->onDelete('cascade');
             $table->string('nama');
-            $table->string('password');
+            $table->enum('kategori', ['siswa', 'guru']); 
             $table->text('alamat');
             $table->date('tanggal_daftar');
             $table->string('status');

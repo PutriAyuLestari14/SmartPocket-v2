@@ -177,7 +177,8 @@
                                         <a href="{{ route('operator.nasabah.edit', $n->id_nasabah) }}" class="w-7 h-7 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center transition-colors" title="Edit">
                                             <i class="fas fa-edit text-xs"></i>
                                         </a>
-                                        <form action="{{ route('operator.nasabah.destroy', $n->id_nasabah) }}" method="POST" onsubmit="return confirm('Yakin mau hapus data nasabah ini?')" class="inline">
+                                        <form action="{{ route('operator.nasabah.destroy', $n->id_nasabah) }}" method="POST" 
+                                            onsubmit="return confirm('⚠️ PERINGATAN!\n\nApakah Anda yakin ingin menghapus nasabah ini?\n\nNama: {{ $n->nama }}\nNo. Rek: {{ $n->rekening->no_rek ?? '-' }}\n\nData yang dihapus tidak dapat dikembalikan!')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="w-7 h-7 bg-red-50 hover:bg-red-100 rounded-lg flex items-center justify-center text-red-600 transition-colors" title="Hapus">

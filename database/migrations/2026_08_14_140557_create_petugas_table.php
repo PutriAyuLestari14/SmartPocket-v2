@@ -13,10 +13,9 @@ return new class extends Migration
     {
         Schema::create('petugas', function (Blueprint $table) {
             $table->id('id_petugas');
-            $table->unsignedBigInteger('id_user')->nullable(); 
-            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
-            $table->string('username')->unique();
-            $table->string('password');
+            $table->string('username')->nullable();
+            $table->foreign('username')->references('username')->on('users')->onDelete('cascade');
+            $table->string('nama_lengkap');
             $table->string('role');
             $table->timestamps();
         });

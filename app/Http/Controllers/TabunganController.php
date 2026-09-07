@@ -17,7 +17,7 @@ class TabunganController extends Controller
         
         // 5 transaksi baru punya si user
         $transaksiTerbaru = DetailTabungan::whereHas('rekening.nasabah', function($query) use ($user) {
-                $query->where('id_user', $user->id);
+                $query->where('username', $user->username);
             })
             ->orderBy('tanggal_transaksi', 'desc')
             ->limit(5)
@@ -32,7 +32,7 @@ class TabunganController extends Controller
         
         // transaksi punya si user
         $baseQuery = DetailTabungan::whereHas('rekening.nasabah', function($query) use ($user) {
-            $query->where('id_user', $user->id);
+            $query->where('username', $user->username);
         })->with(['jenisTransaksi', 'rekening.nasabah']);
 
         // hitung total pemasukan
