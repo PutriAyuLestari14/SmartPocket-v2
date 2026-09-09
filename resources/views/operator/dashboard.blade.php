@@ -212,9 +212,14 @@
                                         </td>
                                         <td class="px-4 py-3">
                                             @php
-                                                $jenis = strtolower(trim($trx->jenisTransaksi->setoran ?? ''));
+                                                $setoran = strtolower(trim($trx->jenisTransaksi->setoran ?? ''));
+                                                $penarikan = strtolower(trim($trx->jenisTransaksi->penarikan ?? ''));
 
-                                                if ($jenis !== 'setoran' && $jenis !== 'penarikan') {
+                                                if ($setoran === 'setoran') {
+                                                    $jenis = 'setoran';
+                                                } elseif ($penarikan === 'penarikan') {
+                                                    $jenis = 'penarikan';
+                                                } else {
                                                     $jenis = 'lainnya';
                                                 }
                                             @endphp
@@ -238,9 +243,23 @@
                                             Rp {{ number_format($trx->jumlah, 0, ',', '.') }}
                                         </td>
                                         <td class="px-4 py-3">
-                                            <span class="flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
-                                                <i class="fas fa-check-circle"></i> Sukses
-                                            </span>
+                                            @if($trx->status === 'pending')
+                                                <span class="flex items-center gap-1 text-[10px] font-semibold text-amber-600">
+                                                    <i class="fas fa-clock"></i> Pending
+                                                </span>
+                                            @elseif($trx->status === 'berhasil')
+                                                <span class="flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
+                                                    <i class="fas fa-check-circle"></i> Sukses
+                                                </span>
+                                            @elseif($trx->status === 'ditolak')
+                                                <span class="flex items-center gap-1 text-[10px] font-semibold text-red-600">
+                                                    <i class="fas fa-times-circle"></i> Ditolak
+                                                </span>
+                                            @else
+                                                <span class="flex items-center gap-1 text-[10px] font-semibold text-slate-500">
+                                                    <i class="fas fa-question-circle"></i> {{ ucfirst($trx->status ?? 'Tidak diketahui') }}
+                                                </span>
+                                            @endif
                                         </td>
                                     </tr>
                                     @empty

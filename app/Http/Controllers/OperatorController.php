@@ -27,7 +27,11 @@ class OperatorController extends Controller
             ]
         )->count();
 
-        $penarikanPending = 0;
+       $penarikanPending = DetailTabungan::where('status', 'pending')
+        ->whereHas('jenisTransaksi', function ($q) {
+            $q->whereRaw('LOWER(TRIM(penarikan)) = ?', ['penarikan']);
+        })
+        ->count();
 
         $transaksiTerkini = DetailTabungan::with([
             'jenisTransaksi',

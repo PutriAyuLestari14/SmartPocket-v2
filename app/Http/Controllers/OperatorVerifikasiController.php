@@ -20,9 +20,19 @@ class OperatorVerifikasiController extends Controller
             ->paginate(10);
 
         // Hitung buat sidebar kanan
-        $pendingCount = DetailTabungan::where('id_jenis_transaksi', 2)->where('status', 'pending')->count();
-        $approvedToday = DetailTabungan::where('id_jenis_transaksi', 2)->where('status', 'berhasil')->whereDate('tanggal_transaksi', today())->count();
-        $rejectedToday = DetailTabungan::where('id_jenis_transaksi', 2)->whereIn('status', ['ditolak', 'gagal'])->whereDate('tanggal_transaksi', today())->count();
+        $pendingCount = DetailTabungan::where('id_jenis_transaksi', 2)
+            ->where('status', 'pending')
+            ->count();
+            
+        $approvedToday = DetailTabungan::where('id_jenis_transaksi', 2)
+            ->where('status', 'berhasil')
+            ->whereDate('tanggal_transaksi', today())
+            ->count();
+
+        $rejectedToday = DetailTabungan::where('id_jenis_transaksi', 2)
+            ->where('status', 'gagal')
+            ->whereDate('tanggal_transaksi', today())
+            ->count();
 
         return view('operator.verifikasi.index', compact('pengajuan', 'pendingCount', 'approvedToday', 'rejectedToday'));
     }
@@ -71,7 +81,7 @@ class OperatorVerifikasiController extends Controller
         DB::beginTransaction();
         try {
             // Ubah status menjadi ditolak/gagal (Saldo GAK berubah)
-            $trx->status = 'ditolak'; 
+            $trx->status = 'gagal'; 
             $trx->id_petugas = auth()->id(); 
             $trx->save();
 
