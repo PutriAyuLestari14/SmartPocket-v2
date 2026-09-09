@@ -29,9 +29,14 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // Beritahu Laravel untuk pakai 'username' saat autentikasi
+    public function getAuthIdentifierName()
+    {
+        return 'username';
     }
 
     public function nasabah()

@@ -8,16 +8,15 @@ class JenisTransaksi extends Model
 {
     protected $table = 'jenis_transaksi';
     protected $primaryKey = 'id_jenis_transaksi';
-    public $incrementing = false; // krn primary key bukan auto increment biasa ysk 
-    public $timestamps = true;
-
+    
     protected $fillable = [
-        'id_jenis_transaksi',
         'setoran',
         'penarikan',
     ];
 
-    public function detailTabungan()
+    public $timestamps = true;
+
+    public function detailTabungans()
     {
         return $this->hasMany(DetailTabungan::class, 'id_jenis_transaksi', 'id_jenis_transaksi');
     }

@@ -40,8 +40,7 @@ class NasabahController extends Controller
         $totalSaldo = RekeningTabungan::sum('saldo');
 
         // gaskan eksekusi QUERY 
-        $nasabahs = $query->orderBy('nama', 'asc')->paginate(10);
-
+        $nasabahs = $query->orderBy('created_at', 'desc')->paginate(10);
         return view('operator.nasabah.index', compact('nasabahs', 'totalNasabah', 'nasabahBaru', 'totalSaldo'));
     }
 

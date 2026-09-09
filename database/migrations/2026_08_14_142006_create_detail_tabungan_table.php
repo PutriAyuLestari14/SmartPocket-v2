@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('no_rek');
             $table->foreign('no_rek')->references('no_rek')->on('rekening_tabungan')->onDelete('cascade');
 
-            $table->string('id_petugas'); 
+            $table->string('id_petugas')->nullable(); // ← ditambahkan ->nullable()
             $table->foreign('id_petugas')->references('username')->on('users')->onDelete('cascade');
 
             $table->foreignId('id_jenis_transaksi')->constrained('jenis_transaksi', 'id_jenis_transaksi')->onDelete('cascade');
