@@ -100,7 +100,7 @@
                         <!-- Last Updated Info -->
                         <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-500 flex items-center gap-2">
                             <i class="far fa-clock text-slate-400"></i>
-                            <span>Terakhir diubah: <strong>{{ $nasabah->updated_at ? $nasabah->updated_at->format('d M Y') : '-' }}</strong></span>
+                            
                         </div>
                     </div>
 
