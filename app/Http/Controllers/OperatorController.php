@@ -41,8 +41,12 @@ class OperatorController extends Controller
             'tanggal_transaksi',
             now()->month
         )
+        ->whereYear(
+            'tanggal_transaksi',
+            now()->year
+        )
         ->whereHas('jenisTransaksi', function ($q) {
-            $q->where('setoran', 'setoran');
+            $q->whereRaw('LOWER(TRIM(setoran)) = ?', ['setoran']);
         })
         ->sum('jumlah');
 
@@ -50,8 +54,12 @@ class OperatorController extends Controller
             'tanggal_transaksi',
             now()->month
         )
+        ->whereYear(
+            'tanggal_transaksi',
+            now()->year
+        )
         ->whereHas('jenisTransaksi', function ($q) {
-            $q->where('setoran', 'penarikan');
+            $q->whereRaw('LOWER(TRIM(penarikan)) = ?', ['penarikan']);
         })
         ->sum('jumlah');
 

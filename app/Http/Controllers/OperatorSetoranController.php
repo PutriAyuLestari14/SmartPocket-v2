@@ -38,17 +38,16 @@ class OperatorSetoranController extends Controller
                 return back()->with('error', 'Nasabah belum memiliki rekening tabungan')->withInput();
             }
 
-            // Update Saldo
-            $rekening->saldo += $request->jumlah;
-            $rekening->save();
+            // Update Saldo 
+            $rekening->increment('saldo', $request->jumlah);
 
-            // Cari ID Jenis Transaksi untuk Setoran
             $jenisTransaksi = DB::table('jenis_transaksi')
-                ->where('setoran', 'setoran')
+                ->whereNotNull('setoran')
                 ->first();
 
             if (!$jenisTransaksi) {
-                return back()->with('error', 'Jenis transaksi Setoran tidak ditemukan')->withInput();
+                DB::rollBack();
+                return back()->with('error', 'Jenis transaksi Setoran tidak ditemukan di database')->withInput();
             }
 
             // Simpan ke Detail Tabungan
@@ -58,13 +57,16 @@ class OperatorSetoranController extends Controller
                 'id_jenis_transaksi' => $jenisTransaksi->id_jenis_transaksi,
                 'jumlah' => $request->jumlah,
                 'status' => 'berhasil',
-                'tanggal_transaksi' => now(),
+                'tanggal_transaksi' => now()->timezone('Asia/Jakarta'),
+                'keterangan' => $request->keterangan,
             ]);
 
             DB::commit();
 
+            $namaNasabah = $rekening->nasabah ? $rekening->nasabah->nama : 'Nasabah';
+
             return redirect()->route('operator.setoran.create')
-                ->with('success', 'Setoran Rp ' . number_format($request->jumlah, 0, ',', '.') . ' berhasil untuk a.n ' . $rekening->nasabah->nama);
+                ->with('success', 'Berhasil! Setoran Rp ' . number_format($request->jumlah, 0, ',', '.') . ' untuk a.n ' . $namaNasabah);
 
         } catch (\Exception $e) {
             DB::rollBack();

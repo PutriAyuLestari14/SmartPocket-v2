@@ -95,7 +95,7 @@
                         <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
                             <i class="fas fa-users text-blue-600"></i>
                         </div>
-                        <span class="text-xs text-emerald-600 font-semibold bg-emerald-50 px-2 py-1 rounded">+12 bulan ini</span>
+                        <span class="text-xs text-emerald-600 font-semibold bg-emerald-50 px-2 py-1 rounded"></span>
                     </div>
                     <p class="text-xs text-slate-500 mb-1">Total Nasabah Aktif</p>
                     <p class="text-xl lg:text-2xl font-bold text-slate-900">{{ $totalNasabah ?? 3 }}</p>
@@ -112,7 +112,9 @@
                         </div>
                         <p class="text-xs text-emerald-100 mb-1">Total Saldo Kas</p>
                         <p class="text-xl lg:text-2xl font-bold text-white mb-1">Rp {{ number_format($totalSaldo ?? 0, 0, ',', '.') }}</p>
-                        <p class="text-[10px] text-emerald-200">Terakhir diperbarui 10:42</p>
+                        <p class="text-[10px] text-emerald-200">
+                            Terakhir diperbarui {{ now()->format('H:i') }}
+                        </p>
                     </div>
                 </div>
 
@@ -180,7 +182,7 @@
                     <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
                         <div class="p-4 lg:p-5 border-b border-gray-100 flex justify-between items-center">
                             <h3 class="text-sm lg:text-base font-bold text-slate-900">Transaksi Terkini</h3>
-                            <a href="#" class="text-xs text-emerald-600 hover:text-emerald-700 font-semibold">LIHAT SEMUA</a>
+                            <a href="{{ route('operator.transaksi.index') }}" class="text-xs text-emerald-600 hover:text-emerald-700 font-semibold">LIHAT SEMUA</a>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full">
@@ -195,9 +197,8 @@
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
                                     @forelse($transaksiTerkini as $trx)
-                                    <tr class="hover:bg-gray-50">
                                         <td class="px-4 py-3 text-xs text-slate-600">
-                                            {{ \Carbon\Carbon::parse($trx->tanggal_transaksi)->format('H:i') }}
+                                            {{ \Carbon\Carbon::parse($trx->tanggal_transaksi, 'UTC')->setTimezone('Asia/Jakarta')->format('H:i') }}
                                         </td>
                                         <td class="px-4 py-3">
                                             <div>
@@ -210,16 +211,30 @@
                                             </div>
                                         </td>
                                         <td class="px-4 py-3">
-                                            @if($trx->jenisTransaksi->setoran == 'setoran')
-                                                <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-semibold">Setoran</span>
-                                            @elseif($trx->jenisTransaksi->setoran == 'penarikan')
-                                                <span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-[10px] font-semibold">Penarikan</span>
+                                            @php
+                                                $jenis = strtolower(trim($trx->jenisTransaksi->setoran ?? ''));
+
+                                                if ($jenis !== 'setoran' && $jenis !== 'penarikan') {
+                                                    $jenis = 'lainnya';
+                                                }
+                                            @endphp
+
+                                            @if($jenis === 'setoran')
+                                                <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-semibold">
+                                                    Setoran
+                                                </span>
+                                            @elseif($jenis === 'penarikan')
+                                                <span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-[10px] font-semibold">
+                                                    Penarikan
+                                                </span>
                                             @else
-                                                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-semibold">Lainnya</span>
+                                                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-semibold">
+                                                    {{ ucfirst($jenis ?: 'Lainnya') }}
+                                                </span>
                                             @endif
                                         </td>
                                         <td class="px-4 py-3 text-sm font-semibold text-slate-900">
-                                            {{ $trx->jenisTransaksi->setoran == 'penarikan' ? '- ' : '+ ' }} 
+                                            {{ $jenis === 'penarikan' ? '- ' : '+ ' }}
                                             Rp {{ number_format($trx->jumlah, 0, ',', '.') }}
                                         </td>
                                         <td class="px-4 py-3">

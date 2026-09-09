@@ -120,7 +120,7 @@
 
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="px-6 py-4 align-middle">
-                                        <p class="text-sm font-bold text-slate-900">{{ $item->tanggal_transaksi->format('H:i') }} WIB</p>
+                                        <p class="text-sm font-bold text-slate-900">{{ $item->tanggal_transaksi->copy()->timezone('Asia/Jakarta')->format('H:i') }} WIB</p>
                                         <p class="text-[10px] text-slate-400 mt-0.5">{{ $item->tanggal_transaksi->format('d M Y') }}</p>
                                     </td>
                                     <td class="px-6 py-4 align-middle">

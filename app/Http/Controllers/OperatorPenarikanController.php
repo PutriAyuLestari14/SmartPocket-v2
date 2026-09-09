@@ -55,7 +55,7 @@ class OperatorPenarikanController extends Controller
                 'id_petugas' => auth()->id(),
                 'id_jenis_transaksi' => 2, 
                 'jumlah' => $request->jumlah,
-                'tanggal_transaksi' => now(),
+                'tanggal_transaksi' => now()->timezone('Asia/Jakarta'),
                 'status' => 'berhasil',
             ]);
 
