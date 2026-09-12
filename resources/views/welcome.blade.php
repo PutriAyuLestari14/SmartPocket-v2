@@ -1,327 +1,468 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Pocket - BMT SMKN 11 Bandung</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
+    <title>SmartPocket - BMT SMKN 11 Bandung</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
-                    colors: {
-                        brand: {
-                            50: '#ecfdf5', 100: '#d1fae5', 200: '#a7f3d0',
-                            300: '#6ee7b7', 400: '#34d399', 500: '#10b981',
-                            600: '#059669', 700: '#047857', 800: '#065f46', 900: '#064e3b',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
-        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        .card-grad-1 { background: linear-gradient(135deg, #059669 0%, #10b981 100%); }
-        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-        .gradient-text { background: linear-gradient(135deg, #059669 0%, #10b981 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .hero-bg {
+            background-image: url('/images/gedung-bmt.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .hero-overlay {
+            background:
+                linear-gradient(
+                    to bottom,
+                    rgba(0, 0, 0, 0.72) 0%,
+                    rgba(0, 0, 0, 0.38) 45%,
+                    rgba(0, 0, 0, 0.52) 100%
+                );
+        }
+
+        .topbar {
+            background: #15803d;
+        }
+
+        .nav-glass {
+            background: rgba(0, 0, 0, 0.18);
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-primary {
+            background: #15803d;
+            transition: .25s ease;
+        }
+
+        .btn-primary:hover {
+            background: #166534;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(21, 128, 61, .30);
+        }
+
+        .btn-light {
+            background: white;
+            color: #15803d;
+            transition: .25s ease;
+        }
+
+        .btn-light:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, .18);
+        }
+
+        .floating-card {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, .16);
+        }
+
+        .feature-card {
+            transition: .25s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 18px 35px rgba(0, 0, 0, .10);
+        }
     </style>
 </head>
-<body class="bg-white text-slate-900 antialiased overflow-x-hidden">
 
-    <!-- NAVBAR -->
-    <nav class="fixed top-0 w-full z-50 glass border-b border-slate-100 transition-all duration-300" id="navbar">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <a href="{{ url('/') }}" class="flex items-center gap-3 group">
-                    <div class="w-10 h-10 card-grad-1 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/30 group-hover:scale-110 transition-transform">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- TOP BAR -->
+    <div class="topbar h-9 flex items-center justify-end px-6 md:px-12">
+        <div class="flex items-center gap-4 text-white">
+            <span class="text-xs font-medium opacity-90">BMT SMKN 11 BANDUNG</span>
+            <span class="h-4 w-px bg-white/30"></span>
+            <span class="text-xs opacity-90">Smart Financial Service</span>
+        </div>
+    </div>
+
+    <!-- HERO -->
+    <section class="relative min-h-[760px] md:min-h-screen hero-bg">
+
+        <div class="absolute inset-0 hero-overlay"></div>
+
+        <!-- NAVBAR -->
+        <nav class="relative z-20 nav-glass border-b border-white/10">
+            <div class="max-w-7xl mx-auto px-5 md:px-10">
+                <div class="h-24 flex items-center justify-between">
+
+                    <!-- BRAND -->
+                    <a href="#" class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-lg">
+                            <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-green-700 to-green-500 flex items-center justify-center">
+                                <span class="text-white text-sm font-black">SP</span>
+                            </div>
+                        </div>
+
+                        <div class="leading-tight">
+                            <h1 class="text-white text-xl font-extrabold">SmartPocket</h1>
+                            <p class="text-white/75 text-xs font-medium">BMT SMKN 11 Bandung</p>
+                        </div>
+                    </a>
+
+                    <!-- MENU -->
+                    <div class="hidden lg:flex items-center gap-8">
+                        <a href="#" class="text-white font-semibold text-sm hover:text-green-200 transition">Beranda</a>
+                        <a href="#tentang" class="text-white/90 font-medium text-sm hover:text-white transition">Tentang BMT</a>
+                        <a href="#layanan" class="text-white/90 font-medium text-sm hover:text-white transition">Layanan</a>
+                        <a href="#fitur" class="text-white/90 font-medium text-sm hover:text-white transition">Fitur</a>
+                        <a href="#kontak" class="text-white/90 font-medium text-sm hover:text-white transition">Kontak</a>
+                    </div>
+
+                    <!-- LOGIN -->
+                    <a href="{{ route('login') }}"
+                       class="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-green-700 text-sm font-bold hover:bg-green-50 transition">
+                        Masuk
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                         </svg>
-                    </div>
-                    <div>
-                        <div class="font-extrabold text-lg tracking-tight">Smart Pocket</div>
-                        <div class="text-[10px] text-slate-500 font-medium -mt-1">BMT SMKN 11 BANDUNG</div>
-                    </div>
+                    </a>
+
+                </div>
+            </div>
+        </nav>
+
+        <!-- HERO CONTENT -->
+        <div class="relative z-10 max-w-5xl mx-auto px-6 text-center pt-28 md:pt-32 pb-48">
+
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm mb-7">
+                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                <span class="text-white text-xs md:text-sm font-semibold tracking-wide">
+                    BANK MINI TERPADU SMKN 11 BANDUNG
+                </span>
+            </div>
+
+            <h2 class="text-5xl md:text-7xl lg:text-8xl font-black text-white tracking-tight leading-none">
+                SmartPocket
+            </h2>
+
+            <p class="mt-5 text-xl md:text-2xl text-white/95 font-medium">
+                Solusi Digital BMT SMKN 11 Bandung
+            </p>
+
+            <p class="mt-6 max-w-3xl mx-auto text-base md:text-lg text-white/80 leading-relaxed">
+                Kelola tabungan, transaksi, dan layanan keuangan BMT dengan lebih mudah,
+                cepat, transparan, dan terintegrasi dalam satu platform digital.
+            </p>
+
+            <div class="mt-9 flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="{{ route('register') }}"
+                   class="btn-primary px-8 py-4 rounded-full text-white font-bold text-base flex items-center gap-2">
+                    Mulai Sekarang
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                    </svg>
                 </a>
 
-                <div class="hidden lg:flex items-center gap-1 bg-slate-50 p-1 rounded-full border border-slate-100">
-                    <a href="#home" class="px-5 py-2 text-sm font-semibold text-slate-900 bg-white rounded-full shadow-sm">Beranda</a>
-                    <a href="#fitur" class="px-5 py-2 text-sm font-medium text-slate-600 hover:text-brand-600 transition">Fitur</a>
-                    <a href="#tentang" class="px-5 py-2 text-sm font-medium text-slate-600 hover:text-brand-600 transition">Tentang</a>
-                    <a href="#faq" class="px-5 py-2 text-sm font-medium text-slate-600 hover:text-brand-600 transition">FAQ</a>
-                </div>
-
-                <div class="flex items-center gap-3">
-                    <a href="{{ route('login') }}" class="hidden sm:block text-sm font-semibold text-slate-700 hover:text-brand-600 transition">Masuk</a>
-                    <a href="{{ route('login') }}" class="px-6 py-2.5 text-sm font-bold text-white card-grad-1 rounded-full shadow-lg shadow-brand-500/30 hover:shadow-xl hover:shadow-brand-500/40 hover:-translate-y-0.5 transition-all">Login Akun</a>
-                </div>
+                <a href="#fitur"
+                   class="btn-light px-8 py-4 rounded-full font-bold text-base">
+                    Lihat Layanan
+                </a>
             </div>
         </div>
-    </nav>
 
-    <!-- HERO - SIMPLE & CLEAN -->
-    <section id="home" class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-gradient-to-b from-brand-50/50 to-white">
-        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-brand-200/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-brand-100/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+        <!-- FLOATING INFORMATION CARD -->
+        <div class="absolute z-20 left-1/2 -translate-x-1/2 bottom-[-72px] w-[92%] max-w-6xl">
+            <div class="floating-card bg-white rounded-3xl p-5 md:p-7">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
 
-        <div class="relative max-w-5xl mx-auto px-6 lg:px-8 text-center">
-            
-            <div class="reveal">
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-brand-100 rounded-full shadow-sm mb-8">
-                    <span class="flex h-2 w-2 relative">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
-                    </span>
-                    <span class="text-xs font-bold text-brand-700 uppercase tracking-wider">Platform Resmi BMT</span>
-                </div>
-
-                <h1 class="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight mb-6">
-                    Dompet Digital <br class="hidden md:block">
-                    <span class="gradient-text">Cerdas & Modern</span> <br>
-                    untuk Siswa.
-                </h1>
-
-                <p class="text-lg text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-                    Kelola keuangan BMT SMKN 11 Bandung dengan mudah. Ajukan penarikan, peminjaman, dan cek saldo kapan saja dalam satu aplikasi.
-                </p>
-
-                <div class="flex flex-wrap justify-center gap-4 mb-16">
-                    <a href="{{ route('login') }}" class="group inline-flex items-center gap-2 px-8 py-4 font-bold text-white card-grad-1 rounded-full shadow-xl shadow-brand-500/30 hover:shadow-2xl hover:shadow-brand-500/40 hover:-translate-y-1 transition-all">
-                        Mulai Sekarang
-                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
-                        </svg>
-                    </a>
-                    <a href="#fitur" class="inline-flex items-center gap-2 px-8 py-4 font-bold text-slate-700 bg-white border-2 border-slate-100 rounded-full hover:border-brand-300 hover:text-brand-600 transition-all">
-                        Pelajari Fitur
-                    </a>
-                </div>
-
-                <div class="flex items-center justify-center gap-12 pt-8 border-t border-slate-100">
-                    <div>
-                        <div class="text-3xl font-black text-slate-900">550+</div>
-                        <div class="text-sm text-slate-500 font-medium">Siswa Aktif</div>
-                    </div>
-                    <div class="w-px h-10 bg-slate-200"></div>
-                    <div>
-                        <div class="text-3xl font-black text-slate-900">Rp 50M</div>
-                        <div class="text-sm text-slate-500 font-medium">Dana Terkelola</div>
-                    </div>
-                    <div class="w-px h-10 bg-slate-200"></div>
-                    <div>
-                        <div class="text-3xl font-black text-slate-900">100%</div>
-                        <div class="text-sm text-slate-500 font-medium">Aman</div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- FEATURES -->
-    <section id="fitur" class="py-24 lg:py-32 bg-white">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-20 reveal">
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-50 border border-brand-100 rounded-full mb-6">
-                    <span class="text-xs font-bold text-brand-700 uppercase tracking-wider">Fitur Unggulan</span>
-                </div>
-                <h2 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-6">
-                    Semua kebutuhan <br><span class="gradient-text">keuangan dalam satu tempat.</span>
-                </h2>
-                <p class="text-lg text-slate-600">Dirancang khusus untuk memudahkan siswa dan guru SMKN 11 Bandung.</p>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="reveal md:col-span-2 bg-slate-900 rounded-[2rem] p-10 text-white relative overflow-hidden group hover:scale-[1.02] transition-transform duration-500">
-                    <div class="absolute top-0 right-0 w-96 h-96 bg-brand-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-brand-500/30 transition-colors"></div>
-                    <div class="relative z-10">
-                        <div class="w-14 h-14 bg-white/10 backdrop-blur rounded-2xl flex items-center justify-center mb-6 border border-white/10">
-                            <svg class="w-7 h-7 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+                    <div class="flex items-center gap-4 lg:border-r border-slate-200">
+                        <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center shrink-0">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-width="2"
+                                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V6m0 12v-2m9-4a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
                         </div>
-                        <h3 class="text-3xl font-black mb-4">Cek Saldo Real-time</h3>
-                        <p class="text-slate-300 text-lg mb-8 max-w-md">Pantau saldo BMT Anda kapan saja dengan update langsung. Lihat riwayat transaksi dengan detail yang transparan.</p>
-                        <div class="flex flex-wrap gap-3">
-                            <span class="px-4 py-2 bg-white/10 backdrop-blur rounded-full text-sm font-semibold border border-white/10">✓ Live Update</span>
-                            <span class="px-4 py-2 bg-white/10 backdrop-blur rounded-full text-sm font-semibold border border-white/10">✓ Export PDF</span>
-                            <span class="px-4 py-2 bg-white/10 backdrop-blur rounded-full text-sm font-semibold border border-white/10">✓ Notifikasi</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="reveal bg-brand-50 rounded-[2rem] p-8 border border-brand-100 group hover:border-brand-300 transition-colors">
-                    <div class="w-14 h-14 card-grad-1 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-brand-500/30">
-                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/></svg>
-                    </div>
-                    <h3 class="text-2xl font-black mb-3 text-slate-900">Penarikan Dana</h3>
-                    <p class="text-slate-600 mb-6">Ajukan penarikan kapan saja. Proses cepat dan langsung disetujui admin.</p>
-                    <a href="#" class="inline-flex items-center gap-2 text-brand-600 font-bold text-sm group-hover:gap-3 transition-all">
-                        Selengkapnya <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-                    </a>
-                </div>
-
-                <div class="reveal bg-slate-50 rounded-[2rem] p-8 border border-slate-100 group hover:border-brand-200 hover:bg-white transition-all">
-                    <div class="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
-                    </div>
-                    <h3 class="text-2xl font-black mb-3 text-slate-900">Peminjaman</h3>
-                    <p class="text-slate-600 mb-6">Ajukan pinjaman dana darurat dengan syarat mudah dan cicilan fleksibel.</p>
-                    <a href="#" class="inline-flex items-center gap-2 text-brand-600 font-bold text-sm group-hover:gap-3 transition-all">
-                        Selengkapnya <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-                    </a>
-                </div>
-
-                <div class="reveal md:col-span-2 bg-gradient-to-br from-brand-500 to-brand-700 rounded-[2rem] p-10 text-white relative overflow-hidden group hover:scale-[1.02] transition-transform duration-500">
-                    <div class="absolute bottom-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-                    <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
                         <div>
-                            <div class="w-14 h-14 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center mb-6 border border-white/20">
-                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
-                            </div>
-                            <h3 class="text-3xl font-black mb-4">Keamanan Tingkat Bank</h3>
-                            <p class="text-white/90 text-lg max-w-md">Data Anda dilindungi dengan enkripsi end-to-end. Transaksi aman, data terjaga privasinya.</p>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4 w-full md:w-auto">
-                            <div class="bg-white/10 backdrop-blur rounded-2xl p-4 border border-white/20">
-                                <p class="text-2xl font-black">256-bit</p>
-                                <p class="text-xs text-white/70">SSL Encryption</p>
-                            </div>
-                            <div class="bg-white/10 backdrop-blur rounded-2xl p-4 border border-white/20">
-                                <p class="text-2xl font-black">2FA</p>
-                                <p class="text-xs text-white/70">Authentication</p>
-                            </div>
+                            <p class="font-bold text-slate-900">Tabungan</p>
+                            <p class="text-sm text-slate-500">Kelola saldo dengan mudah</p>
                         </div>
                     </div>
+
+                    <div class="flex items-center gap-4 lg:border-r border-slate-200">
+                        <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center shrink-0">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-width="2"
+                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-900">Transaksi</p>
+                            <p class="text-sm text-slate-500">Catatan transaksi lebih rapi</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4 lg:border-r border-slate-200">
+                        <div class="w-12 h-12 rounded-2xl bg-yellow-50 flex items-center justify-center shrink-0">
+                            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-width="2"
+                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-900">Real-time</p>
+                            <p class="text-sm text-slate-500">Informasi saldo lebih cepat</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center shrink-0">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-width="2"
+                                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-900">Aman</p>
+                            <p class="text-sm text-slate-500">Data dan transaksi terlindungi</p>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ABOUT -->
-    <section id="tentang" class="py-24 bg-slate-50">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-20 reveal">
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-slate-200 rounded-full mb-6 shadow-sm">
-                    <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Tentang Kami</span>
+    <!-- TENTANG -->
+    <section id="tentang" class="pt-40 pb-20 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+
+                <div>
+                    <p class="text-green-600 font-bold text-sm uppercase tracking-wider mb-3">
+                        Tentang SmartPocket
+                    </p>
+
+                    <h2 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight">
+                        BMT sekolah yang lebih
+                        <span class="text-green-600">modern dan terintegrasi.</span>
+                    </h2>
+
+                    <p class="mt-6 text-slate-600 leading-relaxed text-lg">
+                        SmartPocket merupakan platform digital untuk mendukung pengelolaan
+                        BMT SMKN 11 Bandung agar proses tabungan, transaksi, dan layanan
+                        keuangan dapat dilakukan secara lebih praktis dan terorganisir.
+                    </p>
                 </div>
-                <h2 class="text-4xl md:text-5xl font-black tracking-tight mb-6">BMT Bank Mini Terpadu <br><span class="gradient-text">SMKN 11 Bandung</span></h2>
-                <p class="text-lg text-slate-600">Platform dompet digital resmi untuk siswa dan guru.</p>
+
+                <div class="grid grid-cols-2 gap-5">
+                    <div class="rounded-3xl bg-green-50 p-7">
+                        <p class="text-4xl font-black text-green-700">01</p>
+                        <p class="mt-3 font-bold text-slate-900">Digital</p>
+                        <p class="mt-1 text-sm text-slate-600">Proses BMT lebih mudah diakses.</p>
+                    </div>
+
+                    <div class="rounded-3xl bg-green-50 p-7">
+                        <p class="text-4xl font-black text-green-700">02</p>
+                        <p class="mt-3 font-bold text-slate-900">Transparan</p>
+                        <p class="mt-1 text-sm text-slate-600">Riwayat transaksi lebih jelas.</p>
+                    </div>
+
+                    <div class="rounded-3xl bg-yellow-50 p-7">
+                        <p class="text-4xl font-black text-yellow-700">03</p>
+                        <p class="mt-3 font-bold text-slate-900">Efisien</p>
+                        <p class="mt-1 text-sm text-slate-600">Mengurangi proses manual.</p>
+                    </div>
+
+                    <div class="rounded-3xl bg-purple-50 p-7">
+                        <p class="text-4xl font-black text-purple-700">04</p>
+                        <p class="mt-3 font-bold text-slate-900">Terintegrasi</p>
+                        <p class="mt-1 text-sm text-slate-600">Informasi berada dalam satu sistem.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- LAYANAN / FITUR -->
+    <section id="layanan" class="py-24 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-6">
+
+            <div class="text-center max-w-2xl mx-auto mb-14">
+                <p class="text-green-600 font-bold text-sm uppercase tracking-wider mb-3">
+                    Layanan SmartPocket
+                </p>
+                <h2 class="text-4xl md:text-5xl font-black text-slate-900">
+                    Semua kebutuhan BMT dalam satu platform
+                </h2>
+                <p class="mt-5 text-slate-600">
+                    Dirancang untuk membantu nasabah, operator, dan admin mengelola
+                    aktivitas BMT dengan lebih praktis.
+                </p>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="reveal bg-white rounded-3xl p-8 border border-slate-100 hover:border-brand-200 transition">
-                    <div class="w-14 h-14 bg-brand-100 rounded-2xl flex items-center justify-center mb-5">
-                        <svg class="w-7 h-7 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            <div id="fitur" class="grid md:grid-cols-2 lg:grid-cols-3 gap-7">
+
+                <div class="feature-card bg-white rounded-3xl p-8">
+                    <div class="w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-width="2"
+                                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V6m0 12v-2m9-4a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
                     </div>
-                    <h3 class="text-xl font-black mb-3">Literasi Finansial</h3>
-                    <p class="text-slate-600 text-sm">Membangun kebiasaan menabung dan mengelola uang sejak dini.</p>
+                    <h3 class="text-xl font-bold text-slate-900">Tabungan Digital</h3>
+                    <p class="mt-3 text-slate-600 leading-relaxed">
+                        Memudahkan pengguna melihat dan mengelola informasi tabungan
+                        dalam satu sistem.
+                    </p>
                 </div>
 
-                <div class="reveal bg-white rounded-3xl p-8 border border-slate-100 hover:border-brand-200 transition" style="transition-delay: 100ms;">
-                    <div class="w-14 h-14 bg-brand-100 rounded-2xl flex items-center justify-center mb-5">
-                        <svg class="w-7 h-7 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                <div class="feature-card bg-white rounded-3xl p-8">
+                    <div class="w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-width="2"
+                                  d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
                     </div>
-                    <h3 class="text-xl font-black mb-3">Aman & Terpercaya</h3>
-                    <p class="text-slate-600 text-sm">Dikelola langsung oleh sekolah dengan sistem yang transparan.</p>
+                    <h3 class="text-xl font-bold text-slate-900">Transaksi Online</h3>
+                    <p class="mt-3 text-slate-600 leading-relaxed">
+                        Pencatatan transaksi dibuat lebih cepat dan terstruktur sehingga
+                        memudahkan pengelolaan data.
+                    </p>
                 </div>
 
-                <div class="reveal bg-white rounded-3xl p-8 border border-slate-100 hover:border-brand-200 transition" style="transition-delay: 200ms;">
-                    <div class="w-14 h-14 bg-brand-100 rounded-2xl flex items-center justify-center mb-5">
-                        <svg class="w-7 h-7 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <div class="feature-card bg-white rounded-3xl p-8">
+                    <div class="w-14 h-14 rounded-2xl bg-yellow-100 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-width="2"
+                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
                     </div>
-                    <h3 class="text-xl font-black mb-3">Cepat & Praktis</h3>
-                    <p class="text-slate-600 text-sm">Transaksi kapan saja tanpa perlu antre di bank mini.</p>
+                    <h3 class="text-xl font-bold text-slate-900">Notifikasi</h3>
+                    <p class="mt-3 text-slate-600 leading-relaxed">
+                        Informasi penting mengenai transaksi dan aktivitas BMT dapat
+                        disampaikan dengan lebih cepat.
+                    </p>
                 </div>
+
+                <div class="feature-card bg-white rounded-3xl p-8">
+                    <div class="w-14 h-14 rounded-2xl bg-purple-100 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-width="2"
+                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">Verifikasi</h3>
+                    <p class="mt-3 text-slate-600 leading-relaxed">
+                        Membantu operator memeriksa dan memvalidasi transaksi agar
+                        pengelolaan data lebih terkontrol.
+                    </p>
+                </div>
+
+                <div class="feature-card bg-white rounded-3xl p-8">
+                    <div class="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-width="2"
+                                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">Keamanan Data</h3>
+                    <p class="mt-3 text-slate-600 leading-relaxed">
+                        Informasi akun dan transaksi dikelola melalui sistem dengan
+                        autentikasi pengguna.
+                    </p>
+                </div>
+
+                <div class="feature-card bg-white rounded-3xl p-8">
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-width="2"
+                                  d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m-6 0a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2h2a2 2 0 012 2v6zm6 0a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2a2 2 0 00-2 2v12z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">Laporan BMT</h3>
+                    <p class="mt-3 text-slate-600 leading-relaxed">
+                        Data aktivitas BMT dapat dirangkum sehingga membantu operator
+                        dan admin memantau kondisi layanan.
+                    </p>
+                </div>
+
             </div>
         </div>
     </section>
 
     <!-- CTA -->
-    <section class="py-24 bg-slate-50">
-        <div class="max-w-6xl mx-auto px-6 lg:px-8">
-            <div class="reveal relative card-grad-1 rounded-[3rem] p-12 md:p-20 overflow-hidden text-center">
-                <div class="absolute -top-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
-                <div class="absolute -bottom-20 -left-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
-                
-                <div class="relative z-10">
-                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight">Siap Kelola Keuangan <br>Lebih Mudah?</h2>
-                    <p class="text-lg text-white/90 mb-10 max-w-2xl mx-auto">Login sekarang dan nikmati kemudahan transaksi BMT SMKN 11 Bandung dalam genggaman Anda.</p>
-                    <div class="flex flex-wrap justify-center gap-4">
-                        <a href="{{ route('login') }}" class="group inline-flex items-center gap-2 px-8 py-4 bg-white text-brand-700 font-black rounded-full hover:shadow-2xl hover:scale-105 transition-all">
-                            Login Sekarang
-                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-                        </a>
-                        <a href="https://wa.me/6288975134699" target="_blank" class="inline-flex items-center gap-2 px-8 py-4 bg-white/20 backdrop-blur text-white font-black rounded-full hover:bg-white/30 transition border border-white/30">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                            WhatsApp
-                        </a>
-                    </div>
-                </div>
-            </div>
+    <section class="py-24 bg-green-700">
+        <div class="max-w-5xl mx-auto px-6 text-center">
+            <h2 class="text-4xl md:text-5xl font-black text-white">
+                Kelola BMT dengan lebih mudah bersama SmartPocket
+            </h2>
+            <p class="mt-5 text-white/80 text-lg max-w-2xl mx-auto">
+                Satu platform untuk membantu menciptakan pengelolaan BMT SMKN 11 Bandung
+                yang lebih praktis, tertata, dan modern.
+            </p>
+
+            <a href="{{ route('register') }}"
+               class="inline-flex mt-8 px-8 py-4 rounded-full bg-white text-green-700 font-bold hover:bg-green-50 transition">
+                Daftar Sekarang
+            </a>
         </div>
     </section>
 
     <!-- FOOTER -->
-    <footer class="bg-slate-900 text-slate-400 pt-20 pb-10">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-            <div class="grid md:grid-cols-4 gap-12 mb-16">
-                <div class="md:col-span-2">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 card-grad-1 rounded-xl flex items-center justify-center">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+    <footer id="kontak" class="bg-slate-950 text-white py-12">
+        <div class="max-w-7xl mx-auto px-6">
+
+            <div class="grid md:grid-cols-3 gap-10">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl bg-green-600 flex items-center justify-center">
+                            <span class="font-black">SP</span>
                         </div>
-                        <div class="text-white font-extrabold text-lg">Smart Pocket</div>
+                        <div>
+                            <h3 class="font-bold text-lg">SmartPocket</h3>
+                            <p class="text-xs text-slate-400">BMT SMKN 11 Bandung</p>
+                        </div>
                     </div>
-                    <p class="text-sm max-w-sm leading-relaxed mb-6">Platform dompet digital resmi BMT Bank Mini Terpadu SMKN 11 Bandung untuk memudahkan siswa dan guru.</p>
+
+                    <p class="mt-5 text-sm text-slate-400 leading-relaxed max-w-sm">
+                        Platform digital untuk mendukung pengelolaan layanan dan transaksi
+                        BMT SMKN 11 Bandung.
+                    </p>
                 </div>
+
                 <div>
-                    <h4 class="text-white font-bold mb-6">Menu</h4>
-                    <ul class="space-y-4 text-sm">
-                        <li><a href="#home" class="hover:text-brand-400 transition">Beranda</a></li>
-                        <li><a href="#fitur" class="hover:text-brand-400 transition">Fitur</a></li>
-                        <li><a href="#tentang" class="hover:text-brand-400 transition">Tentang</a></li>
-                        <li><a href="#faq" class="hover:text-brand-400 transition">FAQ</a></li>
-                    </ul>
+                    <h4 class="font-bold mb-4">Navigasi</h4>
+                    <div class="space-y-3 text-sm text-slate-400">
+                        <a href="#" class="block hover:text-white">Beranda</a>
+                        <a href="#tentang" class="block hover:text-white">Tentang BMT</a>
+                        <a href="#fitur" class="block hover:text-white">Fitur</a>
+                        <a href="#kontak" class="block hover:text-white">Kontak</a>
+                    </div>
                 </div>
+
                 <div>
-                    <h4 class="text-white font-bold mb-6">Kontak</h4>
-                    <ul class="space-y-4 text-sm">
-                        <li>Jl. Budhi No.52, Bandung</li>
-                        <li>info@smkn11bandung.sch.id</li>
-                        <li>(022) 123-4567</li>
-                    </ul>
+                    <h4 class="font-bold mb-4">BMT SMKN 11 Bandung</h4>
+                    <p class="text-sm text-slate-400 leading-relaxed">
+                        SmartPocket — Bank Mini Terpadu untuk mendukung layanan keuangan
+                        di lingkungan SMKN 11 Bandung.
+                    </p>
                 </div>
             </div>
-            <div class="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-                <p>&copy; {{ date('Y') }} Smart Pocket - BMT SMKN 11 Bandung. All rights reserved.</p>
+
+            <div class="border-t border-white/10 mt-10 pt-6 text-center text-sm text-slate-500">
+                © 2026 SmartPocket - BMT SMKN 11 Bandung
             </div>
         </div>
     </footer>
 
-    <script>
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) entry.target.classList.add('active');
-            });
-        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-        const navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 20) navbar.classList.add('shadow-lg', 'bg-white/90');
-            else navbar.classList.remove('shadow-lg', 'bg-white/90');
-        });
-    </script>
 </body>
 </html>

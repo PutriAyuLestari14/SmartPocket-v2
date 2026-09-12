@@ -59,7 +59,7 @@
                 </a>
                 
                 <p class="px-4 py-2 mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lainnya</p>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
+                <a href="{{ route('nasabah.profile.edit')}}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
                     <i class="fas fa-cog w-5 text-center"></i> Profile
                 </a>
             </nav>
@@ -195,8 +195,9 @@
                                 <p class="text-sm font-bold {{ $trx->jenisTransaksi->setoran == 'setoran' ? 'text-emerald-600' : 'text-red-600' }} mb-1">
                                     {{ $trx->jenisTransaksi->setoran == 'setoran' ? '+ ' : '- ' }} Rp {{ number_format($trx->jumlah, 0, ',', '.') }}
                                 </p>
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200">
-                                    <span class="text-[10px] font-bold text-emerald-700">Berhasil</span>
+                                <span class="px-2 py-1 rounded-full text-[10px] font-semibold 
+                                    {{ $trx->status == 'berhasil' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700' }}">
+                                    {{ ucfirst($trx->status) }}
                                 </span>
                             </div>
                         </div>

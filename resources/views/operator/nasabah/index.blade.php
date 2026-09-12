@@ -119,18 +119,22 @@
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-6">
                 <div class="p-4 border-b border-gray-100">
                     <form method="GET" action="{{ route('operator.nasabah.index') }}" class="flex flex-col sm:flex-row gap-3">
+                        
                         <div class="flex-1 relative">
-                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari NIS atau Nama..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                            <i class="fas fa-hashtag absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari No. Rekening..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
                         </div>
+
                         <select name="status_filter" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
                             <option value="">Semua Status</option>
                             <option value="aktif" {{ request('status_filter') == 'aktif' ? 'selected' : '' }}>Aktif</option>
                             <option value="nonaktif" {{ request('status_filter') == 'nonaktif' ? 'selected' : '' }}>Non-Aktif</option>
                         </select>
+
                         <button type="submit" class="px-4 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2">
                             <i class="fas fa-search text-sm"></i> Cari
                         </button>
+
                         @if(request('search') || request('status_filter'))
                             <a href="{{ route('operator.nasabah.index') }}" class="px-4 py-2.5 bg-gray-100 text-slate-600 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
                                 <i class="fas fa-times text-sm"></i> Reset
@@ -138,7 +142,7 @@
                         @endif
                     </form>
                 </div>
-
+                
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50">

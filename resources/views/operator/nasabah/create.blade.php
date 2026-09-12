@@ -103,7 +103,7 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                         <!-- NIS/NIP -->
                         <div>
-                            <label class="block text-xs lg:text-sm font-semibold text-slate-700 mb-2">NIS / NIP <span class="text-red-500">*</span></label>
+                            <label class="block text-xs lg:text-sm font-semibold text-slate-700 mb-2">NISN / NIP <span class="text-red-500">*</span></label>
                             <input type="text" name="username" value="{{ old('username') }}" placeholder="Masukkan Nomor Induk" 
                                 class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm" required>
                             <p class="text-[10px] text-slate-500 mt-1">Digunakan sebagai username login</p>
@@ -114,6 +114,16 @@
                             <label class="block text-xs lg:text-sm font-semibold text-slate-700 mb-2">Nama Lengkap <span class="text-red-500">*</span></label>
                             <input type="text" name="nama" value="{{ old('nama') }}" placeholder="Nama sesuai KTP/Kartu Pelajar" 
                                 class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm" required>
+                        </div>
+
+                        <!-- Prefix No. Rekening -->
+                        <div>
+                            <label class="block text-xs lg:text-sm font-semibold text-slate-700 mb-2"> No. Rekening <span class="text-red-500">*</span></label>
+                            <input type="text" name="prefix" value="{{ old('prefix') }}" placeholder="Sesuai angkatan siswa"
+                                maxlength="4"
+                                class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm"
+                                required>
+                            <p class="text-[10px] text-slate-500 mt-1">Siswa: 2 digit angkatan. Guru: GT.</p>
                         </div>
 
                         <!-- Jenis Nasabah -->

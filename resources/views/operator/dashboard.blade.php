@@ -73,7 +73,9 @@
             <header class="mb-6">
                 <div class="flex justify-between items-start mb-4">
                     <div>
-                        <h1 class="text-xl lg:text-2xl font-bold text-slate-900">Selamat Datang, Operator</h1>
+                        <h1 class="text-xl lg:text-2xl font-bold text-slate-900">Selamat Datang, 
+                            {{ auth()->user()->petugas->nama_lengkap ?? auth()->user()->name}} 
+                        </h1>
                         <div class="flex items-center gap-3 mt-2 text-sm text-slate-600">
                             <i class="far fa-calendar"></i>
                             <span>{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</span>

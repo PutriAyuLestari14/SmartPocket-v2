@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NasabahController;
+use App\Http\Controllers\NasabahProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminLaporanController;
 use App\Http\Controllers\TabunganController;
@@ -90,6 +91,14 @@ Route::middleware(['auth'])->group(function () {
         // peminjaman wat GURU YAK
         Route::get('/nasabah/peminjaman', [NasabahPeminjamanController::class, 'create'])->name('nasabah.peminjaman.create');
         Route::post('/nasabah/peminjaman', [NasabahPeminjamanController::class, 'store'])->name('nasabah.peminjaman.store');
+
+        // Profile Nasabah
+        Route::get('/nasabah/profile', [NasabahProfileController::class, 'edit'])->name('nasabah.profile.edit');
+        Route::patch('/nasabah/profile', [NasabahProfileController::class, 'update'])->name('nasabah.profile.update');
+
+        // Change Password Nasabah
+        Route::get('/nasabah/password', [NasabahProfileController::class, 'editPassword'])->name('nasabah.password.edit');
+        Route::put('/nasabah/password', [NasabahProfileController::class, 'updatePassword'])->name('nasabah.password.update');
 
     });
 

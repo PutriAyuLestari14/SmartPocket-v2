@@ -21,7 +21,6 @@ class DatabaseSeeder extends Seeder
 
         Petugas::firstOrCreate(
             ['username' => $adminUser->username], 
-
             [
                 'role' => 'admin',
                 'nama_lengkap' => 'Bapak Ade',
@@ -36,7 +35,6 @@ class DatabaseSeeder extends Seeder
 
         Petugas::firstOrCreate(
             ['username' => $operatorUser->username], 
-
             [
                 'role' => 'operator',
                 'nama_lengkap' => 'Teller BMT',
@@ -52,15 +50,10 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        $nasabahUser = User::firstOrCreate(['username' => '12345678'], [
-            'name' => 'Siswa Nasabah',
-            'password' => Hash::make('nasabah123'),
-            'role' => 'nasabah',
-        ]);
-
         $nasabah = Nasabah::firstOrCreate(
             ['username' => $siswaUser->username], 
             [
+                'no_rek' => 'RK-0001',
                 'nama' => 'Siswa Nasabah',
                 'kategori' => 'siswa',
                 'alamat' => 'Jl. Sekolah No. 1',

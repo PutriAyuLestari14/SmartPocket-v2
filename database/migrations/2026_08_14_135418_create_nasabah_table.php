@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('id_nasabah');
             $table->string('username');
             $table->foreign('username')->references('username')->on('users')->onDelete('cascade');
+            $table->string('no_rek')->unique();
             $table->string('nama');
             $table->enum('kategori', ['siswa', 'guru']); 
             $table->text('alamat');

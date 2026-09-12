@@ -43,4 +43,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Nasabah::class, 'username', 'username');
     }
+
+    public function petugas()
+    {
+        return $this->hasOne(Petugas::class, 'username', 'username');
+    }
 }

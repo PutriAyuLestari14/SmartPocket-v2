@@ -2,6 +2,9 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\Nasabah;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -37,15 +40,40 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('username', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        $login = $this->string('username')->toString();
+        $password = $this->string('password')->toString();
 
-            throw ValidationException::withMessages([
-                'username' => trans('auth.failed'),
-            ]);
+        // Coba login nasabah menggunakan nomor rekening
+        $nasabah = Nasabah::where('no_rek', $login)->first();
+
+        if ($nasabah && $nasabah->user) {
+            if (Auth::attempt([
+                'username' => $nasabah->user->username,
+                'password' => $password,
+                'role' => 'nasabah',
+            ], $this->boolean('remember'))) {
+                RateLimiter::clear($this->throttleKey());
+                return;
+            }
         }
 
-        RateLimiter::clear($this->throttleKey());
+        // Coba login admin/operator menggunakan username
+        $user = User::where('username', $login)
+            ->whereIn('role', ['admin', 'operator'])
+            ->first();
+
+        if ($user && Hash::check($password, $user->password)) {
+            Auth::login($user, $this->boolean('remember'));
+
+            RateLimiter::clear($this->throttleKey());
+            return;
+        }
+
+        RateLimiter::hit($this->throttleKey());
+
+        throw ValidationException::withMessages([
+            'username' => trans('auth.failed'),
+        ]);
     }
 
     /**
@@ -55,7 +83,7 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }
 
@@ -64,7 +92,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-                'username' => trans('auth.throttle', [
+            'username' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -76,6 +104,8 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('username')).'|'.$this->ip());
+        return Str::transliterate(
+            Str::lower($this->string('username')) . '|' . $this->ip()
+        );
     }
 }

@@ -37,9 +37,10 @@ class OperatorController extends Controller
             'jenisTransaksi',
             'rekening.nasabah'
         ])
-        ->orderBy('tanggal_transaksi', 'desc')
-        ->take(8)
-        ->get();
+            ->where('status', '!=', 'pending')
+            ->orderBy('tanggal_transaksi', 'desc')
+            ->take(8)
+            ->get();
 
         $totalSetoranBulanIni = DetailTabungan::whereMonth(
             'tanggal_transaksi',

@@ -84,7 +84,7 @@
                 </a>
                 
                 <p class="px-4 py-2 mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lainnya</p>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
+                <a href="{{ route('nasabah.profile.edit')}}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
                     <i class="fas fa-cog w-5 text-center"></i> Profile
                 </a>
             </nav>
@@ -117,8 +117,15 @@
                             <p class="text-sm font-semibold text-slate-900">{{ auth()->user()->name }}</p>
                             <p class="text-xs text-slate-500">{{ ucfirst(auth()->user()->nasabah->kategori ?? 'siswa') }}</p>
                         </div>
-                        <div class="w-9 h-9 bg-emerald-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                            {{ substr(auth()->user()->name, 0, 1) }}
+                        <!-- PROFILE -->
+                        <div class="w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-sm overflow-hidden bg-emerald-500 border-2 border-white shadow-sm">
+                            @if(auth()->user()->nasabah && auth()->user()->nasabah->photo)
+                                <img src="{{ asset('storage/' . auth()->user()->nasabah->photo) }}" 
+                                    alt="Profile" 
+                                    class="w-full h-full object-cover">
+                            @else
+                                {{ substr(auth()->user()->name, 0, 1) }}
+                            @endif
                         </div>
                     </div>
                 </div>

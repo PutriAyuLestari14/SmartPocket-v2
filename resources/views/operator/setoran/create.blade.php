@@ -100,9 +100,9 @@
 
                             <!-- Search by Nama -->
                             <div class="mb-3">
-                                <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Cari Nasabah (Nama / NIS)</label>
+                                <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Cari Nasabah (No. Rekening)</label>
                                 <div class="flex gap-2">
-                                    <input type="text" id="searchNama" placeholder="Ketik nama atau NIS..." 
+                                    <input type="text" id="searchNama" placeholder="Ketik No. Rekening..." 
                                         class="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                                         onkeyup="filterNasabah()">
                                     <button type="button" onclick="cariNasabah()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-semibold transition-colors">
@@ -114,9 +114,9 @@
                                 <div id="dropdownNasabah" class="hidden mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto z-10">
                                     @foreach($nasabah as $n)
                                         <div onclick="pilihNasabah('{{ $n->id_nasabah }}', '{{ $n->nama }}', '{{ $n->rekening->no_rek ?? '-' }}', {{ $n->rekening->saldo ?? 0 }})" 
-                                             class="px-3 py-2 hover:bg-emerald-50 cursor-pointer border-b border-gray-100 last:border-0">
-                                            <p class="text-sm font-semibold text-slate-900">{{ $n->nama }}</p>
-                                            <p class="text-xs text-slate-500">NIS: {{ $n->user->username }} | No. Rek: {{ $n->rekening->no_rek ?? '-' }}</p>
+                                            class="px-3 py-2 hover:bg-emerald-50 cursor-pointer border-b border-gray-100 last:border-0">
+                                            <p class="text-sm font-bold text-slate-900 font-mono">No. Rek: {{ $n->rekening->no_rek ?? '-' }}</p>
+                                            <p class="text-xs text-slate-500">Nama: {{ $n->nama }} | NISN: {{ $n->user->username ?? '-' }}</p>
                                         </div>
                                     @endforeach
                                 </div>
@@ -133,7 +133,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">No Rekening</label>
+                                    <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">NISN</label>
                                     <div class="px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg min-h-[38px] flex items-center">
                                         <p id="displayNoRek" class="text-sm font-semibold text-slate-900">-</p>
                                     </div>

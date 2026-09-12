@@ -10,6 +10,7 @@ class TransaksiController extends Controller
     public function index(Request $request)
     {
         $query = DetailTabungan::with(['jenisTransaksi', 'rekening.nasabah'])
+            ->where('status', '!=', 'pending')
             ->orderBy('tanggal_transaksi', 'desc');
 
         // Filter Jenis
