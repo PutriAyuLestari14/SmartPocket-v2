@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\DetailTabungan;
 use App\Models\RekeningTabungan;
 use Illuminate\Http\Request;
+use App\Http\Controllers\NotifikasiController;
+use App\Models\Nasabah;
 use Illuminate\Support\Facades\DB;
 
 class OperatorVerifikasiController extends Controller
@@ -12,7 +14,6 @@ class OperatorVerifikasiController extends Controller
     public function index()
     {
         // Ambil data pending dengan pagination
-        // id_jenis_transaksi = 2 diasumsiin buat Penarikan 
         $pengajuan = DetailTabungan::with(['rekening.nasabah.user'])
             ->where('id_jenis_transaksi', 2) 
             ->where('status', 'pending')
@@ -61,6 +62,16 @@ class OperatorVerifikasiController extends Controller
             $trx->id_petugas = auth()->id(); 
             $trx->save();
 
+            // === TAMBAHKAN KODE INI ===
+            // Kirim notifikasi ke nasabah
+            $nasabah = $rekening->nasabah;
+            NotifikasiController::kirim(
+                $nasabah->id_nasabah,
+                'Penarikan Disetujui ✅',
+                'Pengajuan penarikan dana sebesar Rp ' . number_format($trx->jumlah, 0, ',', '.') . ' telah disetujui. Saldo Anda telah dikurangi.',
+                'penarikan'
+            );
+
             DB::commit();
             
             $namaNasabah = $rekening->nasabah->nama ?? 'Nasabah';
@@ -84,6 +95,15 @@ class OperatorVerifikasiController extends Controller
             $trx->status = 'gagal'; 
             $trx->id_petugas = auth()->id(); 
             $trx->save();
+
+            // Kirim notifikasi ke nasabah
+            $nasabah = $rekening->nasabah;
+            NotifikasiController::kirim(
+                $nasabah->id_nasabah,
+                'Penarikan Ditolak ❌',
+                'Pengajuan penarikan dana sebesar Rp ' . number_format($trx->jumlah, 0, ',', '.') . ' telah ditolak oleh operator.',
+                'penarikan'
+            );
 
             DB::commit();
             return back()->with('success', 'Pengajuan penarikan a.n ' . $namaNasabah . ' telah ditolak.');

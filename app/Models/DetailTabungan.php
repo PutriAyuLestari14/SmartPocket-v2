@@ -15,6 +15,7 @@ class DetailTabungan extends Model
         'jumlah',
         'status',
         'tanggal_transaksi',
+        'keterangan',
     ];
 
     protected $casts = [

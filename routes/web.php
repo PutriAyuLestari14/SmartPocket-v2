@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NasabahController;
 use App\Http\Controllers\NasabahProfileController;
+use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminLaporanController;
 use App\Http\Controllers\TabunganController;
@@ -21,7 +22,8 @@ use App\Http\Controllers\OperatorVerifikasiController;
 use App\Http\Controllers\OperatorLaporanController; 
 use App\Http\Controllers\OperatorSetoranController; 
 use App\Http\Controllers\OperatorPenarikanController; 
-use App\Http\Controllers\OperatorPembayaranController; 
+use App\Http\Controllers\OperatorPembayaranController;
+use App\Http\Controllers\OperatorNotifikasiController; 
 
 Route::get('/', function () {
     return view('welcome');
@@ -75,6 +77,10 @@ Route::middleware(['auth'])->group(function () {
         // laporan
         Route::get('/laporan', [OperatorLaporanController::class, 'index'])->name('operator.laporan.index');
 
+        // Notifikasi Operator
+        Route::get('/operator/notifikasi', [OperatorNotifikasiController::class, 'index'])->name('operator.notifikasi.index');
+        Route::post('/operator/notifikasi/read-all', [OperatorNotifikasiController::class, 'markAllAsRead'])->name('operator.notifikasi.read-all');
+
     });
 
     // NASABAH 
@@ -84,6 +90,11 @@ Route::middleware(['auth'])->group(function () {
         //riwayat
         Route::get('/riwayat', [TabunganController::class, 'riwayat'])->name('nasabah.riwayat');
 
+        // Notifikasi
+        Route::get('/nasabah/notifikasi', [NotifikasiController::class, 'index'])->name('nasabah.notifikasi.index');
+        Route::post('/nasabah/notifikasi/{id}/read', [NotifikasiController::class, 'markAsRead'])->name('nasabah.notifikasi.read');
+        Route::post('/nasabah/notifikasi/read-all', [NotifikasiController::class, 'markAllAsRead'])->name('nasabah.notifikasi.read-all');
+        
         //penarikan
         Route::get('/nasabah/penarikan', [NasabahPenarikanController::class, 'create'])->name('nasabah.penarikan.create');
         Route::post('/nasabah/penarikan', [NasabahPenarikanController::class, 'store'])->name('nasabah.penarikan.store');

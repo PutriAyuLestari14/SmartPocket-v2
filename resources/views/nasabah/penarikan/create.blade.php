@@ -155,7 +155,7 @@
                                 </div>
                                 <p class="text-xs text-slate-500 mt-2 flex items-center gap-1.5">
                                     <i class="fas fa-lightbulb text-amber-500"></i>
-                                    Masukkan angka saja, contoh: 50000
+                                    Masukkan angka, contoh: 50000
                                 </p>
                             </div>
 

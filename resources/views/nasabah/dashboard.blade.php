@@ -108,10 +108,10 @@
                     <p class="text-sm text-slate-500 mt-1">{{ auth()->user()->name }}</p>
                 </div>
                 <div class="flex items-center gap-3 lg:gap-4">
-                    <button class="w-9 h-9 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-700 hover:border-gray-300 transition-colors relative">
+                    <a href="{{ route('nasabah.notifikasi.index') }}" class="w-9 h-9 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-slate-500 hover:text-emerald-600 hover:border-emerald-300 transition-colors relative group">
                         <i class="far fa-bell text-sm"></i>
-                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                    </button>
+                        <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                    </a>
                     <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
                         <div class="text-right hidden sm:block">
                             <p class="text-sm font-semibold text-slate-900">{{ auth()->user()->name }}</p>

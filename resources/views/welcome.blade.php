@@ -410,7 +410,7 @@
                 yang lebih praktis, tertata, dan modern.
             </p>
 
-            <a href="{{ route('register') }}"
+            <a href="{{ route('login') }}"
                class="inline-flex mt-8 px-8 py-4 rounded-full bg-white text-green-700 font-bold hover:bg-green-50 transition">
                 Daftar Sekarang
             </a>

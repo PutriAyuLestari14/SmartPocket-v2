@@ -17,13 +17,11 @@ class NasabahController extends Controller
     {
         $query = Nasabah::with(['user', 'rekening']);
 
-        // LOGIKA SEARCH BERDASARKAN ANGKATAN / NO REK (SUDAH DIPERBAIKI)
+        // SEARCH BERDASARKAN ANGKATAN / NO REK 
         if ($request->filled('search')) {
             $search = $request->search;
 
             // Mencari no_rek yang DI AWALI dengan angka yang diketik
-            // Contoh: ketik "24" -> cari "24%" (semua angkatan 24)
-            // Contoh: ketik "24001" -> cari "24001%" (no rek spesifik)
             $query->whereHas('rekening', function($q) use ($search) {
                 $q->where('no_rek', 'like', $search . '%');
             });
@@ -67,7 +65,7 @@ class NasabahController extends Controller
             'nama' => 'required|string|max:255',
             'kategori' => 'required|in:siswa,guru',
             'prefix' => 'required|string|max:4',
-            'password' => 'required|string|min:6',
+            'password' => 'nullable|string|min:6',
             'alamat' => 'required|string',
             'saldo' => 'nullable|numeric|min:0',
             'tanggal_daftar' => 'required|date',
@@ -77,11 +75,15 @@ class NasabahController extends Controller
         DB::beginTransaction();
 
         try {
-            // 1. Buat User
+
+            // 1. buat user
+            $finalPassword = $request->password ?: 'nasabah123';
+
             $user = User::create([
                 'username' => $request->username,
+                'no_rek' => $noRek,
                 'name' => $request->nama,
-                'password' => Hash::make($request->password),
+                'password' => Hash::make($finalPassword),
                 'role' => 'nasabah',
             ]);
 

@@ -159,11 +159,19 @@
                         </div>
 
                         <!-- Password -->
-                        <div>
-                            <label class="block text-xs lg:text-sm font-semibold text-slate-700 mb-2">Password Akun (Awal) <span class="text-red-500">*</span></label>
-                            <input type="password" name="password" placeholder="Buat password sementara" 
-                                class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm" required>
-                            <p class="text-[10px] text-slate-500 mt-1">Password untuk login nasabah</p>
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Password Akun
+                            </label>
+                            <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                                <p class="text-sm text-emerald-800">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Password default: <strong>nasabah123</strong>
+                                </p>
+                                <p class="text-xs text-emerald-600 mt-1">
+                                    Nasabah dapat mengubah password setelah login pertama.
+                                </p>
+                            </div>
                         </div>
 
                         <!-- Tanggal Daftar -->
