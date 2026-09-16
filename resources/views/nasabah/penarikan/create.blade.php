@@ -159,6 +159,30 @@
                                 </p>
                             </div>
 
+                            <!-- 🆕 INPUT BARU: Tanggal Penarikan -->
+                            <div class="mb-6">
+                                <label for="tanggal_transaksi" class="block text-sm font-semibold text-slate-700 mb-2">
+                                    Tanggal Penarikan <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative group">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <i class="fas fa-calendar-alt text-slate-400"></i>
+                                    </div>
+                                    <input 
+                                        type="date" 
+                                        name="tanggal_transaksi" 
+                                        id="tanggal_transaksi" 
+                                        value="{{ old('tanggal_transaksi', date('Y-m-d')) }}" 
+                                        class="input-premium w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-base font-medium text-slate-900" 
+                                        required
+                                    >
+                                </div>
+                                <p class="text-xs text-slate-500 mt-2 flex items-center gap-1.5">
+                                    <i class="fas fa-info-circle text-emerald-500"></i>
+                                    Pilih tanggal kapan dana ingin ditarik.
+                                </p>
+                            </div>
+
                             <!-- Input Keterangan -->
                             <div class="mb-8">
                                 <label for="keterangan" class="block text-sm font-semibold text-slate-700 mb-2">

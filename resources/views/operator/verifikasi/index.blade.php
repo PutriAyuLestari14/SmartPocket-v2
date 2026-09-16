@@ -131,7 +131,6 @@
                                         <td class="px-6 py-4 text-xs font-semibold text-slate-900">{{ $pengajuan->firstItem() + $index }}</td>
                                         <td class="px-6 py-4">
                                             <p class="text-xs font-semibold text-slate-900">{{ \Carbon\Carbon::parse($item->tanggal_transaksi)->format('d M Y') }}</p>
-                                            <p class="text-[10px] text-slate-400">{{ \Carbon\Carbon::parse($item->tanggal_transaksi)->format('H:i') }} WIB</p>
                                         </td>
                                         <td class="px-6 py-4">
                                             <p class="text-sm font-semibold text-slate-900">{{ $item->rekening->nasabah->nama ?? 'Data tidak tersedia' }}</p>

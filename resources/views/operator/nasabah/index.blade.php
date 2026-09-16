@@ -17,6 +17,7 @@
 <body class="bg-slate-50 text-slate-800 antialiased">
     <div class="flex min-h-screen">
         
+        <!-- Sidebar -->
         <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-screen">
             <div class="p-6 border-b border-gray-100">
                 <div class="flex items-center gap-3">
@@ -115,34 +116,55 @@
                 </div>
             </div>
 
-            <!-- Search & Filter -->
+            <!-- Search & Filter (VERSI RAPI & PROPORSIONAL) -->
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-6">
                 <div class="p-4 border-b border-gray-100">
                     <form method="GET" action="{{ route('operator.nasabah.index') }}" class="flex flex-col sm:flex-row gap-3">
                         
+                        <!-- INPUT SEARCH -->
                         <div class="flex-1 relative">
-                            <i class="fas fa-hashtag absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari No. Rekening..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-layer-group text-slate-400 text-sm"></i>
+                            </div>
+                            <input 
+                                type="text" 
+                                name="search" 
+                                value="{{ request('search') }}" 
+                                placeholder="Cari Angkatan (cth: 24) atau No. Rek..." 
+                                class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                            >
                         </div>
 
-                        <select name="status_filter" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                        <!-- DROPDOWN STATUS -->
+                        <select name="status_filter" class="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer min-w-[140px]">
                             <option value="">Semua Status</option>
                             <option value="aktif" {{ request('status_filter') == 'aktif' ? 'selected' : '' }}>Aktif</option>
                             <option value="nonaktif" {{ request('status_filter') == 'nonaktif' ? 'selected' : '' }}>Non-Aktif</option>
                         </select>
 
-                        <button type="submit" class="px-4 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2">
-                            <i class="fas fa-search text-sm"></i> Cari
+                        <!-- TOMBOL CARI -->
+                        <button type="submit" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium whitespace-nowrap">
+                            <i class="fas fa-search text-xs"></i> 
+                            <span>Cari</span>
                         </button>
 
+                        <!-- TOMBOL RESET -->
                         @if(request('search') || request('status_filter'))
-                            <a href="{{ route('operator.nasabah.index') }}" class="px-4 py-2.5 bg-gray-100 text-slate-600 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
-                                <i class="fas fa-times text-sm"></i> Reset
+                            <a href="{{ route('operator.nasabah.index') }}" class="px-5 py-2 bg-gray-100 hover:bg-gray-200 text-slate-600 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium whitespace-nowrap">
+                                <i class="fas fa-times text-xs"></i> 
+                                <span>Reset</span>
                             </a>
                         @endif
                     </form>
+                    
+                    <!-- Text Helper -->
+                    <p class="text-[10px] text-slate-400 mt-3 flex items-center gap-1.5">
+                        <i class="fas fa-info-circle"></i> 
+                        Ketik "24" untuk tampil semua angkatan 24, atau "24001" untuk no rek spesifik.
+                    </p>
                 </div>
                 
+                <!-- Tabel Data -->
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50">

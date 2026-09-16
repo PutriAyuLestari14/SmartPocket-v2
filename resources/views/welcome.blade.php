@@ -162,7 +162,7 @@
             </p>
 
             <div class="mt-9 flex flex-col sm:flex-row justify-center items-center gap-4">
-                <a href="{{ route('register') }}"
+                <a href="{{ route('login') }}"
                    class="btn-primary px-8 py-4 rounded-full text-white font-bold text-base flex items-center gap-2">
                     Mulai Sekarang
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
