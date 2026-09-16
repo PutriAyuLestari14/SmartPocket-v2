@@ -107,6 +107,7 @@
                     <h2 class="text-lg lg:text-xl font-bold text-slate-900">Selamat datang</h2>
                     <p class="text-sm text-slate-500 mt-1">{{ auth()->user()->name }}</p>
                 </div>
+                <!--notifikasi-->
                 <div class="flex items-center gap-3 lg:gap-4">
                     <a href="{{ route('nasabah.notifikasi.index') }}" class="w-9 h-9 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-slate-500 hover:text-emerald-600 hover:border-emerald-300 transition-colors relative group">
                         <i class="far fa-bell text-sm"></i>

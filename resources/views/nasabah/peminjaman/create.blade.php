@@ -47,7 +47,7 @@
                     <i class="fas fa-money-bill-wave w-5 text-center"></i> Penarikan
                 </a>
                 @if(auth()->user()->nasabah->kategori == 'guru')
-                    <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
+                    <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium">
                         <i class="fas fa-hand-holding-usd w-5 text-center"></i> Peminjaman
                     </a>
                 @endif

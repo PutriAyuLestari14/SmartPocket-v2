@@ -45,7 +45,7 @@ class NasabahPenarikanController extends Controller
                 'id_petugas' => null, // Tetap null, nanti diisi operator saat approve
                 'id_jenis_transaksi' => 2, // ID untuk Penarikan
                 'jumlah' => $request->jumlah, 
-                'tanggal_transaksi' => $request->tanggal_transaksi, // ← UBAH: Pakai input dari user, bukan now()
+                'tanggal_transaksi' => now()->timezone('Asia/Jakarta'),
                 'keterangan' => $request->keterangan, // ← TAMBAHAN: Simpan keterangan (sebelumnya lupa)
                 'status' => 'pending', 
             ]);

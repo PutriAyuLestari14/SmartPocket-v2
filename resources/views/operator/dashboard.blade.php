@@ -83,17 +83,17 @@
                     </div>
                     
                     <!-- Icon Notifikasi -->
-                    <a href="{{ route('operator.notifikasi.index') }}" class="relative p-2 text-gray-400 hover:text-gray-500">
-                        <i class="fas fa-bell text-xl"></i>
+                    <a href="{{ route('operator.notifikasi.index') }}" class="w-9 h-9 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-slate-500 hover:text-emerald-600 hover:border-emerald-300 transition-colors relative group">
+                        <i class="far fa-bell text-sm group-hover:animate-pulse"></i>
                         
                         @php
+                            // Hitung jumlah pengajuan yang masih pending
                             $pendingNotif = \App\Models\DetailTabungan::where('status', 'pending')->count();
                         @endphp
                         
+                        <!-- Titik Merah Hanya Muncul Kalau Ada Pending -->
                         @if($pendingNotif > 0)
-                            <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-                                {{ $pendingNotif }}
-                            </span>
+                            <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
                         @endif
                     </a>
                 </div>

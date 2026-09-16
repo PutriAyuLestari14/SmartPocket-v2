@@ -26,7 +26,7 @@
                                 <span class="text-emerald-600 font-bold">Rp {{ number_format($trx->jumlah, 0, ',', '.') }}</span>
                             </p>
                             <p class="text-xs text-slate-500">
-                                        {{ $trx->tanggal_transaksi->timezone('Asia/Jakarta')->format('d F Y • H:i') }} WIB
+                                {{ $trx->tanggal_transaksi->timezone('Asia/Jakarta')->format('d F Y • H:i') }} WIB
                             </p>
                         </div>
                         <a href="{{ route('operator.verifikasi.index') }}" 
