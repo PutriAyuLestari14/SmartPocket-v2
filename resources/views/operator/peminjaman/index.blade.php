@@ -96,37 +96,34 @@
                         <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
                             <i class="fas fa-wallet text-emerald-600"></i>
                         </div>
-                        <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-semibold">+12% Bulan Ini</span>
                     </div>
                     <p class="text-[10px] font-semibold text-slate-500 uppercase mb-1">Total Pinjaman Aktif</p>
-                    <p class="text-2xl font-bold text-slate-900 mb-1">Rp 125.500.000</p>
-                    <p class="text-xs text-slate-500">Dari 42 pinjaman aktif</p>
+                    <p class="text-2xl font-bold text-slate-900 mb-1">Rp {{ number_format($totalAktif ?? 0, 0, ',', '.') }}</p>
+                    <p class="text-xs text-slate-500">Dari {{ $totalPeminjam ?? 0 }} peminjam</p>
                 </div>
 
-                <!-- Pengajuan Menunggu -->
-                <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-clock text-amber-600"></i>
-                        </div>
-                        <span class="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] font-semibold">Perlu Review</span>
-                    </div>
-                    <p class="text-[10px] font-semibold text-slate-500 uppercase mb-1">Pengajuan Menunggu</p>
-                    <p class="text-2xl font-bold text-slate-900 mb-1">8 Berkas</p>
-                    <p class="text-xs text-slate-500">Total Rp 35.000.000</p>
-                </div>
-
-                <!-- Peminjam Baru -->
+                <!-- Total Cicilan Bulan Ini -->
                 <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
                     <div class="flex items-start justify-between mb-3">
                         <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-user-plus text-blue-600"></i>
+                            <i class="fas fa-calendar-check text-blue-600"></i>
                         </div>
-                        <span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-[10px] font-semibold">Segera Tindak Lanjuti</span>
                     </div>
-                    <p class="text-[10px] font-semibold text-slate-500 uppercase mb-1">Peminjam Baru</p>
-                    <p class="text-2xl font-bold text-slate-900 mb-1">2 Peminjam</p>
-                    <p class="text-xs text-slate-500">Menunggu verifikasi</p>
+                    <p class="text-[10px] font-semibold text-slate-500 uppercase mb-1">Cicilan Bulan Ini</p>
+                    <p class="text-2xl font-bold text-slate-900 mb-1">Rp {{ number_format($totalCicilanBulanIni ?? 0, 0, ',', '.') }}</p>
+                    <p class="text-xs text-slate-500">{{ $jumlahCicilanBulanIni ?? 0 }} peminjam</p>
+                </div>
+
+                <!-- Jatuh Tempo -->
+                <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-amber-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-[10px] font-semibold text-slate-500 uppercase mb-1">Jatuh Tempo Bulan Ini</p>
+                    <p class="text-2xl font-bold text-slate-900 mb-1">{{ $jatuhTempoBulanIni ?? 0 }}</p>
+                    <p class="text-xs text-slate-500">Perlu ditagih</p>
                 </div>
             </div>
 
@@ -169,77 +166,60 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div>
-                                        <p class="text-sm font-semibold text-slate-900">Budi Waluyo, S.Pd</p>
-                                        <p class="text-[10px] text-slate-500 font-mono">NIP: 198405102005011003</p>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-sm font-semibold text-slate-900">Rp 15.000.000</td>
-                                <td class="px-6 py-4 text-xs text-slate-600">24 Bulan</td>
-                                <td class="px-6 py-4 text-xs text-slate-600">12 Bulan</td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-semibold">Lancar</span>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="flex justify-center gap-2">
-                                        <button class="w-7 h-7 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center transition-colors" title="Lihat Detail">
-                                            <i class="fas fa-eye text-xs"></i>
-                                        </button>
-                                        <button class="w-7 h-7 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center transition-colors" title="Edit">
-                                            <i class="fas fa-edit text-xs"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                            @forelse($peminjamans as $peminjaman)
+                                @php
+                                    // Hitung berapa bulan lagi (dari tenor dikurangi yang udah dibayar)
+                                    $sisaBulan = $peminjaman->tenor; // Nanti bisa dihitung dari detail pembayaran
+                                    $statusClass = 'bg-emerald-100 text-emerald-700';
+                                    $statusText = 'Lancar';
+                                    
+                                    // Kalau sisa pinjaman udah 0, berarti lunas
+                                    if ($peminjaman->sisa_pinjaman <= 0) {
+                                        $statusClass = 'bg-blue-100 text-blue-700';
+                                        $statusText = 'Lunas';
+                                    }
+                                @endphp
 
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div>
-                                        <p class="text-sm font-semibold text-slate-900">Siti Wahyuni, M.Pd</p>
-                                        <p class="text-[10px] text-slate-500 font-mono">NIP: 197508272010012001</p>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-sm font-semibold text-slate-900">Rp 5.000.000</td>
-                                <td class="px-6 py-4 text-xs text-slate-600">12 Bulan</td>
-                                <td class="px-6 py-4 text-xs text-slate-600">Menunggu</td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] font-semibold">Pending</span>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="flex justify-center gap-2">
-                                        <button class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-semibold rounded-lg transition-colors">
-                                            Review
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div>
-                                        <p class="text-sm font-semibold text-slate-900">Ahmad Hidayat</p>
-                                        <p class="text-[10px] text-slate-500 font-mono">Dari Tata Usaha</p>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-sm font-semibold text-slate-900">Rp 8.000.000</td>
-                                <td class="px-6 py-4 text-xs text-slate-600">12 Bulan</td>
-                                <td class="px-6 py-4 text-xs text-slate-600">2 Bulan</td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2.5 py-1 bg-red-100 text-red-700 rounded-full text-[10px] font-semibold">Terlambat</span>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="flex justify-center gap-2">
-                                        <button class="w-7 h-7 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center transition-colors" title="Lihat Detail">
-                                            <i class="fas fa-eye text-xs"></i>
-                                        </button>
-                                        <button class="w-7 h-7 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center transition-colors" title="Edit">
-                                            <i class="fas fa-edit text-xs"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4">
+                                        <div>
+                                            <p class="text-sm font-semibold text-slate-900">{{ $peminjaman->nasabah->nama ?? 'N/A' }}</p>
+                                            <p class="text-[10px] text-slate-500">{{ $peminjaman->nasabah->kategori ?? '-' }}</p>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm font-semibold text-slate-900">
+                                        Rp {{ number_format($peminjaman->jumlah_pinjaman, 0, ',', '.') }}
+                                    </td>
+                                    <td class="px-6 py-4 text-xs text-slate-600">
+                                        {{ $peminjaman->tenor }} Bulan
+                                    </td>
+                                    <td class="px-6 py-4 text-xs text-slate-600">
+                                        {{ $sisaBulan }} Bulan
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2.5 py-1 {{ $statusClass }} rounded-full text-[10px] font-semibold">
+                                            {{ $statusText }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex justify-center gap-2">
+                                            <button class="w-7 h-7 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center transition-colors" title="Lihat Detail">
+                                                <i class="fas fa-eye text-xs"></i>
+                                            </button>
+                                            <button class="w-7 h-7 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center transition-colors" title="Edit">
+                                                <i class="fas fa-edit text-xs"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="px-6 py-12 text-center">
+                                        <i class="fas fa-inbox text-4xl text-slate-300 mb-3"></i>
+                                        <p class="text-sm text-slate-500">Belum ada pinjaman yang disetujui</p>
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

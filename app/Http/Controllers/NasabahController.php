@@ -81,7 +81,6 @@ class NasabahController extends Controller
 
             $user = User::create([
                 'username' => $request->username,
-                'no_rek' => $noRek,
                 'name' => $request->nama,
                 'password' => Hash::make($finalPassword),
                 'role' => 'nasabah',
@@ -132,10 +131,10 @@ class NasabahController extends Controller
                     throw new \Exception('Jenis transaksi Setoran tidak ditemukan di database.');
                 }
 
-                DetailTabungan::create([
+               DetailTabungan::create([
                     'no_rek' => $noRek,
-                    'id_petugas' => auth()->user()->username,
-                    'id_jenis_transaksi' => $jenisTransaksi->id_jenis_transaksi,
+                    'id_petugas' => auth()->user()->petugas->id_petugas,
+                    'id_jenis_transaksi' => 1,
                     'jumlah' => $request->saldo,
                     'status' => 'berhasil',
                     'tanggal_transaksi' => now()->timezone('Asia/Jakarta'),
@@ -222,24 +221,49 @@ class NasabahController extends Controller
     {
         $rekening = RekeningTabungan::where('id_nasabah', $nasabah->id_nasabah)->first();
 
+        // Cek riwayat transaksi tabungan
         if ($rekening) {
             $adaTransaksi = DetailTabungan::where('no_rek', $rekening->no_rek)->exists();
 
             if ($adaTransaksi) {
                 return redirect()
                     ->route('operator.nasabah.index')
-                    ->with('error', 'Nasabah tidak dapat dihapus karena sudah memiliki riwayat transaksi.');
+                    ->with(
+                        'error',
+                        'Nasabah tidak dapat dihapus karena sudah memiliki riwayat transaksi tabungan.'
+                    );
             }
+        }
+
+        // Cek riwayat peminjaman
+        $adaPeminjaman = \App\Models\Peminjaman::where(
+            'id_nasabah',
+            $nasabah->id_nasabah
+        )->exists();
+
+        if ($adaPeminjaman) {
+            return redirect()
+                ->route('operator.nasabah.index')
+                ->with(
+                    'error',
+                    'Nasabah tidak dapat dihapus karena sudah memiliki riwayat peminjaman.'
+                );
         }
 
         DB::beginTransaction();
 
         try {
             // Hapus rekening
-            RekeningTabungan::where('id_nasabah', $nasabah->id_nasabah)->delete();
+            RekeningTabungan::where(
+                'id_nasabah',
+                $nasabah->id_nasabah
+            )->delete();
 
             // Hapus user
-            User::where('username', $nasabah->username)->delete();
+            User::where(
+                'username',
+                $nasabah->username
+            )->delete();
 
             // Hapus nasabah
             $nasabah->delete();
@@ -248,7 +272,10 @@ class NasabahController extends Controller
 
             return redirect()
                 ->route('operator.nasabah.index')
-                ->with('success', 'Data Nasabah berhasil dihapus!');
+                ->with(
+                    'success',
+                    'Data Nasabah berhasil dihapus!'
+                );
 
         } catch (\Exception $e) {
             DB::rollBack();

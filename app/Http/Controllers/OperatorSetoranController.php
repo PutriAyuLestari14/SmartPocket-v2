@@ -53,7 +53,7 @@ class OperatorSetoranController extends Controller
             // Simpan ke Detail Tabungan
             DetailTabungan::create([
                 'no_rek' => $rekening->no_rek,
-                'id_petugas' => auth()->user()->username,
+                'id_petugas' => auth()->user()->petugas->id_petugas,
                 'id_jenis_transaksi' => $jenisTransaksi->id_jenis_transaksi,
                 'jumlah' => $request->jumlah,
                 'status' => 'berhasil',

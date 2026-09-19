@@ -61,6 +61,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/peminjaman', [OperatorPeminjamanController::class, 'index'])->name('operator.peminjaman.index');
         Route::get('/peminjaman/create', [OperatorPeminjamanController::class, 'create'])->name('operator.peminjaman.create');
         Route::post('/peminjaman', [OperatorPeminjamanController::class, 'store'])->name('operator.peminjaman.store');
+        Route::post('/peminjaman/{id}/approve', [OperatorPeminjamanController::class, 'approve'])->name('operator.peminjaman.approve');
+        Route::post('/peminjaman/{id}/reject', [OperatorPeminjamanController::class, 'reject'])->name('operator.peminjaman.reject');
 
         // pembayaran guru
         Route::get('/pembayaran/create', [OperatorPembayaranController::class, 'create'])->name('operator.pembayaran.create');
@@ -70,6 +72,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/verifikasi', [OperatorVerifikasiController::class, 'index'])->name('operator.verifikasi.index');
         Route::post('/verifikasi/{id}/approve', [OperatorVerifikasiController::class, 'approve'])->name('operator.verifikasi.approve');
         Route::post('/verifikasi/{id}/reject', [OperatorVerifikasiController::class, 'reject'])->name('operator.verifikasi.reject');
+        Route::get('/verifikasi/peminjaman', [OperatorPeminjamanController::class, 'indexVerifikasi'])->name('operator.verifikasi.peminjaman');
 
         // transaksi riwayat
         Route::get('/transaksi', [TransaksiController::class, 'index'])->name('operator.transaksi.index');

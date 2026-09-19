@@ -52,8 +52,8 @@ class OperatorPenarikanController extends Controller
 
             DetailTabungan::create([
                 'no_rek' => $rekening->no_rek,
-                'id_petugas' => auth()->id(),
-                'id_jenis_transaksi' => 2, 
+                'id_petugas' => auth()->user()->petugas->id_petugas,
+                'id_jenis_transaksi' => 2,
                 'jumlah' => $request->jumlah,
                 'tanggal_transaksi' => now()->timezone('Asia/Jakarta'),
                 'status' => 'berhasil',

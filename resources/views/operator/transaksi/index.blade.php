@@ -81,7 +81,7 @@
                                 <option value="">Semua Jenis</option>
                                 <option value="setoran" {{ request('jenis') == 'setoran' ? 'selected' : '' }}>Setoran</option>
                                 <option value="penarikan" {{ request('jenis') == 'penarikan' ? 'selected' : '' }}>Penarikan</option>
-                                <input type="date" name="tanggal" value="{{ request('tanggal') }}" onchange="this.form.submit()" class="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                                <option value="peminjaman" {{ request('jenis') == 'peminjaman' ? 'selected' : '' }}>Peminjaman</option>
                             </select>
                     </div>
                 </div>
@@ -102,8 +102,10 @@
                             
                             @forelse($transaksi as $item)
                                 @php
-                                    // Tentukan jenis transaksi (1 = Setoran, 2 = Penarikan)
+                                    // Tentukan jenis transaksi (1 = Setoran, 2 = Penarikan, 3 = Peminjaman)
                                     $isSetoran = $item->id_jenis_transaksi == 1;
+                                    $isPenarikan = $item->id_jenis_transaksi == 2;
+                                    $isPeminjaman = $item->id_jenis_transaksi == 3;
                                     $amountFormatted = 'Rp ' . number_format($item->jumlah, 0, ',', '.');
                                     
                                     // Tentukan warna badge status
