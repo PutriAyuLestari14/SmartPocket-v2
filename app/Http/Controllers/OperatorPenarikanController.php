@@ -31,7 +31,7 @@ class OperatorPenarikanController extends Controller
             'jumlah.min' => 'Minimal penarikan adalah Rp 1.000',
         ]);
 
-        // jika ada 1 langkah yang gagal, semua perubahan dibatalkan (jadi data ga ada yg rusak)    
+        // jika ada 1 langkah yang gagal, semua perubahan dibatalkan    
         DB::beginTransaction();
         try {
 

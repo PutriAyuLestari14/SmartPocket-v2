@@ -85,24 +85,7 @@ class NasabahController extends Controller
                 'password' => Hash::make($finalPassword),
                 'role' => 'nasabah',
             ]);
-
-            // 2. Generate Nomor Rekening berdasarkan Prefix
-            $prefix = strtoupper(trim($request->prefix));
-
-            $lastRekening = RekeningTabungan::where('no_rek', 'like', $prefix . '%')
-                ->orderBy('no_rek', 'desc')
-                ->first();
-
-            if ($lastRekening) {
-                $lastNumber = (int) substr($lastRekening->no_rek, strlen($prefix));
-                $nextNumber = $lastNumber + 1;
-            } else {
-                $nextNumber = 1;
-            }
-
-            $noRek = $prefix . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
-
-            // 3. Buat Data Nasabah
+             // 3. Buat Data Nasabah
             $nasabah = Nasabah::create([
                 'username' => $request->username,
                 'no_rek' => $noRek,

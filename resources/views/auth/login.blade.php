@@ -337,7 +337,7 @@
                     @csrf
 
                     <div class="input-group">
-                        <label for="username">Username</label>
+                        <label for="username">No Rekening</label>
                         <input type="text" id="username" name="username" placeholder="cth: siswa123" required autofocus>
                     </div>
 

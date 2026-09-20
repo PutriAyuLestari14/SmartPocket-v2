@@ -59,10 +59,9 @@ class OperatorVerifikasiController extends Controller
 
             // Update status & catat petugas yang approve
             $trx->status = 'berhasil';
-            $trx->id_petugas = auth()->id(); 
+            $trx->id_petugas = auth()->user()->petugas->id_petugas;
             $trx->save();
 
-            // === TAMBAHKAN KODE INI ===
             // Kirim notifikasi ke nasabah
             $nasabah = $rekening->nasabah;
             NotifikasiController::kirim(
@@ -93,7 +92,7 @@ class OperatorVerifikasiController extends Controller
         try {
             // Ubah status menjadi ditolak/gagal (Saldo GAK berubah)
             $trx->status = 'gagal'; 
-            $trx->id_petugas = auth()->id(); 
+            $trx->id_petugas = auth()->user()->petugas->id_petugas;
             $trx->save();
 
             // Kirim notifikasi ke nasabah

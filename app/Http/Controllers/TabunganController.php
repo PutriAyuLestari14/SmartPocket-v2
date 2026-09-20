@@ -22,7 +22,7 @@ class TabunganController extends Controller
             $id_nasabah
         )->first();
 
-        // TRANSAKSI TABUNGAN YANG SUDAH BERHASIL
+        // transaksi tabungan yg setuju / berhasil
         $transaksiTabungan = DetailTabungan::whereHas(
             'rekening.nasabah',
             function ($query) use ($user) {
@@ -41,8 +41,7 @@ class TabunganController extends Controller
             ];
         });
 
-        // PEMINJAMAN YANG SUDAH DIPROSES
-        // pending tidak masuk transaksi terbaru
+        // peminjaman yg udh di proses
         $transaksiPeminjaman = Peminjaman::where(
             'id_nasabah',
             $id_nasabah
@@ -61,7 +60,7 @@ class TabunganController extends Controller
             ];
         });
 
-        // GABUNGKAN TRANSAKSI YANG SUDAH DIPROSES
+        // gabungan transaksi yg udh di proses
         $transaksiTerbaru = $transaksiTabungan
             ->concat($transaksiPeminjaman)
             ->sortByDesc('tanggal_transaksi')
@@ -69,7 +68,7 @@ class TabunganController extends Controller
             ->values();
 
 
-        // PENGAJUAN PENARIKAN YANG MASIH PENDING
+        // pengajuan penarikan yg masih pending
         $pengajuanPenarikan = null;
 
         if ($rekening) {
@@ -83,7 +82,7 @@ class TabunganController extends Controller
             ->first();
         }
 
-        // PENGAJUAN PEMINJAMAN YANG MASIH PENDING
+        // pengajuan peminjaman yg masih pending
         $pengajuanPeminjaman = Peminjaman::where(
             'id_nasabah',
             $id_nasabah
@@ -92,7 +91,7 @@ class TabunganController extends Controller
         ->latest('created_at')
         ->first();
 
-        // PINJAMAN AKTIF
+        // pinjaman aktif
         $pinjamanAktif = Peminjaman::where(
             'id_nasabah',
             $id_nasabah
@@ -102,7 +101,7 @@ class TabunganController extends Controller
         ->orderBy('tanggal_jatuh_tempo', 'asc')
         ->first();
 
-        // TOTAL SISA PINJAMAN
+        // totall sisa pinjaman
         $totalSisaPinjaman = Peminjaman::where(
             'id_nasabah',
             $id_nasabah
@@ -111,7 +110,7 @@ class TabunganController extends Controller
         ->where('sisa_pinjaman', '>', 0)
         ->sum('sisa_pinjaman');
 
-        // KIRIM DATA KE DASHBOARD
+        // kirim data ke dashboard
         return view('nasabah.dashboard', compact(
             'rekening',
             'transaksiTerbaru',
@@ -128,17 +127,14 @@ class TabunganController extends Controller
 
         $idNasabah = $user->nasabah->id_nasabah;
 
-        // ==========================================
-        // SETORAN & PENARIKAN YANG SUDAH BERHASIL
-        // ==========================================
-
-        $transaksiTabungan = DetailTabungan::whereHas(
+        // setoran dan penarikan yg udh berhaisl
+       $transaksiTabungan = DetailTabungan::whereHas(
             'rekening.nasabah',
             function ($query) use ($user) {
                 $query->where('username', $user->username);
             }
         )
-        ->where('status', 'berhasil')
+        ->whereIn('status', ['berhasil', 'gagal'])
         ->with([
             'jenisTransaksi',
             'rekening.nasabah'
@@ -155,11 +151,7 @@ class TabunganController extends Controller
             ];
         });
 
-        // ==========================================
-        // PEMINJAMAN YANG SUDAH DIPROSES
-        // pending TIDAK masuk riwayat transaksi
-        // ==========================================
-
+        // pinjaman yg udh di proses
         $transaksiPeminjaman = Peminjaman::where(
             'id_nasabah',
             $idNasabah
@@ -182,19 +174,13 @@ class TabunganController extends Controller
             ];
         });
 
-        // ==========================================
-        // GABUNGKAN SEMUA TRANSAKSI UNTUK RIWAYAT
-        // ==========================================
-
+        // gabungan transaksi buat riwayat
         $semuaTransaksi = $transaksiTabungan
             ->concat($transaksiPeminjaman)
             ->sortByDesc('tanggal_transaksi')
             ->values();
 
-        // ==========================================
-        // TOTAL SETORAN
-        // ==========================================
-
+        // total setoran
         $totalPemasukan = $transaksiTabungan
             ->filter(function ($trx) {
                 return $trx->jenisTransaksi
@@ -202,10 +188,7 @@ class TabunganController extends Controller
             })
             ->sum('jumlah');
 
-        // ==========================================
-        // TOTAL PENARIKAN
-        // ==========================================
-
+        // total penarikan
         $totalPengeluaran = $transaksiTabungan
             ->filter(function ($trx) {
                 return $trx->jenisTransaksi
@@ -213,10 +196,7 @@ class TabunganController extends Controller
             })
             ->sum('jumlah');
 
-        // ==========================================
-        // PAGINATION MANUAL
-        // ==========================================
-
+        // pagnition manual
         $perPage = 5;
 
         $currentPage = (int) $request->input('page', 1);
@@ -239,10 +219,7 @@ class TabunganController extends Controller
             ]
         );
 
-        // ==========================================
-        // KIRIM DATA KE HALAMAN RIWAYAT
-        // ==========================================
-
+        // kirim data ke riwayat
         return view('nasabah.riwayat', compact(
             'transaksi',
             'totalPemasukan',
