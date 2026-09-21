@@ -6,6 +6,7 @@ use App\Models\Nasabah;
 use App\Models\RekeningTabungan;
 use App\Models\DetailTabungan;
 use App\Models\Peminjaman;
+use App\Models\Angsuran; // <-- Tambahkan ini
 use Illuminate\Http\Request;
 
 class TabunganController extends Controller
@@ -13,52 +14,39 @@ class TabunganController extends Controller
     public function index()
     {
         $user = auth()->user();
-
         $id_nasabah = $user->nasabah->id_nasabah;
 
         // cari rekening punya user yang login
-        $rekening = RekeningTabungan::where(
-            'id_nasabah',
-            $id_nasabah
-        )->first();
+        $rekening = RekeningTabungan::where('id_nasabah', $id_nasabah)->first();
 
         // transaksi tabungan yg setuju / berhasil
-        $transaksiTabungan = DetailTabungan::whereHas(
-            'rekening.nasabah',
-            function ($query) use ($user) {
+        $transaksiTabungan = DetailTabungan::whereHas('rekening.nasabah', function ($query) use ($user) {
                 $query->where('username', $user->username);
-            }
-        )
-        ->where('status', 'berhasil')
-        ->get()
-        ->map(function ($trx) {
-            return (object) [
-                'tipe' => 'tabungan',
-                'id_jenis_transaksi' => $trx->id_jenis_transaksi,
-                'jumlah' => $trx->jumlah,
-                'status' => $trx->status,
-                'tanggal_transaksi' => $trx->tanggal_transaksi,
-            ];
-        });
+            })
+            ->where('status', 'berhasil')
+            ->get()
+            ->map(function ($trx) {
+                return (object) [
+                    'tipe' => 'tabungan',
+                    'id_jenis_transaksi' => $trx->id_jenis_transaksi,
+                    'jumlah' => $trx->jumlah,
+                    'status' => $trx->status,
+                    'tanggal_transaksi' => $trx->tanggal_transaksi,
+                ];
+            });
 
         // peminjaman yg udh di proses
-        $transaksiPeminjaman = Peminjaman::where(
-            'id_nasabah',
-            $id_nasabah
-        )
-        ->whereIn('status_verifikasi', [
-            'disetujui',
-            'ditolak'
-        ])
-        ->get()
-        ->map(function ($pinjaman) {
-            return (object) [
-                'tipe' => 'peminjaman',
-                'jumlah' => $pinjaman->jumlah_pinjaman,
-                'status' => $pinjaman->status_verifikasi,
-                'tanggal_transaksi' => $pinjaman->created_at,
-            ];
-        });
+        $transaksiPeminjaman = Peminjaman::where('id_nasabah', $id_nasabah)
+            ->whereIn('status_verifikasi', ['disetujui', 'ditolak'])
+            ->get()
+            ->map(function ($pinjaman) {
+                return (object) [
+                    'tipe' => 'peminjaman',
+                    'jumlah' => $pinjaman->jumlah_pinjaman,
+                    'status' => $pinjaman->status_verifikasi,
+                    'tanggal_transaksi' => $pinjaman->created_at,
+                ];
+            });
 
         // gabungan transaksi yg udh di proses
         $transaksiTerbaru = $transaksiTabungan
@@ -67,50 +55,35 @@ class TabunganController extends Controller
             ->take(5)
             ->values();
 
-
         // pengajuan penarikan yg masih pending
         $pengajuanPenarikan = null;
-
         if ($rekening) {
-            $pengajuanPenarikan = DetailTabungan::where(
-                'no_rek',
-                $rekening->no_rek
-            )
-            ->where('id_jenis_transaksi', 2)
-            ->where('status', 'pending')
-            ->latest('created_at')
-            ->first();
+            $pengajuanPenarikan = DetailTabungan::where('no_rek', $rekening->no_rek)
+                ->where('id_jenis_transaksi', 2)
+                ->where('status', 'pending')
+                ->latest('created_at')
+                ->first();
         }
 
         // pengajuan peminjaman yg masih pending
-        $pengajuanPeminjaman = Peminjaman::where(
-            'id_nasabah',
-            $id_nasabah
-        )
-        ->where('status_verifikasi', 'pending')
-        ->latest('created_at')
-        ->first();
+        $pengajuanPeminjaman = Peminjaman::where('id_nasabah', $id_nasabah)
+            ->where('status_verifikasi', 'pending')
+            ->latest('created_at')
+            ->first();
 
         // pinjaman aktif
-        $pinjamanAktif = Peminjaman::where(
-            'id_nasabah',
-            $id_nasabah
-        )
-        ->where('status_verifikasi', 'disetujui')
-        ->where('sisa_pinjaman', '>', 0)
-        ->orderBy('tanggal_jatuh_tempo', 'asc')
-        ->first();
+        $pinjamanAktif = Peminjaman::where('id_nasabah', $id_nasabah)
+            ->where('status_verifikasi', 'disetujui')
+            ->where('sisa_pinjaman', '>', 0)
+            ->orderBy('tanggal_jatuh_tempo', 'asc')
+            ->first();
 
-        // totall sisa pinjaman
-        $totalSisaPinjaman = Peminjaman::where(
-            'id_nasabah',
-            $id_nasabah
-        )
-        ->where('status_verifikasi', 'disetujui')
-        ->where('sisa_pinjaman', '>', 0)
-        ->sum('sisa_pinjaman');
+        // total sisa pinjaman
+        $totalSisaPinjaman = Peminjaman::where('id_nasabah', $id_nasabah)
+            ->where('status_verifikasi', 'disetujui')
+            ->where('sisa_pinjaman', '>', 0)
+            ->sum('sisa_pinjaman');
 
-        // kirim data ke dashboard
         return view('nasabah.dashboard', compact(
             'rekening',
             'transaksiTerbaru',
@@ -124,89 +97,87 @@ class TabunganController extends Controller
     public function riwayat(Request $request)
     {
         $user = auth()->user();
-
         $idNasabah = $user->nasabah->id_nasabah;
 
-        // setoran dan penarikan yg udh berhaisl
-       $transaksiTabungan = DetailTabungan::whereHas(
-            'rekening.nasabah',
-            function ($query) use ($user) {
+        // 1. Setoran dan penarikan yang sudah berhasil/gagal
+        $transaksiTabungan = DetailTabungan::whereHas('rekening.nasabah', function ($query) use ($user) {
                 $query->where('username', $user->username);
-            }
-        )
-        ->whereIn('status', ['berhasil', 'gagal'])
-        ->with([
-            'jenisTransaksi',
-            'rekening.nasabah'
-        ])
-        ->get()
-        ->map(function ($trx) {
-            return (object) [
-                'tipe' => 'tabungan',
-                'tanggal_transaksi' => $trx->tanggal_transaksi,
-                'jumlah' => $trx->jumlah,
-                'status' => $trx->status,
-                'jenisTransaksi' => $trx->jenisTransaksi,
-                'keterangan' => $trx->keterangan,
-            ];
-        });
+            })
+            ->whereIn('status', ['berhasil', 'gagal'])
+            ->with(['jenisTransaksi', 'rekening.nasabah'])
+            ->get()
+            ->map(function ($trx) {
+                return (object) [
+                    'tipe' => 'tabungan',
+                    'sub_tipe' => $trx->id_jenis_transaksi == 1 ? 'Setoran' : 'Penarikan',
+                    'tanggal_transaksi' => $trx->tanggal_transaksi,
+                    'jumlah' => $trx->jumlah,
+                    'status' => $trx->status,
+                    'keterangan' => $trx->keterangan ?? '-',
+                ];
+            });
 
-        // pinjaman yg udh di proses
-        $transaksiPeminjaman = Peminjaman::where(
-            'id_nasabah',
-            $idNasabah
-        )
-        ->whereIn('status_verifikasi', [
-            'disetujui',
-            'ditolak'
-        ])
-        ->get()
-        ->map(function ($pinjaman) {
-            return (object) [
-                'tipe' => 'peminjaman',
-                'tanggal_transaksi' => $pinjaman->created_at,
-                'jumlah' => $pinjaman->jumlah_pinjaman,
-                'status' => $pinjaman->status_verifikasi,
-                'jenisTransaksi' => null,
-                'keterangan' => $pinjaman->keterangan,
-                'tenor' => $pinjaman->tenor,
-                'tanggal_jatuh_tempo' => $pinjaman->tanggal_jatuh_tempo,
-            ];
-        });
+        // 2. Pinjaman yang sudah diproses (Disetujui/Ditolak)
+        $transaksiPeminjaman = Peminjaman::where('id_nasabah', $idNasabah)
+            ->whereIn('status_verifikasi', ['disetujui', 'ditolak'])
+            ->get()
+            ->map(function ($pinjaman) {
+                return (object) [
+                    'tipe' => 'peminjaman',
+                    'sub_tipe' => 'Pengajuan Pinjaman',
+                    'tanggal_transaksi' => $pinjaman->created_at,
+                    'jumlah' => $pinjaman->jumlah_pinjaman,
+                    'status' => $pinjaman->status_verifikasi,
+                    'keterangan' => $pinjaman->keterangan ?? '-',
+                ];
+            });
 
-        // gabungan transaksi buat riwayat
+        // 3. Pembayaran Angsuran (Cicilan) yang sudah dibayar
+        $idPinjamanList = Peminjaman::where('id_nasabah', $idNasabah)->pluck('id_pinjaman');
+        
+        $transaksiAngsuran = Angsuran::whereIn('id_pinjaman', $idPinjamanList)
+            ->with('peminjaman') // Pastikan relasi ini ada di model Angsuran
+            ->get()
+            ->map(function ($angsuran) {
+                return (object) [
+                    'tipe' => 'angsuran',
+                    'sub_tipe' => 'Pembayaran Cicilan',
+                    'tanggal_transaksi' => $angsuran->tanggal_pembayaran,
+                    'jumlah' => $angsuran->jumlah,
+                    'status' => 'berhasil',
+                    'keterangan' => 'Cicilan Pinjaman',
+                ];
+            });
+
+        // Gabungkan semua transaksi dan urutkan dari yang terbaru
         $semuaTransaksi = $transaksiTabungan
             ->concat($transaksiPeminjaman)
+            ->concat($transaksiAngsuran)
             ->sortByDesc('tanggal_transaksi')
             ->values();
 
-        // total setoran
+        // Total setoran
         $totalPemasukan = $transaksiTabungan
             ->filter(function ($trx) {
-                return $trx->jenisTransaksi
-                    && $trx->jenisTransaksi->id_jenis_transaksi == 1;
+                return $trx->sub_tipe === 'Setoran' && $trx->status === 'berhasil';
             })
             ->sum('jumlah');
 
-        // total penarikan
+        // Total penarikan
         $totalPengeluaran = $transaksiTabungan
             ->filter(function ($trx) {
-                return $trx->jenisTransaksi
-                    && $trx->jenisTransaksi->id_jenis_transaksi == 2;
+                return $trx->sub_tipe === 'Penarikan' && $trx->status === 'berhasil';
             })
             ->sum('jumlah');
 
-        // pagnition manual
-        $perPage = 5;
-
+        // Pagination manual
+        $perPage = 10; // Dinaikkan sedikit agar riwayat angsuran terlihat
         $currentPage = (int) $request->input('page', 1);
 
-        $items = $semuaTransaksi
-            ->slice(
-                ($currentPage - 1) * $perPage,
-                $perPage
-            )
-            ->values();
+        $items = $semuaTransaksi->slice(
+            ($currentPage - 1) * $perPage,
+            $perPage
+        )->values();
 
         $transaksi = new \Illuminate\Pagination\LengthAwarePaginator(
             $items,
@@ -219,7 +190,6 @@ class TabunganController extends Controller
             ]
         );
 
-        // kirim data ke riwayat
         return view('nasabah.riwayat', compact(
             'transaksi',
             'totalPemasukan',

@@ -18,7 +18,7 @@
     <div class="flex min-h-screen">
         
         <!-- Sidebar (Standar Smart Pocket) -->
-        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-screen">
+        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-screen z-10">
             <div class="p-6 border-b border-gray-100">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-md">
@@ -47,9 +47,6 @@
                 <a href="{{ route('operator.verifikasi.index') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
                     <i class="fas fa-check-circle w-5 text-center"></i> Verifikasi
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
-                    <i class="fas fa-chart-bar w-5 text-center"></i> Laporan
-                </a>
             </nav>
 
             <div class="p-4 border-t border-gray-100 space-y-3">
@@ -64,7 +61,20 @@
 
         <!-- Main Content -->
         <main class="flex-1 ml-64 p-4 lg:p-8">
-            <!-- Header -->
+            <!-- Alert Success/Error -->
+            @if(session('success'))
+                <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-3 text-emerald-800">
+                    <i class="fas fa-check-circle text-emerald-600"></i>
+                    <span class="text-sm font-medium">{{ session('success') }}</span>
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-800">
+                    <i class="fas fa-exclamation-circle text-red-600"></i>
+                    <span class="text-sm font-medium">{{ session('error') }}</span>
+                </div>
+            @endif
+
             <div class="mb-6">
                 <h1 class="text-xl lg:text-2xl font-bold text-slate-900">Input Pembayaran Cicilan</h1>
                 <p class="text-sm text-slate-500 mt-1">Proses pembayaran angsuran pinjaman untuk guru dan staf.</p>
@@ -84,37 +94,44 @@
                             </div>
                         </div>
 
-                        <!-- Search -->
-                        <div class="flex gap-3 mb-4">
+                        <!-- Search Form -->
+                        <form action="{{ route('operator.pembayaran.create') }}" method="GET" class="flex gap-3 mb-4">
                             <div class="flex-1 relative">
                                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                                <input type="text" placeholder="Cari NIP atau Nama Guru..." 
+                                <input type="text" name="cari" value="{{ request('cari') }}" placeholder="Cari Nama atau Username/NIP..." 
                                     class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
                             </div>
-                            <button class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-semibold transition-colors">
+                            <button type="submit" class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-semibold transition-colors">
                                 Cari
                             </button>
-                        </div>
+                        </form>
 
-                        <!-- Selected Peminjam Card -->
-                        <div class="bg-emerald-50/50 border border-emerald-100 rounded-lg p-4">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-emerald-200 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <span class="text-emerald-700 font-bold text-lg">IB</span>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="text-base font-bold text-slate-900">Ibu Lilis Tati Elis</p>
-                                    <p class="text-[10px] text-slate-500">NIP: 198501012010012001 • Guru Matematika</p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-[10px] text-slate-500 uppercase font-semibold">Status Pinjaman</p>
-                                    <span class="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] font-bold">Aktif</span>
+                        <!-- Selected Nasabah Card -->
+                        @if($nasabah)
+                            <div class="bg-emerald-50/50 border border-emerald-100 rounded-lg p-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-emerald-200 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <span class="text-emerald-700 font-bold text-lg">{{ substr($nasabah->nama, 0, 2) }}</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-base font-bold text-slate-900">{{ $nasabah->nama }}</p>
+                                        <p class="text-[10px] text-slate-500">No. Rek: {{ $nasabah->no_rek }} • {{ ucfirst($nasabah->kategori) }}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-[10px] text-slate-500 uppercase font-semibold">Status Nasabah</p>
+                                        <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-bold">{{ ucfirst($nasabah->status) }}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @elseif(request('cari'))
+                            <div class="p-4 bg-amber-50 border border-amber-100 rounded-lg text-amber-800 text-sm flex items-center gap-2">
+                                <i class="fas fa-exclamation-triangle"></i> Data nasabah tidak ditemukan.
+                            </div>
+                        @endif
                     </div>
 
                     <!-- 2. Detail Pembayaran -->
+                    @if($nasabah && $peminjamanAktif->isNotEmpty())
                     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
                         <div class="flex items-center gap-2 mb-5">
                             <i class="fas fa-file-invoice-dollar text-emerald-600"></i>
@@ -127,9 +144,16 @@
                             <!-- Pilih Pinjaman Aktif -->
                             <div class="mb-4">
                                 <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1.5">Pinjaman Aktif</label>
-                                <select name="id_peminjaman" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
-                                    <option value="1">Pinjaman Modal Usaha - Rp 10.000.000 (Sisa 8 bulan)</option>
-                                    <option value="2">Pinjaman Darurat - Rp 5.000.000 (Lunas)</option>
+                                <select name="id_pinjaman" id="selectPinjaman" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" required>
+                                    <option value="">-- Pilih Pinjaman --</option>
+                                    @foreach($peminjamanAktif as $p)
+                                        <option value="{{ $p->id_pinjaman }}" 
+                                            data-jumlah="{{ $p->jumlah_pinjaman }}" 
+                                            data-sisa="{{ $p->sisa_pinjaman }}"
+                                            data-tenor="{{ $p->tenor }}">
+                                            Pinjaman Rp {{ number_format($p->jumlah_pinjaman, 0, ',', '.') }} (Sisa: Rp {{ number_format($p->sisa_pinjaman, 0, ',', '.') }})
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
 
@@ -137,17 +161,13 @@
                             <div class="grid grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1.5">Cicilan Ke-</label>
-                                    <select name="cicilan_ke" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
-                                        <option value="1">1 dari 12</option>
-                                        <option value="2">2 dari 12</option>
-                                        <option value="3" selected>3 dari 12</option>
-                                        <option value="4">4 dari 12</option>
-                                    </select>
+                                    <input type="number" name="cicilan_ke" id="inputCicilanKe" min="1" value="1"
+                                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" required>
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1.5">Tanggal Pembayaran</label>
-                                    <input type="date" name="tanggal_bayar" value="2023-10-24" 
-                                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                                    <input type="date" name="tanggal_pembayaran" value="{{ date('Y-m-d') }}" 
+                                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" required>
                                 </div>
                             </div>
 
@@ -156,27 +176,17 @@
                                 <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1.5">Nominal Pembayaran</label>
                                 <div class="relative">
                                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-semibold">Rp</span>
-                                    <input type="number" name="nominal" id="nominalBayar" value="1000000" 
-                                        class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-right">
+                                    <input type="number" name="jumlah" id="nominalBayar" value="0" 
+                                        class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-right" required>
                                 </div>
-                                <p class="text-[10px] text-slate-400 mt-1">*Nominal default sesuai angsuran bulanan</p>
+                                <p class="text-[10px] text-slate-400 mt-1">*Masukkan nominal yang dibayarkan nasabah</p>
                             </div>
 
-                            <!-- Metode & Catatan -->
-                            <div class="grid grid-cols-2 gap-4 mb-5">
-                                <div>
-                                    <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1.5">Metode Pembayaran</label>
-                                    <select name="metode" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
-                                        <option value="tunai" selected>Tunai (Cash)</option>
-                                        <option value="transfer">Transfer Bank</option>
-                                        <option value="potong_gaji">Potong Gaji</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1.5">Keterangan</label>
-                                    <input type="text" name="keterangan" placeholder="Opsional..." 
-                                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
-                                </div>
+                            <!-- Keterangan -->
+                            <div class="mb-5">
+                                <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1.5">Keterangan</label>
+                                <input type="text" name="keterangan" placeholder="Opsional (contoh: Pembayaran via transfer)..." 
+                                    class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
                             </div>
 
                             <!-- Action Buttons -->
@@ -190,67 +200,109 @@
                             </div>
                         </form>
                     </div>
+                    @elseif($nasabah)
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
+                            <i class="fas fa-check-circle text-4xl text-emerald-500 mb-3"></i>
+                            <p class="text-slate-600 font-medium">Nasabah ini tidak memiliki pinjaman aktif yang perlu dibayar.</p>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Right Column: Summary & Schedule -->
                 <div class="lg:col-span-1 space-y-4">
                     
-                    <!-- Info Pinjaman -->
+                    <!-- Info Pinjaman (Dinamis) -->
                     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
                         <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-                            <i class="fas fa-info-circle text-blue-500"></i> Info Pinjaman
+                            <i class="fas fa-info-circle text-emerald-500"></i> Info Pinjaman Terpilih
                         </h3>
                         
-                        <div class="space-y-3">
+                        <div class="space-y-3" id="infoPinjaman">
                             <div class="flex justify-between items-center pb-3 border-b border-gray-100">
                                 <span class="text-xs text-slate-600">Total Pinjaman</span>
-                                <span class="text-sm font-bold text-slate-900">Rp 10.000.000</span>
+                                <span class="text-sm font-bold text-slate-900" id="infoTotal">Rp 0</span>
                             </div>
                             <div class="flex justify-between items-center pb-3 border-b border-gray-100">
-                                <span class="text-xs text-slate-600">Angsuran/Bulan</span>
-                                <span class="text-sm font-bold text-slate-900">Rp 1.000.000</span>
-                            </div>
-                            <div class="flex justify-between items-center pb-3 border-b border-gray-100">
-                                <span class="text-xs text-slate-600">Sudah Dibayar</span>
-                                <span class="text-sm font-bold text-emerald-600">2 Bulan</span>
+                                <span class="text-xs text-slate-600">Tenor</span>
+                                <span class="text-sm font-bold text-slate-900" id="infoTenor">0 Bulan</span>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-xs text-slate-600">Sisa Cicilan</span>
-                                <span class="text-sm font-bold text-amber-600">10 Bulan</span>
+                                <span class="text-xs text-slate-600">Sisa Pinjaman</span>
+                                <span class="text-sm font-bold text-amber-600" id="infoSisa">Rp 0</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Jadwal Cicilan Berikutnya -->
-                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-                        <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-                            <i class="fas fa-calendar-alt text-amber-500"></i> Jadwal Berikutnya
-                        </h3>
-                        
-                        <div class="p-3 bg-amber-50 rounded-lg border border-amber-100">
-                            <div class="flex justify-between items-center mb-1">
-                                <p class="text-xs font-bold text-slate-900">Cicilan Ke-4</p>
-                                <span class="text-[10px] font-semibold text-amber-700 bg-amber-200 px-2 py-0.5 rounded-full">Belum Bayar</span>
-                            </div>
-                            <p class="text-[10px] text-slate-500">Jatuh Tempo: 24 November 2023</p>
-                            <p class="text-sm font-bold text-slate-900 mt-2">Rp 1.000.000</p>
-                        </div>
-                    </div>
-
-                    <!-- Total Sisa Pinjaman -->
-                    <div class="bg-emerald-500 rounded-xl p-5 text-white">
-                        <p class="text-[10px] text-emerald-100 uppercase font-semibold mb-1">Estimasi Sisa Pinjaman</p>
-                        <p class="text-2xl font-bold">Rp 8.000.000</p>
-                        <p class="text-[10px] text-emerald-100 mt-2">Setelah pembayaran ini diproses</p>
+                    <!-- Total Sisa Pinjaman Setelah Bayar -->
+                    <div class="bg-emerald-500 rounded-xl p-5 text-white shadow-md">
+                        <p class="text-[10px] text-emerald-100 uppercase font-semibold mb-1">Estimasi Sisa Setelah Bayar</p>
+                        <p class="text-2xl font-bold" id="estimasiSisa">Rp 0</p>
+                        <p class="text-[10px] text-emerald-100 mt-2">*Akan terupdate saat nominal diisi</p>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
+    <!-- JavaScript untuk Update Otomatis Panel Kanan -->
     <script>
-        document.getElementById('nominalBayar').addEventListener('input', function(e) {
+        const selectPinjaman = document.getElementById('selectPinjaman');
+        const nominalBayar = document.getElementById('nominalBayar');
+        const inputCicilanKe = document.getElementById('inputCicilanKe');
+        
+        const infoTotal = document.getElementById('infoTotal');
+        const infoTenor = document.getElementById('infoTenor');
+        const infoSisa = document.getElementById('infoSisa');
+        const estimasiSisa = document.getElementById('estimasiSisa');
+
+        let currentSisa = 0;
+
+        // Format Rupiah
+        const formatRupiah = (angka) => {
+            return 'Rp ' + new Intl.NumberFormat('id-ID').format(angka);
+        };
+
+        // Saat pinjaman dipilih
+        selectPinjaman.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (this.value) {
+                const total = parseInt(selectedOption.dataset.jumlah);
+                currentSisa = parseInt(selectedOption.dataset.sisa);
+                const tenor = parseInt(selectedOption.dataset.tenor);
+
+                infoTotal.textContent = formatRupiah(total);
+                infoTenor.textContent = tenor + ' Bulan';
+                infoSisa.textContent = formatRupiah(currentSisa);
+                
+                // Reset nominal dan update estimasi
+                nominalBayar.value = '';
+                updateEstimasi();
+            } else {
+                infoTotal.textContent = 'Rp 0';
+                infoTenor.textContent = '0 Bulan';
+                infoSisa.textContent = 'Rp 0';
+                estimasiSisa.textContent = 'Rp 0';
+                currentSisa = 0;
+            }
         });
+
+        // Saat nominal diketik
+        nominalBayar.addEventListener('input', updateEstimasi);
+
+        function updateEstimasi() {
+            if (currentSisa > 0) {
+                const bayar = parseInt(nominalBayar.value) || 0;
+                const sisaSetelahBayar = Math.max(0, currentSisa - bayar);
+                estimasiSisa.textContent = formatRupiah(sisaSetelahBayar);
+                
+                // Warning jika bayar lebih besar dari sisa
+                if (bayar > currentSisa) {
+                    estimasiSisa.classList.add('text-red-200');
+                } else {
+                    estimasiSisa.classList.remove('text-red-200');
+                }
+            }
+        }
     </script>
 </body>
 </html>

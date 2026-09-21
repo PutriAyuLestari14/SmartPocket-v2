@@ -140,7 +140,7 @@
                         </h2>
                     </div>
                     <p class="text-xs sm:text-sm text-slate-500 mt-1">
-                        Daftar lengkap mutasi tabungan dan riwayat pengajuan Anda.
+                        Daftar lengkap mutasi tabungan, peminjaman, dan pembayaran cicilan Anda.
                     </p>
                 </div>
 
@@ -224,6 +224,7 @@
                         <option value="setor">Setor Tunai</option>
                         <option value="tarik">Penarikan Saldo</option>
                         <option value="pinjam">Peminjaman Dana</option>
+                        <option value="cicil">Pembayaran Cicilan</option>
                     </select>
                     
                     <!-- Filter Status -->
@@ -243,31 +244,32 @@
                             
                             <!-- KIRI: ICON + DETAIL -->
                             <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
-                                {{-- SETORAN --}}
-                                @if($trx->tipe === 'tabungan' && $trx->jenisTransaksi->id_jenis_transaksi == 1)
+                                
+                                {{-- 1. SETORAN --}}
+                                @if($trx->tipe === 'tabungan' && ($trx->sub_tipe === 'Setoran' || ($trx->jenisTransaksi && $trx->jenisTransaksi->id_jenis_transaksi == 1)))
                                     <div class="w-11 h-11 bg-mintLight text-mint rounded-xl flex items-center justify-center font-bold flex-shrink-0">
                                         <i class="fas fa-arrow-down text-base"></i>
                                     </div>
                                     <div class="min-w-0">
                                         <p class="text-sm font-bold text-forest leading-snug truncate">Setoran Tunai</p>
                                         <p class="text-[11px] font-semibold text-slate-400 mt-0.5">
-                                            {{ $trx->tanggal_transaksi->timezone('Asia/Jakarta')->format('d M Y • H:i') }} WIB
+                                            {{ \Carbon\Carbon::parse($trx->tanggal_transaksi)->timezone('Asia/Jakarta')->format('d M Y • H:i') }} WIB
                                         </p>
                                     </div>
 
-                                {{-- PENARIKAN --}}
-                                @elseif($trx->tipe === 'tabungan' && $trx->jenisTransaksi->id_jenis_transaksi == 2)
+                                {{-- 2. PENARIKAN --}}
+                                @elseif($trx->tipe === 'tabungan' && ($trx->sub_tipe === 'Penarikan' || ($trx->jenisTransaksi && $trx->jenisTransaksi->id_jenis_transaksi == 2)))
                                     <div class="w-11 h-11 bg-red-50 text-red-600 rounded-xl flex items-center justify-center font-bold flex-shrink-0">
                                         <i class="fas fa-arrow-up text-base"></i>
                                     </div>
                                     <div class="min-w-0">
                                         <p class="text-sm font-bold text-forest leading-snug truncate">Penarikan Tunai</p>
                                         <p class="text-[11px] font-semibold text-slate-400 mt-0.5">
-                                            {{ $trx->tanggal_transaksi->timezone('Asia/Jakarta')->format('d M Y • H:i') }} WIB
+                                            {{ \Carbon\Carbon::parse($trx->tanggal_transaksi)->timezone('Asia/Jakarta')->format('d M Y • H:i') }} WIB
                                         </p>
                                     </div>
 
-                                {{-- PEMINJAMAN --}}
+                                {{-- 3. PEMINJAMAN --}}
                                 @elseif($trx->tipe === 'peminjaman')
                                     <div class="w-11 h-11 bg-forest/10 text-forest rounded-xl flex items-center justify-center font-bold flex-shrink-0">
                                         <i class="fas fa-hand-holding-usd text-base"></i>
@@ -278,12 +280,35 @@
                                             {{ \Carbon\Carbon::parse($trx->tanggal_transaksi)->timezone('Asia/Jakarta')->format('d M Y • H:i') }} WIB
                                         </p>
                                     </div>
+
+                                {{-- 4. PEMBAYARAN CICILAN (BARU) --}}
+                                @elseif($trx->tipe === 'angsuran')
+                                    <div class="w-11 h-11 bg-mintLight text-forest rounded-xl flex items-center justify-center font-bold flex-shrink-0">
+                                        <i class="fas fa-check-circle text-base"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-bold text-forest leading-snug truncate">Pembayaran Cicilan</p>
+                                        <p class="text-[11px] font-semibold text-slate-400 mt-0.5">
+                                            {{ \Carbon\Carbon::parse($trx->tanggal_transaksi)->timezone('Asia/Jakarta')->format('d M Y • H:i') }} WIB
+                                        </p>
+                                    </div>
                                 @endif
                             </div>
 
-                            <!-- KANAN: NOMINAL + STATUS (Hanya Disetujui / Ditolak) -->
+                            <!-- KANAN: NOMINAL + STATUS -->
                             <div class="text-right flex-shrink-0">
-                                @if($trx->tipe === 'peminjaman')
+                                
+                                {{-- Tampilan untuk CICILAN --}}
+                                @if($trx->tipe === 'angsuran')
+                                    <p class="text-sm sm:text-base font-extrabold text-forest mb-1">
+                                        - Rp {{ number_format($trx->jumlah, 0, ',', '.') }}
+                                    </p>
+                                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-mintLight text-forest border border-mint/20">
+                                        Berhasil
+                                    </span>
+
+                                {{-- Tampilan untuk PEMINJAMAN --}}
+                                @elseif($trx->tipe === 'peminjaman')
                                     <p class="text-sm sm:text-base font-extrabold text-forest mb-1">
                                         Rp {{ number_format($trx->jumlah, 0, ',', '.') }}
                                     </p>
@@ -296,9 +321,14 @@
                                             Ditolak
                                         </span>
                                     @endif
+
+                                {{-- Tampilan untuk TABUNGAN (Setor/Tarik) --}}
                                 @else
-                                    <p class="text-sm sm:text-base font-extrabold {{ $trx->jenisTransaksi->id_jenis_transaksi == 1 ? 'text-mint' : 'text-red-600' }} mb-1">
-                                        {{ $trx->jenisTransaksi->id_jenis_transaksi == 1 ? '+ ' : '- ' }}Rp {{ number_format($trx->jumlah, 0, ',', '.') }}
+                                    @php
+                                        $isSetoran = $trx->sub_tipe === 'Setoran' || ($trx->jenisTransaksi && $trx->jenisTransaksi->id_jenis_transaksi == 1);
+                                    @endphp
+                                    <p class="text-sm sm:text-base font-extrabold {{ $isSetoran ? 'text-mint' : 'text-red-600' }} mb-1">
+                                        {{ $isSetoran ? '+ ' : '- ' }}Rp {{ number_format($trx->jumlah, 0, ',', '.') }}
                                     </p>
                                     @if(in_array($trx->status, ['berhasil', 'disetujui']))
                                         <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-mintLight text-forest border border-mint/20">
@@ -320,7 +350,7 @@
                             </div>
                             <h4 class="text-sm font-extrabold text-forest mb-1">Belum Ada Transaksi</h4>
                             <p class="text-xs text-slate-400 max-w-sm mx-auto">
-                                Seluruh riwayat transaksi tabungan atau peminjaman Anda akan ditampilkan secara rapi di sini.
+                                Seluruh riwayat transaksi tabungan, peminjaman, atau pembayaran cicilan Anda akan ditampilkan secara rapi di sini.
                             </p>
                         </div>
                     @endforelse
