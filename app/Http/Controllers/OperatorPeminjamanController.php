@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Peminjaman;
 use App\Models\Nasabah;
+use App\Models\Angsuran; // <-- Ditambahkan untuk ambil data cicilan
 use App\Http\Controllers\NotifikasiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,26 +13,21 @@ class OperatorPeminjamanController extends Controller
 {
     public function index()
     {
-        // ambil data pinjaman yang udah disetujui & belum lunas
-        // biar operator bisa pantau siapa aja yang masih ada pinjaman & kapan jatuh temponya
         $peminjamans = Peminjaman::with('nasabah')
             ->where('status_verifikasi', 'disetujui')
             ->where('sisa_pinjaman', '>', 0)
             ->orderBy('tanggal_jatuh_tempo', 'asc')
             ->paginate(10);
 
-        // hitung total sisa hutang semua nasabah yang masih aktif
         $totalAktif = Peminjaman::where('status_verifikasi', 'disetujui')
             ->where('sisa_pinjaman', '>', 0)
             ->sum('sisa_pinjaman');
 
-        // hitung ada berapa orang unik yang lagi punya hutang
         $totalPeminjam = Peminjaman::where('status_verifikasi', 'disetujui')
             ->where('sisa_pinjaman', '>', 0)
             ->distinct('id_nasabah')
             ->count('id_nasabah');
 
-        // estimasi total cicilan yang harusnya masuk bulan ini (jumlah / tenor)
         $totalCicilanBulanIni = Peminjaman::where('status_verifikasi', 'disetujui')
             ->where('sisa_pinjaman', '>', 0)
             ->get()
@@ -39,18 +35,15 @@ class OperatorPeminjamanController extends Controller
                 return $peminjaman->jumlah_pinjaman / $peminjaman->tenor;
             });
 
-        // hitung total jumlah cicilan yang harus dibayar bulan ini
         $jumlahCicilanBulanIni = Peminjaman::where('status_verifikasi', 'disetujui')
             ->where('sisa_pinjaman', '>', 0)
             ->count();
 
-        // hitung berapa banyak pinjaman yang jatuh tempo di bulan ini
         $jatuhTempoBulanIni = Peminjaman::where('status_verifikasi', 'disetujui')
             ->where('sisa_pinjaman', '>', 0)
             ->whereMonth('tanggal_jatuh_tempo', date('m'))
             ->count();
 
-        // lempar semua data ke view biar bisa dipajang di dashboard operator
         return view('operator.peminjaman.index', compact(
             'peminjamans',
             'totalAktif',
@@ -63,8 +56,6 @@ class OperatorPeminjamanController extends Controller
 
     public function create()
     {
-        // nyiapin data nasabah khusus kategori guru yang masih aktif
-        // biar pas operator input manual nggak salah pilih orang atau pilih siswa
         $nasabahs = Nasabah::with(['user', 'rekening'])
             ->where('kategori', 'guru')
             ->where('status', 'aktif')
@@ -76,8 +67,6 @@ class OperatorPeminjamanController extends Controller
 
     public function store(Request $request)
     {
-        // validasi dulu inputannya, jangan sampe ada data aneh yang lolos
-        // custom message juga udah disetup biar errornya lebih relate & jelas
         $request->validate([
             'id_nasabah' => 'required|exists:nasabah,id_nasabah',
             'jumlah_pinjaman' => 'required|numeric|min:50000',
@@ -86,26 +75,22 @@ class OperatorPeminjamanController extends Controller
             'tanggal_jatuh_tempo' => 'required|date|after:tanggal_ajuan',
             'keterangan' => 'nullable|string|max:500',
         ], [
-            'id_nasabah.required' => 'nasabah harus dipilih terlebih dahulu.',
-            'id_nasabah.exists' => 'nasabah tidak ditemukan.',
-            'jumlah_pinjaman.min' => 'minimal pinjaman adalah rp 50.000.',
-            'tanggal_jatuh_tempo.after' => 'tanggal jatuh tempo harus setelah tanggal pinjam.',
+            'id_nasabah.required' => 'Nasabah harus dipilih terlebih dahulu.',
+            'id_nasabah.exists' => 'Nasabah tidak ditemukan.',
+            'jumlah_pinjaman.min' => 'Minimal pinjaman adalah Rp 50.000.',
+            'tanggal_jatuh_tempo.after' => 'Tanggal jatuh tempo harus setelah tanggal pinjam.',
         ]);
 
-        // pake db transaction biar aman, no drama rollback kalau ada error di tengah jalan
         DB::beginTransaction();
 
         try {
             $nasabah = Nasabah::findOrFail($request->id_nasabah);
-
-            // pastikan petugas yang login itu valid & ada datanya
             $petugas = auth()->user()->petugas;
 
             if (!$petugas) {
-                throw new \Exception('data petugas untuk akun ini tidak ditemukan.');
+                throw new \Exception('Data petugas untuk akun ini tidak ditemukan.');
             }
 
-            // simpen data peminjaman ke database, status langsung disetujui karena ini input manual operator
             Peminjaman::create([
                 'id_nasabah' => $nasabah->id_nasabah,
                 'id_petugas' => $petugas->id_petugas,
@@ -118,31 +103,19 @@ class OperatorPeminjamanController extends Controller
                 'status_verifikasi' => 'disetujui',
             ]);
 
-            // commit transaction, data udah aman tersimpan
             DB::commit();
 
             return redirect()
                 ->route('operator.peminjaman.index')
-                ->with(
-                    'success',
-                    'peminjaman a.n ' . $nasabah->nama . ' berhasil disimpan dan disetujui.'
-                );
+                ->with('success', 'Peminjaman a.n ' . $nasabah->nama . ' berhasil disimpan dan disetujui.');
         } catch (\Exception $e) {
-            // kalau ada error, batalkan semua proses biar data nggak corrupt
             DB::rollBack();
-
-            return back()
-                ->withInput()
-                ->with(
-                    'error',
-                    'gagal menyimpan peminjaman: ' . $e->getMessage()
-                );
+            return back()->withInput()->with('error', 'Gagal menyimpan peminjaman: ' . $e->getMessage());
         }
     }
 
     public function approve($id)
     {
-        // ambil data pinjaman & nasabah yang mau di-approve
         $peminjaman = Peminjaman::findOrFail($id);
         $nasabah = Nasabah::findOrFail($peminjaman->id_nasabah);
 
@@ -152,38 +125,30 @@ class OperatorPeminjamanController extends Controller
             $petugas = auth()->user()->petugas;
 
             if (!$petugas) {
-                throw new \Exception('data petugas untuk akun ini tidak ditemukan.');
+                throw new \Exception('Data petugas untuk akun ini tidak ditemukan.');
             }
 
-            // ubah status jadi disetujui & catet siapa petugas yang approve
             $peminjaman->status_verifikasi = 'disetujui';
             $peminjaman->id_petugas = $petugas->id_petugas;
             $peminjaman->save();
 
-            // kirim notif ke nasabah biar dia tau 
             NotifikasiController::kirim(
                 $nasabah->id_nasabah,
-                'pinjaman disetujui',
-                'pinjaman rp ' . number_format($peminjaman->jumlah_pinjaman, 0, ',', '.') . ' disetujui. silakan ambil uang tunai di kantor bmt.',
+                'Pinjaman Disetujui',
+                'Pinjaman Rp ' . number_format($peminjaman->jumlah_pinjaman, 0, ',', '.') . ' disetujui. Silakan ambil uang tunai di kantor BMT.',
                 'peminjaman'
             );
 
             DB::commit();
-
-            return back()->with(
-                'success',
-                'pinjaman disetujui! nasabah dapat mengambil uang di bmt.'
-            );
+            return back()->with('success', 'Pinjaman disetujui! Nasabah dapat mengambil uang di BMT.');
         } catch (\Exception $e) {
             DB::rollBack();
-
             return back()->with('error', $e->getMessage());
         }
     }
 
     public function reject($id)
     {
-        // ambil data pinjaman & nasabah yang mau ditolak
         $peminjaman = Peminjaman::findOrFail($id);
         $nasabah = Nasabah::findOrFail($peminjaman->id_nasabah);
 
@@ -193,51 +158,38 @@ class OperatorPeminjamanController extends Controller
             $petugas = auth()->user()->petugas;
 
             if (!$petugas) {
-                throw new \Exception('data petugas untuk akun ini tidak ditemukan.');
+                throw new \Exception('Data petugas untuk akun ini tidak ditemukan.');
             }
 
-            // ubah status jadi ditolak & catet petugas yang reject
             $peminjaman->status_verifikasi = 'ditolak';
             $peminjaman->id_petugas = $petugas->id_petugas;
             $peminjaman->save();
 
-            // kasih tau nasabah lewat notif biar nggak nungguin ghosting 
             NotifikasiController::kirim(
                 $nasabah->id_nasabah,
-                'pinjaman ditolak',
-                'pinjaman rp ' . number_format($peminjaman->jumlah_pinjaman, 0, ',', '.') . ' ditolak oleh operator.',
+                'Pinjaman Ditolak',
+                'Pinjaman Rp ' . number_format($peminjaman->jumlah_pinjaman, 0, ',', '.') . ' ditolak oleh operator.',
                 'peminjaman'
             );
 
             DB::commit();
-
-            return back()->with('success', 'pinjaman ditolak.');
+            return back()->with('success', 'Pinjaman ditolak.');
         } catch (\Exception $e) {
             DB::rollBack();
-
             return back()->with('error', $e->getMessage());
         }
     }
 
     public function indexVerifikasi()
     {
-        // halaman khusus buat ngecek pengajuan yang masih pending
         $peminjamans = Peminjaman::with('nasabah.user')
             ->where('status_verifikasi', 'pending')
             ->orderBy('tanggal_ajuan', 'desc')
             ->paginate(10);
 
-        // hitung statistik buat dashboard biar keliatan pro
-        $pendingCount = Peminjaman::where('status_verifikasi', 'pending')
-            ->count();
-
-        $approvedToday = Peminjaman::where('status_verifikasi', 'disetujui')
-            ->whereDate('created_at', today())
-            ->count();
-
-        $rejectedToday = Peminjaman::where('status_verifikasi', 'ditolak')
-            ->whereDate('created_at', today())
-            ->count();
+        $pendingCount = Peminjaman::where('status_verifikasi', 'pending')->count();
+        $approvedToday = Peminjaman::where('status_verifikasi', 'disetujui')->whereDate('created_at', today())->count();
+        $rejectedToday = Peminjaman::where('status_verifikasi', 'ditolak')->whereDate('created_at', today())->count();
 
         return view('operator.verifikasi.peminjaman', compact(
             'peminjamans',
@@ -245,5 +197,86 @@ class OperatorPeminjamanController extends Controller
             'approvedToday',
             'rejectedToday'
         ));
+    }
+
+    // =========================================================
+    // METHOD BARU: Ambil Data Mutasi PEMINJAMAN SAJA (Bukan Tabungan)
+    // =========================================================
+    public function getRekeningData($id_nasabah)
+    {
+        try {
+            // 1. Ambil data nasabah
+            $nasabah = Nasabah::findOrFail($id_nasabah);
+            
+            // 2. Ambil semua riwayat peminjaman nasabah ini (diurutkan dari yang lama)
+            $peminjamans = Peminjaman::where('id_nasabah', $id_nasabah)
+                ->orderBy('tanggal_ajuan', 'asc')
+                ->get();
+
+            if ($peminjamans->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nasabah ini belum memiliki riwayat peminjaman.'
+                ]);
+            }
+
+            // 3. Ambil semua angsuran (pembayaran cicilan) untuk pinjaman-pinjaman tersebut
+            $idPinjamanList = $peminjamans->pluck('id_pinjaman');
+            $angsurans = Angsuran::whereIn('id_pinjaman', $idPinjamanList)
+                ->orderBy('tanggal_pembayaran', 'asc')
+                ->get();
+
+            // 4. Gabungkan jadi satu timeline transaksi
+            $transaksi = [];
+            $totalPinjaman = 0;
+            $totalPembayaran = 0;
+
+            // Masukkan data Pencairan Pinjaman sebagai DEBET (Hutang bertambah)
+            foreach ($peminjamans as $pinjaman) {
+                $transaksi[] = [
+                    'tanggal' => \Carbon\Carbon::parse($pinjaman->tanggal_ajuan)->format('d/m/Y'),
+                    'keterangan' => 'Pencairan Pinjaman' . ($pinjaman->keterangan ? ' - ' . $pinjaman->keterangan : ''),
+                    'debit' => $pinjaman->jumlah_pinjaman,
+                    'kredit' => 0,
+                ];
+                $totalPinjaman += $pinjaman->jumlah_pinjaman;
+            }
+
+            // Masukkan data Pembayaran Cicilan sebagai KREDIT (Hutang berkurang)
+            foreach ($angsurans as $angsuran) {
+                $transaksi[] = [
+                    'tanggal' => \Carbon\Carbon::parse($angsuran->tanggal_pembayaran)->format('d/m/Y'),
+                    'keterangan' => 'Pembayaran Cicilan',
+                    'debit' => 0,
+                    'kredit' => $angsuran->jumlah,
+                ];
+                $totalPembayaran += $angsuran->jumlah;
+            }
+
+            // 5. Urutkan ulang seluruh transaksi berdasarkan tanggal (ascending / lama ke baru)
+            usort($transaksi, function($a, $b) {
+                return strtotime(str_replace('/', '-', $a['tanggal'])) - strtotime(str_replace('/', '-', $b['tanggal']));
+            });
+
+            $sisaPinjaman = $totalPinjaman - $totalPembayaran;
+
+            return response()->json([
+                'success' => true,
+                'nasabah' => [
+                    'no_rek' => $nasabah->no_rek ?? '-',
+                    'nama' => $nasabah->nama,
+                ],
+                'total_pinjaman' => $totalPinjaman,
+                'total_pembayaran' => $totalPembayaran,
+                'sisa_pinjaman' => $sisaPinjaman,
+                'transaksi' => $transaksi,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat data: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

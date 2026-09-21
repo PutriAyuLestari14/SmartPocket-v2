@@ -63,6 +63,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/peminjaman', [OperatorPeminjamanController::class, 'store'])->name('operator.peminjaman.store');
         Route::post('/peminjaman/{id}/approve', [OperatorPeminjamanController::class, 'approve'])->name('operator.peminjaman.approve');
         Route::post('/peminjaman/{id}/reject', [OperatorPeminjamanController::class, 'reject'])->name('operator.peminjaman.reject');
+        Route::get('/peminjaman/rekening/{id_nasabah}', [OperatorPeminjamanController::class, 'getRekeningData'])->name('operator.peminjaman.rekening');
 
         // pembayaran guru
         Route::get('/pembayaran/create', [OperatorPembayaranController::class, 'create'])->name('operator.pembayaran.create');
