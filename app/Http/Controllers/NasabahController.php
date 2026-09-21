@@ -75,8 +75,40 @@ class NasabahController extends Controller
         DB::beginTransaction();
 
         try {
+            // 1. Tentukan prefix yang dimasukkan operator
+            $prefix = strtoupper(trim($request->prefix));
 
-            // 1. buat user
+            // 2. Cari nomor rekening terakhir dengan prefix yang sama
+            $rekeningTerakhir = RekeningTabungan::where(
+                'no_rek',
+                'like',
+                $prefix . '%'
+            )
+            ->orderBy('no_rek', 'desc')
+            ->first();
+
+            // 3. Tentukan nomor urut berikutnya
+            if ($rekeningTerakhir) {
+                $nomorTerakhir = (int) substr(
+                    $rekeningTerakhir->no_rek,
+                    strlen($prefix)
+                );
+
+                $nomorBerikutnya = $nomorTerakhir + 1;
+            } else {
+                $nomorBerikutnya = 1;
+            }
+
+            // 4. Bentuk nomor rekening otomatis
+            // Contoh: 24 -> 24001, GK -> GK001
+            $noRek = $prefix . str_pad(
+                $nomorBerikutnya,
+                3,
+                '0',
+                STR_PAD_LEFT
+            );
+
+            // 5. Buat user
             $finalPassword = $request->password ?: 'nasabah123';
 
             $user = User::create([
@@ -85,7 +117,8 @@ class NasabahController extends Controller
                 'password' => Hash::make($finalPassword),
                 'role' => 'nasabah',
             ]);
-             // 3. Buat Data Nasabah
+
+            // 6. Buat data nasabah
             $nasabah = Nasabah::create([
                 'username' => $request->username,
                 'no_rek' => $noRek,
@@ -97,27 +130,29 @@ class NasabahController extends Controller
                 'photo' => null,
             ]);
 
-            // 4. Buat Rekening Tabungan
+            // 7. Buat rekening tabungan
             RekeningTabungan::create([
                 'no_rek' => $noRek,
                 'id_nasabah' => $nasabah->id_nasabah,
-                'saldo' => $request->saldo ?? 0, 
+                'saldo' => $request->saldo ?? 0,
             ]);
 
-            // 5. Simpan saldo awal sebagai transaksi setoran (jika ada)
+            // 8. Simpan saldo awal sebagai transaksi setoran
             if (($request->saldo ?? 0) > 0) {
                 $jenisTransaksi = DB::table('jenis_transaksi')
-                    ->where('setoran', 'setoran') // Pastikan ini sesuai dengan data di tabel jenis_transaksi kamu
+                    ->where('setoran', 'setoran')
                     ->first();
 
                 if (!$jenisTransaksi) {
-                    throw new \Exception('Jenis transaksi Setoran tidak ditemukan di database.');
+                    throw new \Exception(
+                        'Jenis transaksi Setoran tidak ditemukan di database.'
+                    );
                 }
 
-               DetailTabungan::create([
+                DetailTabungan::create([
                     'no_rek' => $noRek,
                     'id_petugas' => auth()->user()->petugas->id_petugas,
-                    'id_jenis_transaksi' => 1,
+                    'id_jenis_transaksi' => $jenisTransaksi->id_jenis_transaksi,
                     'jumlah' => $request->saldo,
                     'status' => 'berhasil',
                     'tanggal_transaksi' => now()->timezone('Asia/Jakarta'),
@@ -126,8 +161,12 @@ class NasabahController extends Controller
 
             DB::commit();
 
-            return redirect()->route('operator.nasabah.index')
-                ->with('success', 'Nasabah berhasil ditambahkan!');
+            return redirect()
+                ->route('operator.nasabah.index')
+                ->with(
+                    'success',
+                    'Nasabah berhasil ditambahkan! No. Rekening: ' . $noRek
+                );
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -139,7 +178,6 @@ class NasabahController extends Controller
                 ]);
         }
     }
-
     // Edit nasabah (Tampilan Form)
     public function edit(Nasabah $nasabah)
     {

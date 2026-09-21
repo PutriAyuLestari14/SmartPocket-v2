@@ -468,6 +468,7 @@
                             @php
                                 $isPeminjaman = ($transaksi->tipe ?? null) === 'peminjaman';
                                 $isTabungan = ($transaksi->tipe ?? null) === 'tabungan';
+                                $isAngsuran = ($transaksi->tipe ?? null) === 'angsuran';
 
                                 $isSetoran = $isTabungan && ($transaksi->id_jenis_transaksi ?? null) == 1;
                                 $isPenarikan = $isTabungan && ($transaksi->id_jenis_transaksi ?? null) == 2;
@@ -488,6 +489,12 @@
                                     $iconBgClass = 'bg-forest text-white';
                                     $amountClass = 'text-forest';
                                     $sign = '';
+                                } elseif ($isAngsuran) {
+                                    $label = 'Pembayaran Cicilan';
+                                    $icon = 'check-circle';
+                                    $iconBgClass = 'bg-mintLight text-forest';
+                                    $amountClass = 'text-red-600';
+                                    $sign = '-';
                                 } elseif ($isSetoran) {
                                     $label = 'Setoran Tabungan';
                                     $icon = 'arrow-down';

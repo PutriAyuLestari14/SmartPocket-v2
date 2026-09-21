@@ -16,7 +16,7 @@ class OperatorPeminjamanController extends Controller
         $peminjamans = Peminjaman::with('nasabah')
             ->where('status_verifikasi', 'disetujui')
             ->where('sisa_pinjaman', '>', 0)
-            ->orderBy('tanggal_jatuh_tempo', 'asc')
+            ->orderBy('created_at', 'desc')
             ->paginate(10);
 
         $totalAktif = Peminjaman::where('status_verifikasi', 'disetujui')
@@ -37,7 +37,8 @@ class OperatorPeminjamanController extends Controller
 
         $jumlahCicilanBulanIni = Peminjaman::where('status_verifikasi', 'disetujui')
             ->where('sisa_pinjaman', '>', 0)
-            ->count();
+            ->distinct('id_nasabah')
+            ->count('id_nasabah');
 
         $jatuhTempoBulanIni = Peminjaman::where('status_verifikasi', 'disetujui')
             ->where('sisa_pinjaman', '>', 0)
@@ -210,8 +211,9 @@ class OperatorPeminjamanController extends Controller
             
             // 2. Ambil semua riwayat peminjaman nasabah ini (diurutkan dari yang lama)
             $peminjamans = Peminjaman::where('id_nasabah', $id_nasabah)
-                ->orderBy('tanggal_ajuan', 'asc')
-                ->get();
+            ->where('status_verifikasi', 'disetujui')
+            ->orderBy('tanggal_ajuan', 'asc')
+            ->get();
 
             if ($peminjamans->isEmpty()) {
                 return response()->json([
