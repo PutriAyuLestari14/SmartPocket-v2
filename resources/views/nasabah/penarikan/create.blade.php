@@ -1,3 +1,9 @@
+@php
+    $saldoMengendap = 10000;
+    $saldoTersedia = $rekening->saldo ?? 0;
+    $maksimalPenarikan = max(0, $saldoTersedia - $saldoMengendap);
+@endphp
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -132,7 +138,7 @@
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="w-full bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 text-sm font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2">
-                        <i class="fas fa-sign-out-alt text-xs"></i> Keluar
+                        <i class="fas fa-sign-out-alt text-xs"></i> Logout
                     </button>
                 </form>
             </div>
@@ -187,7 +193,7 @@
                             <div>
                                 <p class="text-[10px] font-bold text-emerald-200 uppercase tracking-widest">Saldo Tersedia</p>
                                 <h3 class="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1 break-all">
-                                    Rp {{ number_format($rekening->saldo ?? 0, 0, ',', '.') }}
+                                    Rp {{ number_format($saldoTersedia, 0, ',', '.') }}
                                 </h3>
                             </div>
                             <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-mint border border-white/20 flex-shrink-0">
@@ -198,6 +204,26 @@
                         <div class="pt-4 border-t border-white/15 flex items-center gap-2 text-xs text-emerald-100/90 relative z-10">
                             <i class="fas fa-shield-alt text-mint"></i>
                             <span class="font-medium">Saldo terverifikasi aman di BMT</span>
+                        </div>
+
+                        <div class="mt-5 grid grid-cols-2 gap-3 relative z-10">
+                            <div class="bg-white/10 border border-white/10 rounded-xl p-3">
+                                <p class="text-[9px] font-bold text-emerald-200 uppercase tracking-wider">
+                                    Saldo Mengendap
+                                </p>
+                                <p class="text-sm font-black text-white mt-1">
+                                    Rp {{ number_format($saldoMengendap, 0, ',', '.') }}
+                                </p>
+                            </div>
+
+                            <div class="bg-white/10 border border-white/10 rounded-xl p-3">
+                                <p class="text-[9px] font-bold text-emerald-200 uppercase tracking-wider">
+                                    Maks. Penarikan
+                                </p>
+                                <p class="text-sm font-black text-white mt-1">
+                                    Rp {{ number_format($maksimalPenarikan, 0, ',', '.') }}
+                                </p>
+                            </div>
                         </div>
                     </div>
 
@@ -245,6 +271,7 @@
                                         id="jumlah" 
                                         value="{{ old('jumlah') }}" 
                                         min="10000" 
+                                        max="{{ $maksimalPenarikan }}"
                                         step="1000"
                                         placeholder="0"
                                         class="input-premium w-full pl-12 pr-4 py-3.5 bg-bgMain border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-mint/20 focus:border-mint text-base font-bold text-slate-900 placeholder-slate-400" 
@@ -255,6 +282,24 @@
                                 <p class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
                                     <i class="fas fa-lightbulb text-amber-500"></i>
                                     Masukkan nominal tanpa titik/koma, contoh: 50000
+                                </p>
+
+                                <div class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                                    <div class="flex items-start gap-2">
+                                        <i class="fas fa-info-circle text-amber-500 mt-0.5"></i>
+                                        <p class="text-xs text-amber-700 leading-relaxed">
+                                            Saldo mengendap sebesar
+                                            <strong>Rp {{ number_format($saldoMengendap, 0, ',', '.') }}</strong>
+                                            harus tetap tersimpan.
+                                            Maksimal penarikan Anda adalah
+                                            <strong>Rp {{ number_format($maksimalPenarikan, 0, ',', '.') }}</strong>.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <p id="pesanBatasPenarikan" class="hidden mt-2 text-xs text-red-600 font-semibold">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    Nominal penarikan melebihi batas maksimal.
                                 </p>
                             </div>
 
@@ -396,8 +441,29 @@
         }
 
         // Validasi Input Angka
+        const saldoMengendap = {{ $saldoMengendap }};
+        const saldoTersedia = {{ $saldoTersedia }};
+        const maksimalPenarikan = {{ $maksimalPenarikan }};
+
         function validasiAngka(input) {
-            if (input.value < 0) input.value = 0;
+            const pesan = document.getElementById('pesanBatasPenarikan');
+            const btnSubmit = document.getElementById('btnSubmit');
+
+            if (input.value < 0) {
+                input.value = 0;
+            }
+
+            const jumlah = Number(input.value);
+
+            if (jumlah > maksimalPenarikan) {
+                pesan.classList.remove('hidden');
+                btnSubmit.disabled = true;
+                btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                pesan.classList.add('hidden');
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
         }
     </script>
 </body>

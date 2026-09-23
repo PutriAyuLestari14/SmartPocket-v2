@@ -22,42 +22,64 @@ class NasabahPenarikanController extends Controller
         $user = auth()->user();
         $rekening = RekeningTabungan::where('id_nasabah', $user->nasabah->id_nasabah)->first();
 
-        // 1. TAMBAHKAN validasi untuk 'tanggal_transaksi'
+        $saldoMengendap = 10000;
+
         $request->validate([
             'jumlah' => 'required|numeric|min:10000',
-            'tanggal_transaksi' => 'required|date', // ← TAMBAHAN BARU
+            'tanggal_transaksi' => 'required|date',
             'keterangan' => 'required|string|max:255',
         ], [
             'jumlah.min' => 'Minimal penarikan adalah Rp 10.000',
-            'tanggal_transaksi.required' => 'Tanggal penarikan wajib diisi.', // ← PESAN ERROR BARU
+            'tanggal_transaksi.required' => 'Tanggal penarikan wajib diisi.',
         ]);
 
-        // Cek saldo cukup (hanya untuk validasi tampilan, saldo belum dipotong)
-        if ($rekening->saldo < $request->jumlah) {
-            return back()->with('error', 'Saldo Anda tidak mencukupi. Saldo saat ini: Rp ' . number_format($rekening->saldo, 0, ',', '.'))->withInput();
+        if (!$rekening) {
+            return back()->with('error', 'Rekening tabungan tidak ditemukan.')->withInput();
+        }
+
+        $maksimalPenarikan = max(0, $rekening->saldo - $saldoMengendap);
+
+        if ($request->jumlah > $maksimalPenarikan) {
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Penarikan melebihi batas. Saldo mengendap Rp ' .
+                    number_format($saldoMengendap, 0, ',', '.') .
+                    ' harus tetap tersimpan. Maksimal penarikan Anda adalah Rp ' .
+                    number_format($maksimalPenarikan, 0, ',', '.') . '.'
+                );
         }
 
         DB::beginTransaction();
+
         try {
-            // 2. SIMPAN DATA KE DATABASE
             DetailTabungan::create([
                 'no_rek' => $rekening->no_rek,
-                'id_petugas' => null, // Tetap null, nanti diisi operator saat approve
-                'id_jenis_transaksi' => 2, // ID untuk Penarikan
-                'jumlah' => $request->jumlah, 
+                'id_petugas' => null,
+                'id_jenis_transaksi' => 2,
+                'jumlah' => $request->jumlah,
                 'tanggal_transaksi' => now()->timezone('Asia/Jakarta'),
-                'keterangan' => $request->keterangan, // ← TAMBAHAN: Simpan keterangan (sebelumnya lupa)
-                'status' => 'pending', 
+                'keterangan' => $request->keterangan,
+                'status' => 'pending',
             ]);
 
             DB::commit();
-            
+
             return redirect()->route('nasabah.penarikan.create')
-                ->with('success', 'Pengajuan penarikan Rp ' . number_format($request->jumlah, 0, ',', '.') . ' berhasil dikirim! Menunggu verifikasi operator.');
+                ->with(
+                    'success',
+                    'Pengajuan penarikan Rp ' .
+                    number_format($request->jumlah, 0, ',', '.') .
+                    ' berhasil dikirim! Menunggu verifikasi operator.'
+                );
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Gagal mengajukan: ' . $e->getMessage())->withInput();
+
+            return back()
+                ->with('error', 'Gagal mengajukan: ' . $e->getMessage())
+                ->withInput();
         }
     }
 }

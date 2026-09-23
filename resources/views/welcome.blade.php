@@ -75,10 +75,9 @@
             <div class="max-w-7xl mx-auto px-5 md:px-10">
                 <div class="h-24 flex items-center justify-between">
                     <a href="#" class="flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-lg">
-                            <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-green-700 to-green-500 flex items-center justify-center">
-                                <span class="text-white text-sm font-black">SP</span>
-                            </div>
+                        <!-- LOGO BMT -->
+                        <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-lg p-1">
+                            <img src="{{ asset('images/logo-bmt-green.png') }}" alt="Logo BMT SMKN 11 Bandung" class="w-full h-full object-contain rounded-full">
                         </div>
                         <div class="leading-tight">
                             <h1 class="text-white text-xl font-extrabold">SmartPocket</h1>
@@ -169,7 +168,7 @@
         </div>
     </section>
 
-    <!-- FLOATING CARD (MOBILE ONLY - Normal section, tidak absolute) -->
+    <!-- FLOATING CARD (MOBILE ONLY) -->
     <section class="md:hidden px-4 -mt-4 relative z-20">
         <div class="floating-card bg-white rounded-3xl p-5">
             <div class="grid grid-cols-1 gap-4">
@@ -264,42 +263,42 @@
             <div id="fitur" class="grid md:grid-cols-2 lg:grid-cols-3 gap-7">
                 <div class="feature-card bg-white rounded-3xl p-8">
                     <div class="w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V6m0 12v-2m9-4a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-currentColor stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V6m0 12v-2m9-4a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                     <h3 class="text-xl font-bold text-slate-900">Tabungan Digital</h3>
                     <p class="mt-3 text-slate-600 leading-relaxed">Memudahkan pengguna melihat dan mengelola informasi tabungan dalam satu sistem.</p>
                 </div>
                 <div class="feature-card bg-white rounded-3xl p-8">
                     <div class="w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-currentColor stroke-width="2" d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </div>
                     <h3 class="text-xl font-bold text-slate-900">Transaksi Online</h3>
                     <p class="mt-3 text-slate-600 leading-relaxed">Pencatatan transaksi dibuat lebih cepat dan terstruktur sehingga memudahkan pengelolaan data.</p>
                 </div>
                 <div class="feature-card bg-white rounded-3xl p-8">
                     <div class="w-14 h-14 rounded-2xl bg-yellow-100 flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <svg class="w-7 h-7 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-currentColor stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                     <h3 class="text-xl font-bold text-slate-900">Notifikasi</h3>
                     <p class="mt-3 text-slate-600 leading-relaxed">Informasi penting mengenai transaksi dan aktivitas BMT dapat disampaikan dengan lebih cepat.</p>
                 </div>
                 <div class="feature-card bg-white rounded-3xl p-8">
                     <div class="w-14 h-14 rounded-2xl bg-purple-100 flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-currentColor stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                     <h3 class="text-xl font-bold text-slate-900">Verifikasi</h3>
                     <p class="mt-3 text-slate-600 leading-relaxed">Membantu operator memeriksa dan memvalidasi transaksi agar pengelolaan data lebih terkontrol.</p>
                 </div>
                 <div class="feature-card bg-white rounded-3xl p-8">
                     <div class="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <svg class="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-currentColor stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                     </div>
                     <h3 class="text-xl font-bold text-slate-900">Keamanan Data</h3>
                     <p class="mt-3 text-slate-600 leading-relaxed">Informasi akun dan transaksi dikelola melalui sistem dengan autentikasi pengguna.</p>
                 </div>
                 <div class="feature-card bg-white rounded-3xl p-8">
                     <div class="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m-6 0a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2h2a2 2 0 012 2v6zm6 0a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2a2 2 0 00-2 2v12z"/></svg>
+                        <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-currentColor stroke-width="2" d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m-6 0a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2h2a2 2 0 012 2v6zm6 0a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2a2 2 0 00-2 2v12z"/></svg>
                     </div>
                     <h3 class="text-xl font-bold text-slate-900">Laporan BMT</h3>
                     <p class="mt-3 text-slate-600 leading-relaxed">Data aktivitas BMT dapat dirangkum sehingga membantu operator dan admin memantau kondisi layanan.</p>
@@ -323,7 +322,11 @@
             <div class="grid md:grid-cols-3 gap-10">
                 <div>
                     <div class="flex items-center gap-3">
-                        <div class="w-11 h-11 rounded-xl bg-green-600 flex items-center justify-center"><span class="font-black text-white">SP</span></div>
+                       <!-- LOGO BMT FOOTER -->
+                        <div class="w-11 h-11 rounded-full bg-white flex items-center justify-center p-1">
+                            {{-- Menggunakan rounded-full di sini juga --}}
+                            <img src="{{ asset('images/logo-bmt-green.png') }}" alt="Logo BMT SMKN 11 Bandung" class="w-full h-full object-contain rounded-full">
+                        </div>
                         <div>
                             <h3 class="font-bold text-lg">SmartPocket</h3>
                             <p class="text-xs text-slate-400">BMT SMKN 11 Bandung</p>

@@ -392,25 +392,12 @@
                                 </span>
 
                                 <p class="text-xs text-slate-600 leading-relaxed">
-                                    Cek <strong>metode pembayaran</strong>
-                                    (Tunai / Potong Gaji) sebelum menyetujui.
-                                </p>
-                            </div>
-
-                            <div class="flex gap-3">
-                                <span class="w-5 h-5 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold">
-                                    4
-                                </span>
-
-                                <p class="text-xs text-slate-600 leading-relaxed">
                                     Setelah disetujui, <strong>dana pinjaman dapat dicairkan</strong>
                                     sesuai prosedur BMT.
                                 </p>
                             </div>
-
                         </div>
                     </div>
-
                 </div>
             </div>
         </main>

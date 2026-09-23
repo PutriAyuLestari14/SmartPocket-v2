@@ -209,8 +209,17 @@
                             </li>
                             <li class="flex items-start gap-2">
                                 <i class="fas fa-check text-mint mt-0.5 text-[10px]"></i>
-                                <span>Jangka waktu pengembalian (tenor) hingga <strong class="text-forest">24 bulan</strong>.</span>
+                                <span>Memiliki rekening tabungan aktif.</span>
                             </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check text-mint mt-0.5 text-[10px]"></i>
+                                <span>Riwayat angsuran lancar.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check text-mint mt-0.5 text-[10px]"></i>
+                                <span>Dana diambil tunai di kantor BMT setelah disetujui.</span>
+                            </li>
+                            
                         </ul>
                     </div>
                 </div>
