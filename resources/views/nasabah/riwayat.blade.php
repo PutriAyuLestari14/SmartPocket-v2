@@ -214,23 +214,31 @@
                     <!-- Search Input -->
                     <div class="flex-1 relative">
                         <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input type="text" placeholder="Cari transaksi berdasarkan keterangan..." 
-                               class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint transition-all">
+                        <input
+                            type="text"
+                            id="searchTransaksi"
+                            placeholder="Cari transaksi berdasarkan keterangan..."
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint transition-all"
+                            autocomplete="off">
                     </div>
-                    
+
                     <!-- Filter Tipe -->
-                    <select class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint transition-all">
+                    <select
+                        id="filterTipe"
+                        class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint transition-all">
                         <option value="">Semua Tipe Transaksi</option>
-                        <option value="setor">Setor Tunai</option>
-                        <option value="tarik">Penarikan Saldo</option>
-                        <option value="pinjam">Peminjaman Dana</option>
-                        <option value="cicil">Pembayaran Cicilan</option>
+                        <option value="setoran">Setor Tunai</option>
+                        <option value="penarikan">Penarikan Saldo</option>
+                        <option value="peminjaman">Peminjaman Dana</option>
+                        <option value="angsuran">Pembayaran Cicilan</option>
                     </select>
-                    
+
                     <!-- Filter Status -->
-                    <select class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint transition-all">
+                    <select
+                        id="filterStatus"
+                        class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint transition-all">
                         <option value="">Semua Status</option>
-                        <option value="disetujui">Disetujui / Berhasil</option>
+                        <option value="berhasil">Berhasil</option>
                         <option value="ditolak">Ditolak</option>
                     </select>
                 </div>
@@ -249,7 +257,10 @@
                             $isPenarikan = $isTabungan && $jenis == 2;
                         @endphp
 
-                        <div class="p-4 sm:p-5 hover:bg-slate-50/80 transition-colors flex items-center justify-between gap-4">
+                        <div
+                            class="transaksi-item p-4 sm:p-5 hover:bg-slate-50/80 transition-colors flex items-center justify-between gap-4"
+                            data-tipe="{{ $isSetoran ? 'setoran' : ($isPenarikan ? 'penarikan' : ($isPeminjaman ? 'peminjaman' : 'angsuran')) }}"
+                            data-status="{{ strtolower($trx->status ?? 'berhasil') }}">
 
                             <!-- KIRI: ICON + DETAIL -->
                             <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
@@ -393,12 +404,37 @@
     </div>
 
     <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const backdrop = document.getElementById('sidebarBackdrop');
-            sidebar.classList.toggle('-translate-x-full');
-            backdrop.classList.toggle('hidden');
-        }
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchTransaksi');
+            const filterTipe = document.getElementById('filterTipe');
+            const filterStatus = document.getElementById('filterStatus');
+            const transaksiItems = document.querySelectorAll('.transaksi-item');
+
+            function filterTransaksi() {
+                const keyword = searchInput.value.toLowerCase().trim();
+                const tipe = filterTipe.value.toLowerCase();
+                const status = filterStatus.value.toLowerCase();
+
+                transaksiItems.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    const itemTipe = item.dataset.tipe.toLowerCase();
+                    const itemStatus = item.dataset.status.toLowerCase();
+
+                    const cocokSearch = text.includes(keyword);
+                    const cocokTipe = !tipe || itemTipe === tipe;
+                    const cocokStatus = !status || itemStatus === status;
+
+                    item.style.display =
+                        cocokSearch && cocokTipe && cocokStatus
+                            ? ''
+                            : 'none';
+                });
+            }
+
+            searchInput.addEventListener('input', filterTransaksi);
+            filterTipe.addEventListener('change', filterTransaksi);
+            filterStatus.addEventListener('change', filterTransaksi);
+        });
     </script>
 </body>
 </html>

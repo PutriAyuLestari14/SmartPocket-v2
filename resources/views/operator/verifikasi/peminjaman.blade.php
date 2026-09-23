@@ -145,8 +145,10 @@
                                     <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                                     <input
                                         type="text"
-                                        placeholder="Cari nama/NIS..."
-                                        class="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 w-64 transition-all">
+                                        id="searchVerifikasi"
+                                        placeholder="Cari nama atau no. rekening..."
+                                        class="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 w-64 transition-all"
+                                        autocomplete="off">
                                 </div>
                             </div>
                         </div>
@@ -573,6 +575,16 @@
                 closeApproveLoanModal();
                 closeRejectLoanModal();
             }
+        });
+
+        document.getElementById('searchVerifikasi').addEventListener('input', function () {
+            const keyword = this.value.toLowerCase().trim();
+            const rows = document.querySelectorAll('table tbody tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(keyword) ? '' : 'none';
+            });
         });
     </script>
 

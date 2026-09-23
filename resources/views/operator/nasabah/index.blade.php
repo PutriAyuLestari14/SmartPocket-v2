@@ -116,52 +116,29 @@
                 </div>
             </div>
 
-            <!-- Search & Filter (VERSI RAPI & PROPORSIONAL) -->
+            <!-- Search -->
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-6">
                 <div class="p-4 border-b border-gray-100">
-                    <form method="GET" action="{{ route('operator.nasabah.index') }}" class="flex flex-col sm:flex-row gap-3">
-                        
-                        <!-- INPUT SEARCH -->
+                    <div class="flex flex-col sm:flex-row gap-3">
                         <div class="flex-1 relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-layer-group text-slate-400 text-sm"></i>
+                                <i class="fas fa-search text-slate-400 text-sm"></i>
                             </div>
-                            <input 
-                                type="text" 
-                                name="search" 
-                                value="{{ request('search') }}" 
-                                placeholder="Cari Angkatan (cth: 24) atau No. Rek..." 
-                                class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-                            >
+                            <input
+                                type="text"
+                                id="searchNasabah"
+                                placeholder="Cari nama atau no. rekening..."
+                                class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                                autocomplete="off">
                         </div>
-
-                        <!-- DROPDOWN STATUS -->
-                        <select name="status_filter" class="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer min-w-[140px]">
+                        <select
+                            id="statusNasabah"
+                            class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer min-w-[140px]">
                             <option value="">Semua Status</option>
-                            <option value="aktif" {{ request('status_filter') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                            <option value="nonaktif" {{ request('status_filter') == 'nonaktif' ? 'selected' : '' }}>Non-Aktif</option>
+                            <option value="aktif">Aktif</option>
+                            <option value="nonaktif">Non-Aktif</option>
                         </select>
-
-                        <!-- TOMBOL CARI -->
-                        <button type="submit" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium whitespace-nowrap">
-                            <i class="fas fa-search text-xs"></i> 
-                            <span>Cari</span>
-                        </button>
-
-                        <!-- TOMBOL RESET -->
-                        @if(request('search') || request('status_filter'))
-                            <a href="{{ route('operator.nasabah.index') }}" class="px-5 py-2 bg-gray-100 hover:bg-gray-200 text-slate-600 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium whitespace-nowrap">
-                                <i class="fas fa-times text-xs"></i> 
-                                <span>Reset</span>
-                            </a>
-                        @endif
-                    </form>
-                    
-                    <!-- Text Helper -->
-                    <p class="text-[10px] text-slate-400 mt-3 flex items-center gap-1.5">
-                        <i class="fas fa-info-circle"></i> 
-                        Ketik "24" untuk tampil semua angkatan 24, atau "24001" untuk no rek spesifik.
-                    </p>
+                    </div>
                 </div>
                 
                 <!-- Tabel Data -->
@@ -238,5 +215,29 @@
             </div>
         </main>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchNasabah');
+            const statusSelect = document.getElementById('statusNasabah');
+            const rows = document.querySelectorAll('table tbody tr');
+
+            function filterNasabah() {
+                const keyword = searchInput.value.toLowerCase().trim();
+                const status = statusSelect.value.toLowerCase();
+
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+
+                    const cocokSearch = text.includes(keyword);
+                    const cocokStatus = !status || text.includes(status);
+
+                    row.style.display = cocokSearch && cocokStatus ? '' : 'none';
+                });
+            }
+
+            searchInput.addEventListener('input', filterNasabah);
+            statusSelect.addEventListener('change', filterNasabah);
+        });
+    </script>
 </body>
 </html>

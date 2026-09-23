@@ -80,6 +80,7 @@
                 <h1 class="text-xl lg:text-2xl font-bold text-slate-900 mb-2">Tambah Nasabah Baru</h1>
                 <p class="text-sm text-slate-500">Masukkan data detail untuk mendaftarkan nasabah baru ke dalam sistem Mini Bank SMKN 11.</p>
             </div>
+            
 
             <!-- Error Message -->
             @if ($errors->any())

@@ -15,10 +15,10 @@ class TransaksiController extends Controller
 
         // Filter Jenis
         if ($request->filled('jenis')) {
-            if ($request->jenis == 'setoran') {
-                $query->whereHas('jenisTransaksi', fn($q) => $q->where('setoran', 'setoran'));
-            } elseif ($request->jenis == 'penarikan') {
-                $query->whereHas('jenisTransaksi', fn($q) => $q->where('setoran', 'penarikan'));
+            if ($request->jenis === 'setoran') {
+                $query->where('id_jenis_transaksi', 1);
+            } elseif ($request->jenis === 'penarikan') {
+                $query->where('id_jenis_transaksi', 2);
             }
         }
 
