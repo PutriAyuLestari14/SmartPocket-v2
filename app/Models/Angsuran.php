@@ -17,6 +17,7 @@ class Angsuran extends Model
         'id_petugas',
         'tanggal_pembayaran',
         'jumlah',
+        'jenis_pembayaran',
     ];
 
     // Relasi ke tabel peminjaman

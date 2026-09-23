@@ -119,17 +119,28 @@
                 </div>
             </div>
 
-            <!--search-->
+            <!-- Search & Filter -->
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-6">
-                <div class="p-4">
-                    <div class="relative">
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input
-                            type="text"
-                            id="searchPeminjaman"
-                            placeholder="Cari nama atau no. rekening..."
-                            class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
-                            autocomplete="off">
+                <div class="p-4 border-b border-gray-100">
+                    <div class="flex flex-col lg:flex-row gap-3">
+                        <div class="flex-1 relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            <input type="text" placeholder="Cari nama peminjam atau NIP..." 
+                                class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                        </div>
+                        <select class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                            <option>Semua Status</option>
+                            <option>Menunggu</option>
+                            <option>Disetujui</option>
+                            <option>Ditolak</option>
+                            <option>Lunas</option>
+                        </select>
+                        <select class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                            <option>Semua Tenor</option>
+                            <option>6 Bulan</option>
+                            <option>12 Bulan</option>
+                            <option>24 Bulan</option>
+                        </select>
                     </div>
                 </div>
 
@@ -142,6 +153,7 @@
                                 <th class="px-6 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase">Nominal Pinjaman</th>
                                 <th class="px-6 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase">Tenor</th>
                                 <th class="px-6 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase">Sisa Cicilan</th>
+                                <th class="px-6 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase">Status</th>
                                 <th class="px-6 py-3 text-center text-[10px] font-semibold text-slate-500 uppercase">Aksi</th>
                             </tr>
                         </thead>
@@ -149,6 +161,13 @@
                             @forelse($peminjamans as $peminjaman)
                                 @php
                                     $sisaBulan = $peminjaman->tenor;
+                                    $statusClass = 'bg-emerald-100 text-emerald-700';
+                                    $statusText = 'Lancar';
+                                    
+                                    if ($peminjaman->sisa_pinjaman <= 0) {
+                                        $statusClass = 'bg-blue-100 text-blue-700';
+                                        $statusText = 'Lunas';
+                                    }
                                 @endphp
 
                                 <tr class="hover:bg-gray-50">
@@ -166,6 +185,11 @@
                                     </td>
                                     <td class="px-6 py-4 text-xs text-slate-600">
                                         {{ $sisaBulan }} Bulan
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2.5 py-1 {{ $statusClass }} rounded-full text-[10px] font-semibold">
+                                            {{ $statusText }}
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4 text-center">
                                         <div class="flex justify-center gap-2">
@@ -207,13 +231,10 @@
     <!-- MODAL MUTASI PEMINJAMAN -->
     <!-- ============================================ -->
     <div id="mutasiModal" class="fixed inset-0 z-50 hidden">
-        <!-- Backdrop -->
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeMutasiModal()"></div>
         
-        <!-- Modal Content -->
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-5xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl">
             
-            <!-- Header Modal -->
             <div class="sticky top-0 bg-emerald-600 text-white px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
                 <div>
                     <h3 class="text-lg font-bold">Mutasi Peminjaman Nasabah</h3>
@@ -224,13 +245,11 @@
                 </button>
             </div>
 
-            <!-- Loading State -->
             <div id="modalLoading" class="p-12 text-center">
                 <div class="w-12 h-12 border-4 border-emerald-200 border-t-white rounded-full animate-spin mx-auto mb-3"></div>
                 <p class="text-sm text-slate-500">Memuat data mutasi peminjaman...</p>
             </div>
 
-            <!-- Content Modal -->
             <div id="modalContent" class="hidden">
                 <div class="p-6">
                     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -238,29 +257,27 @@
                             <table class="w-full text-xs">
                                 <thead class="bg-emerald-600 text-white">
                                     <tr>
-                                        <th class="px-4 py-3 text-left font-bold uppercase w-32">GT045<br><span class="font-normal text-emerald-200 text-[10px]">No. Rekening</span></th>
-                                        <th class="px-4 py-3 text-left font-bold uppercase">Nama</th>
-                                        <th class="px-4 py-3 text-center font-bold uppercase w-24">TGL<br><span class="font-normal text-emerald-200 text-[10px]">Tanggal</span></th>
-                                        <th class="px-4 py-3 text-right font-bold uppercase w-32">Debet<br><span class="font-normal text-emerald-200 text-[10px]">(Pinjaman)</span></th>
-                                        <th class="px-4 py-3 text-right font-bold uppercase w-32">Kredit<br><span class="font-normal text-emerald-200 text-[10px]">(Cicilan)</span></th>
-                                        <th class="px-4 py-3 text-right font-bold uppercase w-32">Saldo<br><span class="font-normal text-emerald-200 text-[10px]">Sisa Hutang</span></th>
+                                        <th class="px-3 py-3 text-left font-bold uppercase w-24">GT045<br><span class="font-normal text-emerald-200 text-[10px]">No. Rekening</span></th>
+                                        <th class="px-3 py-3 text-left font-bold uppercase">Nama</th>
+                                        <th class="px-3 py-3 text-center font-bold uppercase w-24">TGL<br><span class="font-normal text-emerald-200 text-[10px]">Tanggal</span></th>
+                                        <th class="px-3 py-3 text-center font-bold uppercase w-24">Jenis</th>
+                                        <th class="px-3 py-3 text-right font-bold uppercase w-28">Debet<br><span class="font-normal text-emerald-200 text-[10px]">(Pinjaman)</span></th>
+                                        <th class="px-3 py-3 text-right font-bold uppercase w-28">Kredit<br><span class="font-normal text-emerald-200 text-[10px]">(Cicilan)</span></th>
+                                        <th class="px-3 py-3 text-right font-bold uppercase w-28">Saldo<br><span class="font-normal text-emerald-200 text-[10px]">Sisa Hutang</span></th>
                                     </tr>
                                 </thead>
-                                <tbody id="modalTableBody" class="divide-y divide-gray-100">
-                                    <!-- Data akan diisi via JS -->
-                                </tbody>
+                                <tbody id="modalTableBody" class="divide-y divide-gray-100"></tbody>
                                 <tfoot class="bg-emerald-50 border-t-2 border-emerald-600">
                                     <tr>
-                                        <th colspan="3" class="px-4 py-3 text-left font-bold text-emerald-900 uppercase text-[10px]">Total</th>
-                                        <th class="px-4 py-3 text-right font-bold text-emerald-900 text-[10px]" id="totalDebet">0</th>
-                                        <th class="px-4 py-3 text-right font-bold text-emerald-900 text-[10px]" id="totalKredit">0</th>
-                                        <th class="px-4 py-3 text-right font-bold text-emerald-900 text-[10px]" id="totalSaldo">0</th>
+                                        <th colspan="4" class="px-3 py-3 text-left font-bold text-emerald-900 uppercase text-[10px]">Total</th>
+                                        <th class="px-3 py-3 text-right font-bold text-emerald-900 text-[10px]" id="totalDebet">0</th>
+                                        <th class="px-3 py-3 text-right font-bold text-emerald-900 text-[10px]" id="totalKredit">0</th>
+                                        <th class="px-3 py-3 text-right font-bold text-emerald-900 text-[10px]" id="totalSaldo">0</th>
                                     </tr>
                                 </tfoot>
                             </table>
                         </div>
 
-                        <!-- Empty State -->
                         <div id="modalEmptyState" class="hidden p-8 text-center">
                             <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                                 <i class="fas fa-receipt text-slate-400"></i>
@@ -286,7 +303,6 @@
             const emptyState = document.getElementById('modalEmptyState');
             const tableBody = document.getElementById('modalTableBody');
 
-            // Reset & show modal
             modal.classList.remove('hidden');
             loading.classList.remove('hidden');
             content.classList.add('hidden');
@@ -294,7 +310,6 @@
             tableBody.innerHTML = '';
             document.getElementById('modalNamaNasabah').textContent = namaNasabah + (noRek ? ' - ' + noRek : '');
 
-            // Fetch data dari server
             fetch(`/operator/peminjaman/rekening/${idNasabah}`)
                 .then(res => res.json())
                 .then(data => {
@@ -302,7 +317,7 @@
                     
                     if (!data.success) {
                         content.classList.remove('hidden');
-                        tableBody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-sm text-red-600">${data.message}</td></tr>`;
+                        tableBody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-sm text-red-600">${data.message}</td></tr>`;
                         return;
                     }
 
@@ -316,23 +331,30 @@
                         data.transaksi.forEach((t) => {
                             totalDebet += t.debit;
                             totalKredit += t.kredit;
-                            
-                            // Hitung sisa hutang berjalan
                             saldoBerjalan += (t.debit - t.kredit);
                             
                             const row = document.createElement('tr');
                             row.className = 'hover:bg-gray-50 transition-colors';
                             row.innerHTML = `
-                                <td class="px-4 py-3 text-[10px] font-mono text-slate-600">${data.nasabah.no_rek || '-'}</td>
-                                <td class="px-4 py-3 text-[10px] font-semibold text-slate-900">${namaNasabah}</td>
-                                <td class="px-4 py-3 text-[10px] text-center text-slate-600">${t.tanggal}</td>
-                                <td class="px-4 py-3 text-[10px] font-semibold text-right ${t.debit > 0 ? 'text-emerald-600' : 'text-gray-400'}">
+                                <td class="px-3 py-3 text-[10px] font-mono text-slate-600">${data.nasabah.no_rek || '-'}</td>
+                                <td class="px-3 py-3 text-[10px] font-semibold text-slate-900">${namaNasabah.substring(0, 12)}</td>
+                                <td class="px-3 py-3 text-[10px] text-center text-slate-600">${t.tanggal}</td>
+                                <td class="px-3 py-3 text-center">
+                                    ${t.jenis === 'bunga' 
+                                        ? '<span class="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-[9px] font-bold">BUNGA</span>' 
+                                        : t.jenis === 'pokok' 
+                                            ? '<span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-[9px] font-bold">POKOK</span>' 
+                                            : t.jenis === 'keduanya'
+                                                ? '<span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[9px] font-bold">POKOK+BUNGA</span>'
+                                                : '<span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-[9px] font-bold">PENCAIRAN</span>'}
+                                </td>
+                                <td class="px-3 py-3 text-[10px] font-semibold text-right ${t.debit > 0 ? 'text-emerald-600' : 'text-gray-400'}">
                                     ${t.debit > 0 ? formatRupiah(t.debit).replace(/\./g, ' ') : '0'}
                                 </td>
-                                <td class="px-4 py-3 text-[10px] font-semibold text-right ${t.kredit > 0 ? 'text-red-600' : 'text-gray-400'}">
+                                <td class="px-3 py-3 text-[10px] font-semibold text-right ${t.kredit > 0 ? 'text-red-600' : 'text-gray-400'}">
                                     ${t.kredit > 0 ? formatRupiah(t.kredit).replace(/\./g, ' ') : '0'}
                                 </td>
-                                <td class="px-4 py-3 text-[10px] font-bold text-right text-slate-900 bg-gray-50">
+                                <td class="px-3 py-3 text-[10px] font-bold text-right text-slate-900 bg-gray-50">
                                     ${formatRupiah(saldoBerjalan).replace(/\./g, ' ')}
                                 </td>
                             `;
@@ -340,7 +362,6 @@
                         });
                     }
 
-                    // Update footer total
                     document.getElementById('totalDebet').textContent = formatRupiah(totalDebet).replace(/\./g, ' ');
                     document.getElementById('totalKredit').textContent = formatRupiah(totalKredit).replace(/\./g, ' ');
                     document.getElementById('totalSaldo').textContent = formatRupiah(saldoBerjalan).replace(/\./g, ' ');
@@ -350,26 +371,16 @@
                 .catch(err => {
                     loading.classList.add('hidden');
                     content.classList.remove('hidden');
-                    tableBody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-sm text-red-600">Gagal memuat data</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-sm text-red-600">Gagal memuat data</td></tr>`;
                 });
         }
 
-                function closeMutasiModal() {
-                    document.getElementById('mutasiModal').classList.add('hidden');
-                }
+        function closeMutasiModal() {
+            document.getElementById('mutasiModal').classList.add('hidden');
+        }
 
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') closeMutasiModal();
-                });
-
-                document.getElementById('searchPeminjaman').addEventListener('input', function () {
-            const keyword = this.value.toLowerCase().trim();
-            const rows = document.querySelectorAll('table tbody tr');
-
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(keyword) ? '' : 'none';
-            });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeMutasiModal();
         });
     </script>
 </body>
