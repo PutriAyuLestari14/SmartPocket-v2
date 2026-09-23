@@ -69,7 +69,6 @@
     </header>
 
     <div class="flex flex-1 relative">
-        
         <!-- Sidebar Backdrop untuk Mobile -->
         <div id="sidebarBackdrop" class="fixed inset-0 bg-forestDark/50 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity"></div>
 
@@ -182,10 +181,13 @@
                         </div>
                     </div>
 
-                    <div class="bg-mintLight/60 border border-mint/20 rounded-2xl p-4 sm:p-5">
-                        <h4 class="text-xs font-bold text-forest uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <!-- RINGKASAN SIMULASI (SUDAH DIUPDATE - GABUNG RINCIAN PENCAIRAN) -->
+                    <div class="bg-mintLight/60 border border-mint/20 rounded-2xl p-4 sm:p-5 space-y-3">
+                        <h4 class="text-xs font-bold text-forest uppercase tracking-wider flex items-center gap-2">
                             <i class="fas fa-calculator text-mint"></i> Ringkasan Simulasi
                         </h4>
+                        
+                        <!-- Info Cicilan -->
                         <div class="space-y-2 text-xs">
                             <div class="flex justify-between items-center text-slate-600">
                                 <span>Estimasi Cicilan/Bulan</span>
@@ -194,6 +196,25 @@
                             <div class="flex justify-between items-center text-slate-600">
                                 <span>Total Jatuh Tempo</span>
                                 <span id="simulasiBulan" class="font-semibold text-slate-800">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="h-px bg-mint/30 my-2"></div>
+
+                        <!-- Rincian Pencairan (BARU - DIGABUNG DI SINI) -->
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between items-center text-slate-600">
+                                <span>Nominal Pinjaman</span>
+                                <span id="rincianNominal" class="font-semibold text-slate-900">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between items-center text-rose-600">
+                                <span>Potongan Provisi (1%)</span>
+                                <span id="rincianProvisi" class="font-semibold">- Rp 0</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-1 border-t border-mint/30">
+                                <span class="font-bold text-forest">Dana Diterima</span>
+                                <span id="rincianDiterima" class="font-black text-sm text-forest">Rp 0</span>
                             </div>
                         </div>
                     </div>
@@ -219,7 +240,6 @@
                                 <i class="fas fa-check text-mint mt-0.5 text-[10px]"></i>
                                 <span>Dana diambil tunai di kantor BMT setelah disetujui.</span>
                             </li>
-                            
                         </ul>
                     </div>
                 </div>
@@ -338,10 +358,18 @@
                 <h3 class="text-sm sm:text-base font-extrabold text-slate-900">Konfirmasi Pinjaman</h3>
                 <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Periksa rincian sebelum dikirim ke sistem.</p>
             </div>
-            <div class="my-4 p-3.5 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100 space-y-2.5 text-xs">
+            <div class="my-4 p-3.5 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100 space-y-2.5 text-xs" id="modalDetails">
                 <div class="flex justify-between items-center">
                     <span class="text-slate-400 font-medium">Nominal Pinjaman</span>
                     <span id="previewNominal" class="font-black text-slate-900">Rp 0</span>
+                </div>
+                <div class="flex justify-between items-center text-rose-600">
+                    <span class="font-medium">Potongan Provisi (1%)</span>
+                    <span id="previewProvisi" class="font-bold">- Rp 0</span>
+                </div>
+                <div class="flex justify-between items-center pt-2 border-t border-slate-200">
+                    <span class="text-forest font-bold">Dana Diterima</span>
+                    <span id="previewDiterima" class="font-black text-mint">Rp 0</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-slate-400 font-medium">Tenor</span>
@@ -382,27 +410,57 @@
             const jumlah = parseFloat(document.getElementById('jumlah').value) || 0;
             const tenor = parseInt(document.getElementById('tenor').value) || 0;
             const jatuhTempo = document.getElementById('tanggal_jatuh_tempo').value;
+            
+            // HITUNG PROVISI 1%
+            const provisi = Math.round(jumlah * 0.01);
+            const diterima = jumlah - provisi;
+
+            // Update simulasi cicilan
             if (jumlah > 0 && tenor > 0) {
                 const cicilan = Math.round(jumlah / tenor);
                 document.getElementById('simulasiCicilan').textContent = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(cicilan);
-            } else { document.getElementById('simulasiCicilan').textContent = 'Rp 0'; }
+            } else { 
+                document.getElementById('simulasiCicilan').textContent = 'Rp 0'; 
+            }
+            
+            // Update tanggal jatuh tempo
             if(jatuhTempo) {
                 const dateObj = new Date(jatuhTempo);
                 document.getElementById('simulasiBulan').textContent = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-            } else { document.getElementById('simulasiBulan').textContent = '-'; }
+            } else { 
+                document.getElementById('simulasiBulan').textContent = '-'; 
+            }
+
+            // UPDATE RINCIAN PENCAIRAN DI RINGKASAN SIMULASI
+            const fmt = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
+            document.getElementById('rincianNominal').textContent = fmt.format(jumlah);
+            document.getElementById('rincianProvisi').textContent = '- ' + fmt.format(provisi);
+            document.getElementById('rincianDiterima').textContent = fmt.format(diterima);
         }
 
         function bukaModalKonfirmasi() {
             if (!form.checkValidity()) { form.reportValidity(); return; }
-            const jumlah = document.getElementById('jumlah').value;
+            
+            const jumlah = parseFloat(document.getElementById('jumlah').value) || 0;
             const tenor = document.getElementById('tenor').value;
             const jatuhTempo = document.getElementById('tanggal_jatuh_tempo').value;
-            const nominalFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(jumlah);
+            
+            const provisi = Math.round(jumlah * 0.01);
+            const diterima = jumlah - provisi;
+            const fmt = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
+
             let tglFormatted = '-';
-            if(jatuhTempo) { const dateObj = new Date(jatuhTempo); tglFormatted = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }); }
-            document.getElementById('previewNominal').textContent = nominalFormatted;
+            if(jatuhTempo) { 
+                const dateObj = new Date(jatuhTempo); 
+                tglFormatted = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }); 
+            }
+
+            document.getElementById('previewNominal').textContent = fmt.format(jumlah);
+            document.getElementById('previewProvisi').textContent = '- ' + fmt.format(provisi);
+            document.getElementById('previewDiterima').textContent = fmt.format(diterima);
             document.getElementById('previewTenor').textContent = tenor + " Bulan";
             document.getElementById('previewJatuhTempo').textContent = tglFormatted;
+
             modal.classList.remove('hidden');
             setTimeout(() => { backdrop.classList.remove('opacity-0'); content.classList.remove('opacity-0', 'scale-95'); content.classList.add('opacity-100', 'scale-100'); }, 10);
         }
@@ -415,6 +473,8 @@
         }
 
         function kirimFormulir() { form.submit(); }
+        
+        // Jalankan sekali saat load
         updateSimulasi();
     </script>
 </body>

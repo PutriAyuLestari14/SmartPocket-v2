@@ -20,7 +20,6 @@ class TabunganController extends Controller
         $rekening = RekeningTabungan::where('id_nasabah', $id_nasabah)->first();
 
         // 1. Transaksi tabungan yang sudah diproses
-        // Berhasil dan gagal tampil, pending tidak tampil
         $transaksiTabungan = DetailTabungan::whereHas(
             'rekening.nasabah',
             function ($query) use ($user) {
@@ -43,11 +42,7 @@ class TabunganController extends Controller
         });
 
         // 2. Peminjaman yang sudah diproses
-        // Pending tidak tampil
-        $transaksiPeminjaman = Peminjaman::where(
-            'id_nasabah',
-            $id_nasabah
-        )
+        $transaksiPeminjaman = Peminjaman::where('id_nasabah', $id_nasabah)
         ->whereIn('status_verifikasi', ['disetujui', 'ditolak'])
         ->get()
         ->map(function ($pinjaman) {
@@ -64,15 +59,9 @@ class TabunganController extends Controller
         });
 
         // 3. Pembayaran angsuran yang sudah dilakukan
-        $idPinjamanList = Peminjaman::where(
-            'id_nasabah',
-            $id_nasabah
-        )->pluck('id_pinjaman');
+        $idPinjamanList = Peminjaman::where('id_nasabah', $id_nasabah)->pluck('id_pinjaman');
 
-        $transaksiAngsuran = Angsuran::whereIn(
-            'id_pinjaman',
-            $idPinjamanList
-        )
+        $transaksiAngsuran = Angsuran::whereIn('id_pinjaman', $idPinjamanList)
         ->get()
         ->map(function ($angsuran) {
             return (object) [
@@ -88,7 +77,6 @@ class TabunganController extends Controller
         });
 
         // 4. Gabungkan semua transaksi
-        // Yang paling baru selalu berada di paling atas
         $transaksiTerbaru = $transaksiTabungan
             ->concat($transaksiPeminjaman)
             ->concat($transaksiAngsuran)
@@ -100,45 +88,43 @@ class TabunganController extends Controller
 
         // Pengajuan penarikan yang masih pending
         $pengajuanPenarikan = null;
-
         if ($rekening) {
-            $pengajuanPenarikan = DetailTabungan::where(
-                'no_rek',
-                $rekening->no_rek
-            )
-            ->where('id_jenis_transaksi', 2)
-            ->where('status', 'pending')
-            ->latest('created_at')
-            ->first();
+            $pengajuanPenarikan = DetailTabungan::where('no_rek', $rekening->no_rek)
+                ->where('id_jenis_transaksi', 2)
+                ->where('status', 'pending')
+                ->latest('created_at')
+                ->first();
         }
 
         // Pengajuan peminjaman yang masih pending
-        $pengajuanPeminjaman = Peminjaman::where(
-            'id_nasabah',
-            $id_nasabah
-        )
-        ->where('status_verifikasi', 'pending')
-        ->latest('created_at')
-        ->first();
+        $pengajuanPeminjaman = Peminjaman::where('id_nasabah', $id_nasabah)
+            ->where('status_verifikasi', 'pending')
+            ->latest('created_at')
+            ->first();
 
         // Pinjaman aktif
-        $pinjamanAktif = Peminjaman::where(
-            'id_nasabah',
-            $id_nasabah
-        )
-        ->where('status_verifikasi', 'disetujui')
-        ->where('sisa_pinjaman', '>', 0)
-        ->orderBy('tanggal_jatuh_tempo', 'asc')
-        ->first();
+        $pinjamanAktif = Peminjaman::where('id_nasabah', $id_nasabah)
+            ->where('status_verifikasi', 'disetujui')
+            ->where('sisa_pinjaman', '>', 0)
+            ->orderBy('tanggal_jatuh_tempo', 'asc')
+            ->first();
 
-        // Total sisa pinjaman
-        $totalSisaPinjaman = Peminjaman::where(
-            'id_nasabah',
-            $id_nasabah
-        )
-        ->where('status_verifikasi', 'disetujui')
-        ->where('sisa_pinjaman', '>', 0)
-        ->sum('sisa_pinjaman');
+        // ==========================================
+        // PERBAIKAN: Hitung Sisa Pokok setelah dikurangi Provisi 1%
+        // ==========================================
+        $totalSisaPokokRaw = Peminjaman::where('id_nasabah', $id_nasabah)
+            ->where('status_verifikasi', 'disetujui')
+            ->where('sisa_pinjaman', '>', 0)
+            ->get();
+
+        // Kurangi provisi 1% dari setiap pinjaman
+        $totalSisaPokok = $totalSisaPokokRaw->sum(function($p) {
+            $provisi = $p->jumlah_pinjaman * 0.01;
+            return max(0, $p->sisa_pinjaman - $provisi);
+        });
+
+        $totalSisaBunga = $totalSisaPokokRaw->sum('sisa_bunga') ?? 0;
+        $totalKewajiban = $totalSisaPokok + $totalSisaBunga;
 
         return view('nasabah.dashboard', compact(
             'rekening',
@@ -146,7 +132,9 @@ class TabunganController extends Controller
             'pengajuanPenarikan',
             'pengajuanPeminjaman',
             'pinjamanAktif',
-            'totalSisaPinjaman'
+            'totalSisaPokok',
+            'totalSisaBunga',
+            'totalKewajiban'
         ));
     }
 
@@ -156,8 +144,6 @@ class TabunganController extends Controller
         $idNasabah = $user->nasabah->id_nasabah;
 
         // 1. Setoran dan penarikan yang sudah diproses
-        // Berhasil dan gagal tampil
-        // Pending tidak tampil
         $transaksiTabungan = DetailTabungan::whereHas(
             'rekening.nasabah',
             function ($query) use ($user) {
@@ -165,17 +151,12 @@ class TabunganController extends Controller
             }
         )
         ->whereIn('status', ['berhasil', 'gagal'])
-        ->with([
-            'jenisTransaksi',
-            'rekening.nasabah'
-        ])
+        ->with(['jenisTransaksi', 'rekening.nasabah'])
         ->get()
         ->map(function ($trx) {
             return (object) [
                 'tipe' => 'tabungan',
-                'sub_tipe' => $trx->id_jenis_transaksi == 1
-                    ? 'Setoran'
-                    : 'Penarikan',
+                'sub_tipe' => $trx->id_jenis_transaksi == 1 ? 'Setoran' : 'Penarikan',
                 'id_jenis_transaksi' => $trx->id_jenis_transaksi,
                 'tanggal_transaksi' => $trx->tanggal_transaksi,
                 'jumlah' => $trx->jumlah,
@@ -186,16 +167,8 @@ class TabunganController extends Controller
         });
 
         // 2. Pinjaman yang sudah diproses
-        // Disetujui dan ditolak tampil
-        // Pending tidak tampil
-        $transaksiPeminjaman = Peminjaman::where(
-            'id_nasabah',
-            $idNasabah
-        )
-        ->whereIn('status_verifikasi', [
-            'disetujui',
-            'ditolak'
-        ])
+        $transaksiPeminjaman = Peminjaman::where('id_nasabah', $idNasabah)
+        ->whereIn('status_verifikasi', ['disetujui', 'ditolak'])
         ->get()
         ->map(function ($pinjaman) {
             return (object) [
@@ -211,15 +184,9 @@ class TabunganController extends Controller
         });
 
         // 3. Pembayaran angsuran yang sudah dilakukan
-        $idPinjamanList = Peminjaman::where(
-            'id_nasabah',
-            $idNasabah
-        )->pluck('id_pinjaman');
+        $idPinjamanList = Peminjaman::where('id_nasabah', $idNasabah)->pluck('id_pinjaman');
 
-        $transaksiAngsuran = Angsuran::whereIn(
-            'id_pinjaman',
-            $idPinjamanList
-        )
+        $transaksiAngsuran = Angsuran::whereIn('id_pinjaman', $idPinjamanList)
         ->get()
         ->map(function ($angsuran) {
             return (object) [
@@ -235,7 +202,6 @@ class TabunganController extends Controller
         });
 
         // 4. Gabungkan semua transaksi
-        // Transaksi terbaru selalu di atas
         $semuaTransaksi = $transaksiTabungan
             ->concat($transaksiPeminjaman)
             ->concat($transaksiAngsuran)
@@ -245,21 +211,16 @@ class TabunganController extends Controller
             ->values();
 
         // Total pemasukan
-        // Hanya SETORAN yang berhasil
         $totalPemasukan = $transaksiTabungan
             ->filter(function ($trx) {
-                return $trx->sub_tipe === 'Setoran'
-                    && $trx->status === 'berhasil';
+                return $trx->sub_tipe === 'Setoran' && $trx->status === 'berhasil';
             })
             ->sum('jumlah');
 
         // Total pengeluaran
-        // Hanya PENARIKAN yang berhasil
-        // Penarikan gagal tidak dihitung
         $totalPengeluaran = $transaksiTabungan
             ->filter(function ($trx) {
-                return $trx->sub_tipe === 'Penarikan'
-                    && $trx->status === 'berhasil';
+                return $trx->sub_tipe === 'Penarikan' && $trx->status === 'berhasil';
             })
             ->sum('jumlah');
 
@@ -268,10 +229,7 @@ class TabunganController extends Controller
         $currentPage = (int) $request->input('page', 1);
 
         $items = $semuaTransaksi
-            ->slice(
-                ($currentPage - 1) * $perPage,
-                $perPage
-            )
+            ->slice(($currentPage - 1) * $perPage, $perPage)
             ->values();
 
         $transaksi = new \Illuminate\Pagination\LengthAwarePaginator(

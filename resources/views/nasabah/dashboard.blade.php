@@ -116,7 +116,7 @@
             </div>
         </aside>
 
-        <!-- TOP NAVBAR MOBILE (Sama persis kayak halaman Penarikan) -->
+        <!-- TOP NAVBAR MOBILE -->
         <div class="lg:hidden bg-white border-b border-slate-200/80 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm w-full">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 bg-forest rounded-xl flex items-center justify-center text-white shadow-sm">
@@ -228,9 +228,9 @@
                         </div>
                     </div>
 
-                    <!-- KARTU 2: FASILITAS PINJAMAN GURU -->
+                    <!-- KARTU 2: FASILITAS PINJAMAN GURU (SUDAH DIUPDATE) -->
                     @if(auth()->user()->nasabah->kategori == 'guru')
-                        <div class="card-peminjaman rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between min-h-[210px] hover-lift">
+                        <div class="card-peminjaman rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between min-h-[260px] hover-lift">
                             <div class="flex justify-between items-start relative z-10">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-mintLight border border-mint/30 rounded-xl flex items-center justify-center text-forest font-bold">
@@ -246,20 +246,41 @@
                                 </span>
                             </div>
 
-                            <h3 class="text-3xl sm:text-4xl font-black tracking-tight text-forest">
-                                Rp {{ number_format($totalSisaPinjaman ?? 0, 0, ',', '.') }}
-                            </h3>
+                            <!-- ANGKA UTAMA: HANYA SISA POKOK -->
+                            <div class="my-4 relative z-10">
+                                <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Sisa Pokok Pinjaman</p>
+                                <h3 class="text-3xl sm:text-4xl font-black tracking-tight text-forest">
+                                    Rp {{ number_format($totalSisaPokok ?? 0, 0, ',', '.') }}
+                                </h3>
+                            </div>
 
-                            <div class="pt-3 border-t border-slate-100 flex justify-between items-center relative z-10 text-xs">
+                            <!-- RINCIAN BREAKDOWN -->
+                            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 relative z-10 space-y-2 text-xs">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-500 font-medium">Sisa Pokok</span>
+                                    <span class="font-bold text-slate-800">Rp {{ number_format($totalSisaPokok ?? 0, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-500 font-medium">Total Bunga (1%)</span>
+                                    <span class="font-bold text-amber-600">Rp {{ number_format($totalSisaBunga ?? 0, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="h-px bg-slate-200 my-1"></div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-forest font-bold">Total Kewajiban</span>
+                                    <span class="font-black text-forest text-sm">Rp {{ number_format($totalKewajiban ?? 0, 0, ',', '.') }}</span>
+                                </div>
+                            </div>
+
+                            <div class="pt-4 border-t border-slate-100 flex justify-between items-center relative z-10 text-xs mt-2">
                                 <div>
-                                    <p class="text-[9px] text-slate-400 uppercase tracking-widest font-semibold">Status Peminjaman</p>
+                                    <p class="text-[9px] text-slate-400 uppercase tracking-widest font-semibold">Status</p>
                                     <p class="font-bold text-xs text-mint flex items-center gap-1.5">
-                                        <span class="w-2 h-2 rounded-full {{ isset($peminjamanAktif) && $peminjamanAktif->sisa_pinjaman > 0 ? 'bg-mint' : 'bg-slate-300' }}"></span>
-                                        {{ isset($peminjamanAktif) && $peminjamanAktif->sisa_pinjaman > 0 ? 'Sedang Berjalan' : 'Tidak Ada Pinjaman' }}
+                                        <span class="w-2 h-2 rounded-full {{ $totalSisaPokok > 0 ? 'bg-mint' : 'bg-slate-300' }}"></span>
+                                        {{ $totalSisaPokok > 0 ? 'Sedang Berjalan' : 'Lunas' }}
                                     </p>
                                 </div>
                                 <a href="{{ route('nasabah.peminjaman.create') }}" class="px-4 py-2 bg-mint hover:bg-forest text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-mint/20">
-                                    Ajukan Peminjaman
+                                    Ajukan Baru
                                 </a>
                             </div>
                         </div>
@@ -313,7 +334,7 @@
             </div>
 
             <!-- SECTION 3: WIDGET TAGIHAN ANGSURAN (GURU) -->
-            @if(auth()->user()->nasabah->kategori == 'guru' && isset($peminjamanAktif) && $peminjamanAktif->sisa_pinjaman > 0)
+            @if(auth()->user()->nasabah->kategori == 'guru' && isset($pinjamanAktif) && $pinjamanAktif->sisa_pinjaman > 0)
                 <div class="bg-forest rounded-2xl p-5 mb-8 text-white shadow-md border border-forestDark">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div class="flex items-start gap-4">
@@ -326,7 +347,7 @@
                                     <span class="px-2 py-0.5 text-[9px] font-extrabold bg-mint text-white rounded uppercase">Aktif</span>
                                 </div>
                                 <p class="text-xs text-emerald-100/80 mt-1">
-                                    Sisa Pokok Pinjaman: <span class="text-white font-bold">Rp {{ number_format($peminjamanAktif->sisa_pinjaman, 0, ',', '.') }}</span>
+                                    Sisa Pokok: <span class="text-white font-bold">Rp {{ number_format($pinjamanAktif->sisa_pinjaman, 0, ',', '.') }}</span>
                                 </p>
                             </div>
                         </div>
@@ -335,34 +356,26 @@
                             <div class="text-left sm:text-right">
                                 <p class="text-[10px] text-emerald-200 uppercase font-bold">Angsuran / Bulan</p>
                                 <p class="text-lg font-black text-white">
-                                    Rp {{ number_format($peminjamanAktif->angsuran_per_bulan ?? 0, 0, ',', '.') }}
+                                    Rp {{ number_format($pinjamanAktif->angsuran_per_bulan ?? 0, 0, ',', '.') }}
                                 </p>
                             </div>
-                            <button class="px-4 py-2.5 bg-mint hover:bg-emerald-600 text-white font-bold text-xs rounded-xl transition-all shadow-md flex items-center gap-2">
-                                <i class="fas fa-credit-card text-xs"></i> Bayar
-                            </button>
                         </div>
                     </div>
                 </div>
             @endif
 
-            <!-- SECTION 3B: STATUS PENGAJUAN REALTIME (MONITORING ALERT) -->
+            <!-- SECTION 3B: STATUS PENGAJUAN REALTIME -->
             <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm mb-8">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 bg-amber-500 rounded-full animate-ping"></span>
-                        <h3 class="text-sm font-bold text-forest">
-                            Status Pengajuan Terakhir
-                        </h3>
+                        <h3 class="text-sm font-bold text-forest">Status Pengajuan Terakhir</h3>
                     </div>
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                        Monitoring System
-                    </span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Monitoring System</span>
                 </div>
 
                 @if($pengajuanPenarikan || $pengajuanPeminjaman)
                     <div class="space-y-3">
-                        {{-- pengajuan penarikan --}}
                         @if($pengajuanPenarikan)
                             <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
                                 <div class="flex items-start justify-between gap-3">
@@ -371,34 +384,17 @@
                                             <i class="fas fa-money-bill-wave text-sm"></i>
                                         </div>
                                         <div>
-                                            <p class="text-sm font-bold text-slate-800">
-                                                Pengajuan Penarikan
-                                            </p>
-                                            <p class="text-xs text-slate-500 mt-1">
-                                                Penarikan saldo sedang menunggu verifikasi operator.
-                                            </p>
-                                            <p class="text-sm font-extrabold text-red-600 mt-2">
-                                                Rp {{ number_format($pengajuanPenarikan->jumlah ?? 0, 0, ',', '.') }}
-                                            </p>
-                                            <p class="text-[11px] text-slate-400 mt-1">
-                                                Diajukan:
-                                                {{ $pengajuanPenarikan->created_at
-                                                    ? $pengajuanPenarikan->created_at->format('d M Y, H:i')
-                                                    : '-' }}
-                                                WIB
-                                            </p>
+                                            <p class="text-sm font-bold text-slate-800">Pengajuan Penarikan</p>
+                                            <p class="text-xs text-slate-500 mt-1">Menunggu verifikasi operator.</p>
+                                            <p class="text-sm font-extrabold text-red-600 mt-2">Rp {{ number_format($pengajuanPenarikan->jumlah ?? 0, 0, ',', '.') }}</p>
                                         </div>
                                     </div>
-                                    <span class="px-2.5 py-1 bg-amber-100 text-amber-700 border border-amber-200 rounded-full text-[10px] font-extrabold uppercase flex-shrink-0">
-                                        Pending
-                                    </span>
+                                    <span class="px-2.5 py-1 bg-amber-100 text-amber-700 border border-amber-200 rounded-full text-[10px] font-extrabold uppercase flex-shrink-0">Pending</span>
                                 </div>
                             </div>
                         @endif
 
-                        {{-- pengajuan peminjaman --}}
                         @if($pengajuanPeminjaman)
-
                             <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="flex items-start gap-3">
@@ -406,46 +402,23 @@
                                             <i class="fas fa-hand-holding-usd text-sm"></i>
                                         </div>
                                         <div>
-                                            <p class="text-sm font-bold text-slate-800">
-                                                Pengajuan Peminjaman
-                                            </p>
-                                            <p class="text-xs text-slate-500 mt-1">
-                                                Pengajuan pinjaman sedang menunggu verifikasi operator.
-                                            </p>
-                                            <p class="text-sm font-extrabold text-forest mt-2">
-                                                Rp {{ number_format($pengajuanPeminjaman->jumlah_pinjaman ?? 0, 0, ',', '.') }}
-                                            </p>
-                                            <p class="text-[11px] text-slate-400 mt-1">
-                                                Diajukan:
-                                                {{ $pengajuanPeminjaman->created_at
-                                                    ? $pengajuanPeminjaman->created_at->format('d M Y, H:i')
-                                                    : '-' }}
-                                                WIB
-                                            </p>
+                                            <p class="text-sm font-bold text-slate-800">Pengajuan Peminjaman</p>
+                                            <p class="text-xs text-slate-500 mt-1">Menunggu verifikasi operator.</p>
+                                            <p class="text-sm font-extrabold text-forest mt-2">Rp {{ number_format($pengajuanPeminjaman->jumlah_pinjaman ?? 0, 0, ',', '.') }}</p>
                                         </div>
                                     </div>
-                                    <span class="px-2.5 py-1 bg-amber-100 text-amber-700 border border-amber-200 rounded-full text-[10px] font-extrabold uppercase flex-shrink-0">
-                                        Pending
-                                    </span>
+                                    <span class="px-2.5 py-1 bg-amber-100 text-amber-700 border border-amber-200 rounded-full text-[10px] font-extrabold uppercase flex-shrink-0">Pending</span>
                                 </div>
                             </div>
                         @endif
                     </div>
                 @else
-
                     <div class="bg-slate-50 border border-slate-100 rounded-xl p-5 text-center">
-
                         <div class="w-11 h-11 bg-mintLight rounded-xl flex items-center justify-center mx-auto mb-3 text-mint">
                             <i class="fas fa-check text-sm"></i>
                         </div>
-
-                        <p class="text-sm font-bold text-slate-700">
-                            Tidak Ada Pengajuan Pending
-                        </p>
-
-                        <p class="text-xs text-slate-400 mt-1">
-                            Semua pengajuan kamu sudah diproses.
-                        </p>    
+                        <p class="text-sm font-bold text-slate-700">Tidak Ada Pengajuan Pending</p>
+                        <p class="text-xs text-slate-400 mt-1">Semua pengajuan kamu sudah diproses.</p>    
                     </div>
                 @endif
             </div>
@@ -474,46 +447,15 @@
                                 $isPenarikan = $isTabungan && ($transaksi->id_jenis_transaksi ?? null) == 2;
 
                                 $statusClass = 'bg-slate-100 text-slate-700 border-slate-200';
+                                if (in_array($transaksi->status, ['berhasil', 'disetujui'])) $statusClass = 'bg-mintLight text-forest border-mint/30';
+                                elseif ($transaksi->status === 'pending') $statusClass = 'bg-amber-50 text-amber-800 border-amber-200';
+                                elseif (in_array($transaksi->status, ['ditolak', 'gagal'])) $statusClass = 'bg-red-50 text-red-700 border-red-200';
 
-                                if (in_array($transaksi->status, ['berhasil', 'disetujui'])) {
-                                    $statusClass = 'bg-mintLight text-forest border-mint/30';
-                                } elseif ($transaksi->status === 'pending') {
-                                    $statusClass = 'bg-amber-50 text-amber-800 border-amber-200';
-                                } elseif (in_array($transaksi->status, ['ditolak', 'gagal'])) {
-                                    $statusClass = 'bg-red-50 text-red-700 border-red-200';
-                                }
-
-                                if ($isPeminjaman) {
-                                    $label = 'Pengajuan Peminjaman';
-                                    $icon = 'hand-holding-usd';
-                                    $iconBgClass = 'bg-forest text-white';
-                                    $amountClass = 'text-forest';
-                                    $sign = '';
-                                } elseif ($isAngsuran) {
-                                    $label = 'Pembayaran Cicilan';
-                                    $icon = 'check-circle';
-                                    $iconBgClass = 'bg-mintLight text-forest';
-                                    $amountClass = 'text-red-600';
-                                    $sign = '-';
-                                } elseif ($isSetoran) {
-                                    $label = 'Setoran Tabungan';
-                                    $icon = 'arrow-down';
-                                    $iconBgClass = 'bg-mintLight text-mint';
-                                    $amountClass = 'text-mint';
-                                    $sign = '+';
-                                } elseif ($isPenarikan) {
-                                    $label = 'Penarikan Saldo';
-                                    $icon = 'arrow-up';
-                                    $iconBgClass = 'bg-red-50 text-red-600';
-                                    $amountClass = 'text-red-600';
-                                    $sign = '-';
-                                } else {
-                                    $label = 'Transaksi';
-                                    $icon = 'receipt';
-                                    $iconBgClass = 'bg-slate-100 text-slate-600';
-                                    $amountClass = 'text-slate-800';
-                                    $sign = '';
-                                }
+                                if ($isPeminjaman) { $label = 'Pengajuan Peminjaman'; $icon = 'hand-holding-usd'; $iconBgClass = 'bg-forest text-white'; $amountClass = 'text-forest'; $sign = ''; } 
+                                elseif ($isAngsuran) { $label = 'Pembayaran Cicilan'; $icon = 'check-circle'; $iconBgClass = 'bg-mintLight text-forest'; $amountClass = 'text-red-600'; $sign = '-'; } 
+                                elseif ($isSetoran) { $label = 'Setoran Tabungan'; $icon = 'arrow-down'; $iconBgClass = 'bg-mintLight text-mint'; $amountClass = 'text-mint'; $sign = '+'; } 
+                                elseif ($isPenarikan) { $label = 'Penarikan Saldo'; $icon = 'arrow-up'; $iconBgClass = 'bg-red-50 text-red-600'; $amountClass = 'text-red-600'; $sign = '-'; } 
+                                else { $label = 'Transaksi'; $icon = 'receipt'; $iconBgClass = 'bg-slate-100 text-slate-600'; $amountClass = 'text-slate-800'; $sign = ''; }
                             @endphp
 
                             <div class="p-4 hover:bg-bgMain transition-colors flex items-center justify-between gap-3">
@@ -542,9 +484,7 @@
                                 <i class="fas fa-receipt text-lg"></i>
                             </div>
                             <h4 class="text-sm font-bold text-forest mb-1">Belum Ada Transaksi</h4>
-                            <p class="text-xs text-slate-400 max-w-sm mx-auto">
-                                Semua mutasi tabungan dan pinjaman Anda akan tercatat secara otomatis di sini.
-                            </p>
+                            <p class="text-xs text-slate-400 max-w-sm mx-auto">Semua mutasi tabungan dan pinjaman Anda akan tercatat secara otomatis di sini.</p>
                         </div>
                     @endif
                 </div>

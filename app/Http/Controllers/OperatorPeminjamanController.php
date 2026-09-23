@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Peminjaman;
 use App\Models\Nasabah;
 use App\Models\Angsuran; 
+use App\Models\RekeningTabungan; 
 use App\Http\Controllers\NotifikasiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -92,15 +93,13 @@ class OperatorPeminjamanController extends Controller
                 throw new \Exception('Data petugas untuk akun ini tidak ditemukan.');
             }
 
-            // ==========================================
-            // PERUBAHAN DI SINI: HITUNG BUNGA FLAT 1%
-            // ==========================================
             $jumlahPinjaman = $request->jumlah_pinjaman;
             $tenor = $request->tenor;
             
-            $bungaPerBulan = $jumlahPinjaman * 0.01;      // 1% per bulan
-            $totalBunga = $bungaPerBulan * $tenor;        // Total bunga selama tenor
+            $bungaPerBulan = $jumlahPinjaman * 0.01;
+            $totalBunga = $bungaPerBulan * $tenor;
 
+            // HANYA simpan data pinjaman - JANGAN sentuh saldo tabungan!
             Peminjaman::create([
                 'id_nasabah' => $nasabah->id_nasabah,
                 'id_petugas' => $petugas->id_petugas,
@@ -109,12 +108,9 @@ class OperatorPeminjamanController extends Controller
                 'jumlah_pinjaman' => $jumlahPinjaman,
                 'tenor' => $tenor,
                 'sisa_pinjaman' => $jumlahPinjaman,
-                
-                // TAMBAHAN KOLOM BARU
                 'total_bunga' => $totalBunga,
                 'bunga_per_bulan' => $bungaPerBulan,
                 'sisa_bunga' => $totalBunga,
-                
                 'keterangan' => $request->keterangan,
                 'status_verifikasi' => 'disetujui',
             ]);
@@ -144,22 +140,29 @@ class OperatorPeminjamanController extends Controller
                 throw new \Exception('Data petugas untuk akun ini tidak ditemukan.');
             }
 
+            // Hitung provisi 1% (hanya untuk info/notifikasi)
+            $provisi = $peminjaman->jumlah_pinjaman * 0.01;
+            $danaDiterima = $peminjaman->jumlah_pinjaman - $provisi;
+
+            // Update status pinjaman - JANGAN sentuh saldo tabungan!
             $peminjaman->status_verifikasi = 'disetujui';
             $peminjaman->id_petugas = $petugas->id_petugas;
             $peminjaman->save();
 
+            // Kirim notifikasi
             NotifikasiController::kirim(
                 $nasabah->id_nasabah,
                 'Pinjaman Disetujui',
-                'Pinjaman Rp ' . number_format($peminjaman->jumlah_pinjaman, 0, ',', '.') . ' disetujui. Silakan ambil uang tunai di kantor BMT.',
+                'Pinjaman Rp ' . number_format($peminjaman->jumlah_pinjaman, 0, ',', '.') . ' disetujui. Nasabah dapat menerima dana Rp ' . number_format($danaDiterima, 0, ',', '.') . ' (setelah potong provisi 1%) di loket BMT.',
                 'peminjaman'
             );
 
             DB::commit();
-            return back()->with('success', 'Pinjaman disetujui! Nasabah dapat mengambil uang di BMT.');
+            return back()->with('success', 'Pinjaman disetujui! Nasabah dapat mengambil dana di BMT.');
+            
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', $e->getMessage());
+            return back()->with('error', 'Gagal menyetujui: ' . $e->getMessage());
         }
     }
 
@@ -215,78 +218,73 @@ class OperatorPeminjamanController extends Controller
         ));
     }
 
-    // =========================================================
-    // METHOD BARU: Ambil Data Mutasi PEMINJAMAN SAJA
-    // =========================================================
     public function getRekeningData($id_nasabah)
-{
-    try {
-        $nasabah = Nasabah::findOrFail($id_nasabah);
-        
-        $peminjamans = Peminjaman::where('id_nasabah', $id_nasabah)
-            ->orderBy('tanggal_ajuan', 'asc')
-            ->get();
+    {
+        try {
+            $nasabah = Nasabah::findOrFail($id_nasabah);
+            
+            $peminjamans = Peminjaman::where('id_nasabah', $id_nasabah)
+                ->orderBy('tanggal_ajuan', 'asc')
+                ->get();
 
-        if ($peminjamans->isEmpty()) {
+            if ($peminjamans->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nasabah ini belum memiliki riwayat peminjaman.'
+                ]);
+            }
+
+            $idPinjamanList = $peminjamans->pluck('id_pinjaman');
+            $angsurans = Angsuran::whereIn('id_pinjaman', $idPinjamanList)
+                ->orderBy('tanggal_pembayaran', 'asc')
+                ->get();
+
+            $transaksi = [];
+            $totalPinjaman = 0;
+            $totalPembayaran = 0;
+
+            foreach ($peminjamans as $pinjaman) {
+                $transaksi[] = [
+                    'tanggal' => \Carbon\Carbon::parse($pinjaman->tanggal_ajuan)->format('d/m/Y'),
+                    'keterangan' => 'Pencairan Pinjaman' . ($pinjaman->keterangan ? ' - ' . $pinjaman->keterangan : ''),
+                    'debit' => $pinjaman->jumlah_pinjaman,
+                    'kredit' => 0,
+                    'jenis' => 'pencairan',
+                ];
+                $totalPinjaman += $pinjaman->jumlah_pinjaman;
+            }
+
+            foreach ($angsurans as $angsuran) {
+                $transaksi[] = [
+                    'tanggal' => \Carbon\Carbon::parse($angsuran->tanggal_pembayaran)->format('d/m/Y'),
+                    'keterangan' => 'Pembayaran Cicilan',
+                    'debit' => 0,
+                    'kredit' => $angsuran->jumlah,
+                    'jenis' => $angsuran->jenis_pembayaran ?? 'pokok',
+                ];
+                $totalPembayaran += $angsuran->jumlah;
+            }
+
+            usort($transaksi, function($a, $b) {
+                return strtotime(str_replace('/', '-', $a['tanggal'])) - strtotime(str_replace('/', '-', $b['tanggal']));
+            });
+
+            return response()->json([
+                'success' => true,
+                'nasabah' => [
+                    'no_rek' => $nasabah->no_rek ?? '-',
+                    'nama' => $nasabah->nama,
+                ],
+                'total_pinjaman' => $totalPinjaman,
+                'total_pembayaran' => $totalPembayaran,
+                'transaksi' => $transaksi,
+            ]);
+
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Nasabah ini belum memiliki riwayat peminjaman.'
-            ]);
-        }
-
-        $idPinjamanList = $peminjamans->pluck('id_pinjaman');
-        $angsurans = Angsuran::whereIn('id_pinjaman', $idPinjamanList)
-            ->orderBy('tanggal_pembayaran', 'asc')
-            ->get();
-
-        $transaksi = [];
-        $totalPinjaman = 0;
-        $totalPembayaran = 0;
-
-        // Pencairan Pinjaman (Debet)
-        foreach ($peminjamans as $pinjaman) {
-            $transaksi[] = [
-                'tanggal' => \Carbon\Carbon::parse($pinjaman->tanggal_ajuan)->format('d/m/Y'),
-                'keterangan' => 'Pencairan Pinjaman' . ($pinjaman->keterangan ? ' - ' . $pinjaman->keterangan : ''),
-                'debit' => $pinjaman->jumlah_pinjaman,
-                'kredit' => 0,
-                'jenis' => 'pencairan',
-            ];
-            $totalPinjaman += $pinjaman->jumlah_pinjaman;
-        }
-
-        // Pembayaran Cicilan (Kredit)
-        foreach ($angsurans as $angsuran) {
-            $transaksi[] = [
-                'tanggal' => \Carbon\Carbon::parse($angsuran->tanggal_pembayaran)->format('d/m/Y'),
-                'keterangan' => 'Pembayaran Cicilan',
-                'debit' => 0,
-                'kredit' => $angsuran->jumlah,
-                'jenis' => $angsuran->jenis_pembayaran ?? 'pokok', // <-- TAMBAH
-            ];
-            $totalPembayaran += $angsuran->jumlah;
-        }
-
-        usort($transaksi, function($a, $b) {
-            return strtotime(str_replace('/', '-', $a['tanggal'])) - strtotime(str_replace('/', '-', $b['tanggal']));
-        });
-
-        return response()->json([
-            'success' => true,
-            'nasabah' => [
-                'no_rek' => $nasabah->no_rek ?? '-',
-                'nama' => $nasabah->nama,
-            ],
-            'total_pinjaman' => $totalPinjaman,
-            'total_pembayaran' => $totalPembayaran,
-            'transaksi' => $transaksi,
-        ]);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal memuat data: ' . $e->getMessage()
-        ], 500);
+                'message' => 'Gagal memuat data: ' . $e->getMessage()
+            ], 500);
         }
     }
 }
