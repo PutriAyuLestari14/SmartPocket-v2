@@ -169,11 +169,11 @@
                                     </td>
                                     <td class="px-6 py-4 text-center">
                                         <div class="flex justify-center gap-2">
-                                            <button onclick="openMutasiModal({{ $peminjaman->id_nasabah }}, '{{ $peminjaman->nasabah->nama ?? '' }}', '{{ $peminjaman->nasabah->no_rek ?? '' }}')" 
+                                            <button onclick="openMutasiPinjaman({{ $peminjaman->id_pinjaman }}, '{{ $peminjaman->nasabah->nama ?? '' }}', '{{ $peminjaman->nasabah->no_rek ?? '' }}')" 
                                                 class="w-7 h-7 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center transition-colors" 
                                                 title="Lihat Mutasi Peminjaman">
                                                 <i class="fas fa-eye text-xs"></i>
-                                            </button>
+                                            </button>   
                                             <button class="w-7 h-7 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center transition-colors" title="Edit">
                                                 <i class="fas fa-edit text-xs"></i>
                                             </button>
@@ -268,106 +268,109 @@
 
     <!-- JavaScript untuk Modal -->
     <script>
-        const formatRupiah = (angka) => {
-            return new Intl.NumberFormat('id-ID').format(angka || 0);
-        };
+    const formatRupiah = (angka) => {
+        return new Intl.NumberFormat('id-ID').format(angka || 0);
+    };
 
-        function openMutasiModal(idNasabah, namaNasabah, noRek) {
-            const modal = document.getElementById('mutasiModal');
-            const loading = document.getElementById('modalLoading');
-            const content = document.getElementById('modalContent');
-            const emptyState = document.getElementById('modalEmptyState');
-            const tableBody = document.getElementById('modalTableBody');
+    function openMutasiPinjaman(idPinjaman, namaNasabah, noRek) {
+    console.log('Membuka mutasi untuk pinjaman ID:', idPinjaman);
+    
+    const modal = document.getElementById('mutasiModal');
+    const loading = document.getElementById('modalLoading');
+    const content = document.getElementById('modalContent');
+    const emptyState = document.getElementById('modalEmptyState');
+    const tableBody = document.getElementById('modalTableBody');
 
-            modal.classList.remove('hidden');
-            loading.classList.remove('hidden');
-            content.classList.add('hidden');
-            emptyState.classList.add('hidden');
-            tableBody.innerHTML = '';
-            document.getElementById('modalNamaNasabah').textContent = namaNasabah + (noRek ? ' - ' + noRek : '');
+    modal.classList.remove('hidden');
+    loading.classList.remove('hidden');
+    content.classList.add('hidden');
+    emptyState.classList.add('hidden');
+    tableBody.innerHTML = '';
+    document.getElementById('modalNamaNasabah').textContent = namaNasabah + (noRek ? ' - ' + noRek : '');
 
-            fetch(`/operator/peminjaman/rekening/${idNasabah}`)
-                .then(res => res.json())
-                .then(data => {
-                    loading.classList.add('hidden');
-                    
-                    if (!data.success) {
-                        content.classList.remove('hidden');
-                        tableBody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-sm text-red-600">${data.message}</td></tr>`;
-                        return;
-                    }
+    const url = `/operator/peminjaman/mutasi/${idPinjaman}`;
+    console.log('Fetching URL:', url);
 
-                    let saldoBerjalan = 0;
-                    let totalDebet = 0;
-                    let totalKredit = 0;
+    fetch(url)
+        .then(res => {
+            console.log('Response status:', res.status);
+            return res.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            loading.classList.add('hidden');
+            
+            if (!data.success) {
+                content.classList.remove('hidden');
+                tableBody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-sm text-red-600">${data.message || 'Data tidak ditemukan'}</td></tr>`;
+                return;
+            }
 
-                    if (data.transaksi.length === 0) {
-                        emptyState.classList.remove('hidden');
-                    } else {
-                        data.transaksi.forEach((t) => {
-                            totalDebet += t.debit;
-                            totalKredit += t.kredit;
-                            saldoBerjalan += (t.debit - (t.pokok || 0));
-                            
-                            const row = document.createElement('tr');
-                            row.className = 'hover:bg-gray-50 transition-colors';
-                            row.innerHTML = `
-                                <td class="px-3 py-3 text-[10px] font-mono text-slate-600">${data.nasabah.no_rek || '-'}</td>
-                                <td class="px-3 py-3 text-[10px] font-semibold text-slate-900">${namaNasabah.substring(0, 12)}</td>
-                                <td class="px-3 py-3 text-[10px] text-center text-slate-600">${t.tanggal}</td>
-                                <td class="px-3 py-3 text-center">
-                                    ${t.jenis === 'bunga' 
-                                        ? '<span class="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-[9px] font-bold">BUNGA</span>' 
-                                        : t.jenis === 'pokok' 
-                                            ? '<span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-[9px] font-bold">POKOK</span>' 
-                                            : t.jenis === 'keduanya'
-                                                ? '<span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[9px] font-bold">POKOK+BUNGA</span>'
-                                                : '<span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-[9px] font-bold">PENCAIRAN</span>'}
-                                </td>
-                                <td class="px-3 py-3 text-[10px] font-semibold text-right ${t.debit > 0 ? 'text-emerald-600' : 'text-gray-400'}">
-                                    ${t.debit > 0 ? formatRupiah(t.debit).replace(/\./g, ' ') : '0'}
-                                </td>
-                                <td class="px-3 py-3 text-[10px] font-semibold text-right ${t.kredit > 0 ? 'text-red-600' : 'text-gray-400'}">
-                                    ${t.kredit > 0 ? formatRupiah(t.kredit).replace(/\./g, ' ') : '0'}
-                                </td>
-                                <td class="px-3 py-3 text-[10px] font-bold text-right text-slate-900 bg-gray-50">
-                                    ${formatRupiah(saldoBerjalan).replace(/\./g, ' ')}
-                                </td>
-                            `;
-                            tableBody.appendChild(row);
-                        });
-                    }
+            if (!data.transaksi || data.transaksi.length === 0) {
+                emptyState.classList.remove('hidden');
+                content.classList.remove('hidden');
+                return;
+            }
 
-                    document.getElementById('totalDebet').textContent = formatRupiah(totalDebet).replace(/\./g, ' ');
-                    document.getElementById('totalKredit').textContent = formatRupiah(totalKredit).replace(/\./g, ' ');
-                    document.getElementById('totalSaldo').textContent = formatRupiah(saldoBerjalan).replace(/\./g, ' ');
-
-                    content.classList.remove('hidden');
-                })
-                .catch(err => {
-                    loading.classList.add('hidden');
-                    content.classList.remove('hidden');
-                    tableBody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-sm text-red-600">Gagal memuat data</td></tr>`;
-                });
-        }
-
-        function closeMutasiModal() {
-            document.getElementById('mutasiModal').classList.add('hidden');
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeMutasiModal();
-        });
-
-        document.getElementById('searchPeminjaman').addEventListener('input', function () {
-            const keyword = this.value.toLowerCase().trim();
-            const rows = document.querySelectorAll('table tbody tr');
-
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(keyword) ? '' : 'none';
+            // Render transaksi
+            data.transaksi.forEach((t) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+                row.innerHTML = `
+                    <td class="px-3 py-3 text-[10px] font-mono text-slate-600">${data.nasabah.no_rek || '-'}</td>
+                    <td class="px-3 py-3 text-[10px] font-semibold text-slate-900">${namaNasabah.substring(0, 15)}</td>
+                    <td class="px-3 py-3 text-[10px] text-center text-slate-600">${t.tanggal}</td>
+                    <td class="px-3 py-3 text-center">
+                        ${t.jenis === 'bunga' 
+                            ? '<span class="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-[9px] font-bold">BUNGA</span>' 
+                            : t.jenis === 'pokok' 
+                                ? '<span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-[9px] font-bold">POKOK</span>' 
+                                : t.jenis === 'keduanya'
+                                    ? '<span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[9px] font-bold">POKOK+BUNGA</span>'
+                                    : '<span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-[9px] font-bold">PENCAIRAN</span>'}
+                    </td>
+                    <td class="px-3 py-3 text-[10px] font-semibold text-right ${t.debit > 0 ? 'text-emerald-600' : 'text-gray-400'}">
+                        ${t.debit > 0 ? formatRupiah(t.debit).replace(/\./g, ' ') : '0'}
+                    </td>
+                    <td class="px-3 py-3 text-[10px] font-semibold text-right ${t.kredit > 0 ? 'text-red-600' : 'text-gray-400'}">
+                        ${t.kredit > 0 ? formatRupiah(t.kredit).replace(/\./g, ' ') : '0'}
+                    </td>
+                    <td class="px-3 py-3 text-[10px] font-bold text-right text-slate-900 bg-gray-50">
+                        ${formatRupiah(t.saldo).replace(/\./g, ' ')}
+                    </td>
+                `;
+                tableBody.appendChild(row);
             });
+
+            document.getElementById('totalDebet').textContent = formatRupiah(data.total_debet).replace(/\./g, ' ');
+            document.getElementById('totalKredit').textContent = formatRupiah(data.total_kredit).replace(/\./g, ' ');
+            document.getElementById('totalSaldo').textContent = formatRupiah(data.saldo_akhir).replace(/\./g, ' ');
+
+            content.classList.remove('hidden');
+        })
+        .catch(err => {
+            console.error('Error fetching data:', err);
+            loading.classList.add('hidden');
+            content.classList.remove('hidden');
+            tableBody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-sm text-red-600">Gagal memuat data. Lihat console untuk detail error.</td></tr>`;
         });
-    </script>
-</body>
-</html>
+}
+
+    function closeMutasiModal() {
+        document.getElementById('mutasiModal').classList.add('hidden');
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeMutasiModal();
+    });
+
+    document.getElementById('searchPeminjaman').addEventListener('input', function () {
+        const keyword = this.value.toLowerCase().trim();
+        const rows = document.querySelectorAll('table tbody tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(keyword) ? '' : 'none';
+        });
+    });
+</script>

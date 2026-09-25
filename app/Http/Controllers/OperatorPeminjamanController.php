@@ -9,6 +9,7 @@ use App\Models\RekeningTabungan;
 use App\Http\Controllers\NotifikasiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OperatorPeminjamanController extends Controller
 {
@@ -95,7 +96,6 @@ class OperatorPeminjamanController extends Controller
             $bungaPerBulan = $jumlahPinjaman * 0.01;
             $totalBunga = $bungaPerBulan * $tenor;
 
-            // HANYA simpan data pinjaman - JANGAN sentuh saldo tabungan!
             Peminjaman::create([
                 'id_nasabah' => $nasabah->id_nasabah,
                 'id_petugas' => $petugas->id_petugas,
@@ -136,16 +136,13 @@ class OperatorPeminjamanController extends Controller
                 throw new \Exception('Data petugas untuk akun ini tidak ditemukan.');
             }
 
-            // Hitung provisi 1% (hanya untuk info/notifikasi)
             $provisi = $peminjaman->jumlah_pinjaman * 0.01;
             $danaDiterima = $peminjaman->jumlah_pinjaman - $provisi;
 
-            // Update status pinjaman - JANGAN sentuh saldo tabungan!
             $peminjaman->status_verifikasi = 'disetujui';
             $peminjaman->id_petugas = $petugas->id_petugas;
             $peminjaman->save();
 
-            // Kirim notifikasi
             NotifikasiController::kirim(
                 $nasabah->id_nasabah,
                 'Pinjaman Disetujui',
@@ -214,6 +211,110 @@ class OperatorPeminjamanController extends Controller
         ));
     }
 
+    /**
+     * Get mutasi untuk SATU pinjaman tertentu
+     */
+    public function getMutasiPerPinjaman($id_pinjaman)
+    {
+        try {
+            Log::info('getMutasiPerPinjaman called with ID: ' . $id_pinjaman);
+
+            // Find pinjaman with nasabah
+            $pinjaman = Peminjaman::with('nasabah')->findOrFail($id_pinjaman);
+            
+            if (!$pinjaman) {
+                throw new \Exception('Pinjaman tidak ditemukan');
+            }
+
+            $nasabah = $pinjaman->nasabah;
+            
+            if (!$nasabah) {
+                throw new \Exception('Data nasabah tidak ditemukan');
+            }
+
+            Log::info('Pinjaman found: ' . json_encode($pinjaman->toArray()));
+
+            // Get angsuran for this pinjaman only
+            $angsurans = Angsuran::where('id_pinjaman', $id_pinjaman)
+                ->orderBy('tanggal_pembayaran', 'asc')
+                ->get();
+
+            Log::info('Found ' . $angsurans->count() . ' angsuran records');
+
+            $transaksi = [];
+            $totalDebet = 0;
+            $totalKredit = 0;
+            $saldoBerjalan = 0;
+
+            // 1. Transaksi Pencairan
+            $jumlahPinjaman = (int)$pinjaman->jumlah_pinjaman;
+            $transaksi[] = [
+                'tanggal' => \Carbon\Carbon::parse($pinjaman->tanggal_ajuan)->format('d/m/Y'),
+                'keterangan' => 'Pencairan Pinjaman' . ($pinjaman->keterangan ? ' - ' . $pinjaman->keterangan : ''),
+                'debit' => $jumlahPinjaman,
+                'kredit' => 0,
+                'jenis' => 'pencairan',
+                'saldo' => $jumlahPinjaman,
+            ];
+            $totalDebet += $jumlahPinjaman;
+            $saldoBerjalan = $jumlahPinjaman;
+
+            // 2. Transaksi Angsuran
+            foreach ($angsurans as $angsuran) {
+                $jumlahPokok = (int)($angsuran->jumlah_pokok ?? 0);
+                $saldoBerjalan -= $jumlahPokok;
+                
+                $transaksi[] = [
+                    'tanggal' => \Carbon\Carbon::parse($angsuran->tanggal_pembayaran)->format('d/m/Y'),
+                    'keterangan' => 'Pembayaran Cicilan',
+                    'debit' => 0,
+                    'kredit' => $jumlahPokok,
+                    'pokok' => $jumlahPokok,
+                    'jasa' => (int)($angsuran->jumlah_jasa ?? 0),
+                    'jenis' => $angsuran->jenis_pembayaran ?? 'pokok',
+                    'saldo' => $saldoBerjalan,
+                ];
+                $totalKredit += $jumlahPokok;
+            }
+
+            $responseData = [
+                'success' => true,
+                'pinjaman' => [
+                    'id_pinjaman' => $pinjaman->id_pinjaman,
+                    'tanggal_ajuan' => \Carbon\Carbon::parse($pinjaman->tanggal_ajuan)->format('d/m/Y'),
+                    'jumlah_pinjaman' => $jumlahPinjaman,
+                    'tenor' => $pinjaman->tenor,
+                    'sisa_pinjaman' => (int)$pinjaman->sisa_pinjaman,
+                    'status' => $pinjaman->status_verifikasi,
+                ],
+                'nasabah' => [
+                    'no_rek' => $nasabah->no_rek ?? '-',
+                    'nama' => $nasabah->nama,
+                ],
+                'transaksi' => $transaksi,
+                'total_debet' => $totalDebet,
+                'total_kredit' => $totalKredit,
+                'saldo_akhir' => $saldoBerjalan,
+            ];
+
+            Log::info('Returning response: ' . json_encode($responseData));
+            
+            return response()->json($responseData);
+
+        } catch (\Exception $e) {
+            Log::error('Error in getMutasiPerPinjaman: ' . $e->getMessage());
+            Log::error('Trace: ' . $e->getTraceAsString());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get semua data rekening (untuk backward compatibility)
+     */
     public function getRekeningData($id_nasabah)
     {
         try {
@@ -230,43 +331,64 @@ class OperatorPeminjamanController extends Controller
                 ]);
             }
 
-            $idPinjamanList = $peminjamans->pluck('id_pinjaman');
-            $angsurans = Angsuran::whereIn('id_pinjaman', $idPinjamanList)
-                ->orderBy('tanggal_pembayaran', 'asc')
-                ->get();
-
-            $transaksi = [];
-            $totalPinjaman = 0;
-            $totalPembayaran = 0;
+            $peminjamanList = [];
+            $grandTotalDebet = 0;
+            $grandTotalKredit = 0;
 
             foreach ($peminjamans as $pinjaman) {
+                $angsurans = Angsuran::where('id_pinjaman', $pinjaman->id_pinjaman)
+                    ->orderBy('tanggal_pembayaran', 'asc')
+                    ->get();
+
+                $transaksi = [];
+                $totalDebet = 0;
+                $totalKredit = 0;
+                $saldoBerjalan = 0;
+
                 $transaksi[] = [
                     'tanggal' => \Carbon\Carbon::parse($pinjaman->tanggal_ajuan)->format('d/m/Y'),
                     'keterangan' => 'Pencairan Pinjaman' . ($pinjaman->keterangan ? ' - ' . $pinjaman->keterangan : ''),
                     'debit' => $pinjaman->jumlah_pinjaman,
                     'kredit' => 0,
                     'jenis' => 'pencairan',
+                    'saldo' => $pinjaman->jumlah_pinjaman,
                 ];
-                $totalPinjaman += $pinjaman->jumlah_pinjaman;
+                $totalDebet += $pinjaman->jumlah_pinjaman;
+                $saldoBerjalan = $pinjaman->jumlah_pinjaman;
+
+                foreach ($angsurans as $angsuran) {
+                    $saldoBerjalan -= $angsuran->jumlah_pokok;
+                    $transaksi[] = [
+                        'tanggal' => \Carbon\Carbon::parse($angsuran->tanggal_pembayaran)->format('d/m/Y'),
+                        'keterangan' => 'Pembayaran Cicilan',
+                        'debit' => 0,
+                        'kredit' => $angsuran->jumlah_pokok,
+                        'pokok' => $angsuran->jumlah_pokok,
+                        'jasa' => $angsuran->jumlah_jasa,
+                        'jenis' => $angsuran->jenis_pembayaran ?? 'pokok',
+                        'saldo' => $saldoBerjalan,
+                    ];
+                    $totalKredit += $angsuran->jumlah_pokok;
+                }
+
+                $peminjamanList[] = [
+                    'id_pinjaman' => $pinjaman->id_pinjaman,
+                    'tanggal_ajuan' => \Carbon\Carbon::parse($pinjaman->tanggal_ajuan)->format('d/m/Y'),
+                    'jumlah_pinjaman' => $pinjaman->jumlah_pinjaman,
+                    'tenor' => $pinjaman->tenor,
+                    'sisa_pinjaman' => $pinjaman->sisa_pinjaman,
+                    'status' => $pinjaman->status_verifikasi,
+                    'transaksi' => $transaksi,
+                    'total_debet' => $totalDebet,
+                    'total_kredit' => $totalKredit,
+                    'saldo_akhir' => $saldoBerjalan,
+                ];
+
+                $grandTotalDebet += $totalDebet;
+                $grandTotalKredit += $totalKredit;
             }
 
-            foreach ($angsurans as $angsuran) {
-                $transaksi[] = [
-                    'tanggal' => \Carbon\Carbon::parse($angsuran->tanggal_pembayaran)->format('d/m/Y'),
-                    'keterangan' => 'Pembayaran Cicilan',
-                    'debit' => 0,
-                    'kredit' => $angsuran->jumlah_pokok,
-                    'pokok' => $angsuran->jumlah_pokok,
-                    'jasa' => $angsuran->jumlah_jasa,
-                    'jenis' => $angsuran->jenis_pembayaran ?? 'pokok',
-                ];
-
-                $totalPembayaran += $angsuran->jumlah;
-            }
-
-            usort($transaksi, function($a, $b) {
-                return strtotime(str_replace('/', '-', $a['tanggal'])) - strtotime(str_replace('/', '-', $b['tanggal']));
-            });
+            $grandTotalSaldo = $peminjamans->sum('sisa_pinjaman');
 
             return response()->json([
                 'success' => true,
@@ -274,9 +396,10 @@ class OperatorPeminjamanController extends Controller
                     'no_rek' => $nasabah->no_rek ?? '-',
                     'nama' => $nasabah->nama,
                 ],
-                'total_pinjaman' => $totalPinjaman,
-                'total_pembayaran' => $totalPembayaran,
-                'transaksi' => $transaksi,
+                'peminjaman_list' => $peminjamanList,
+                'grand_total_debet' => $grandTotalDebet,
+                'grand_total_kredit' => $grandTotalKredit,
+                'grand_total_saldo' => $grandTotalSaldo,
             ]);
 
         } catch (\Exception $e) {
