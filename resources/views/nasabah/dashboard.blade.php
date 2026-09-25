@@ -66,8 +66,8 @@
         <aside id="sidebar" class="w-64 bg-white border-r border-slate-200/80 flex flex-col fixed inset-y-0 left-0 z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-sm">
             <div class="p-5 border-b border-slate-100 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-forest rounded-xl flex items-center justify-center text-white shadow-md shadow-forest/20">
-                        <i class="fas fa-wallet text-lg"></i>
+                    <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md p-1 border border-slate-100 shrink-0">
+                        <img src="{{ asset('images/logo-bmt-green.png') }}" alt="Logo BMT SMKN 11 Bandung" class="w-full h-full object-contain rounded-full">
                     </div>
                     <div>
                         <h1 class="text-base font-extrabold text-forest tracking-tight leading-none">SmartPocket</h1>
@@ -110,7 +110,7 @@
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="w-full bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 text-sm font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2">
-                        <i class="fas fa-sign-out-alt text-xs"></i> Keluar
+                        <i class="fas fa-sign-out-alt text-xs"></i> Logout
                     </button>
                 </form>
             </div>
@@ -252,23 +252,6 @@
                                 <h3 class="text-3xl sm:text-4xl font-black tracking-tight text-forest">
                                     Rp {{ number_format($totalSisaPokok ?? 0, 0, ',', '.') }}
                                 </h3>
-                            </div>
-
-                            <!-- RINCIAN BREAKDOWN -->
-                            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 relative z-10 space-y-2 text-xs">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-slate-500 font-medium">Sisa Pokok</span>
-                                    <span class="font-bold text-slate-800">Rp {{ number_format($totalSisaPokok ?? 0, 0, ',', '.') }}</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-slate-500 font-medium">Total Bunga (1%)</span>
-                                    <span class="font-bold text-amber-600">Rp {{ number_format($totalSisaBunga ?? 0, 0, ',', '.') }}</span>
-                                </div>
-                                <div class="h-px bg-slate-200 my-1"></div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-forest font-bold">Total Kewajiban</span>
-                                    <span class="font-black text-forest text-sm">Rp {{ number_format($totalKewajiban ?? 0, 0, ',', '.') }}</span>
-                                </div>
                             </div>
 
                             <div class="pt-4 border-t border-slate-100 flex justify-between items-center relative z-10 text-xs mt-2">

@@ -12,11 +12,13 @@ class Angsuran extends Model
     protected $table = 'angsuran';
     protected $primaryKey = 'id_pembayaran';
 
-    protected $fillable = [
+   protected $fillable = [
         'id_pinjaman',
         'id_petugas',
         'tanggal_pembayaran',
         'jumlah',
+        'jumlah_pokok',
+        'jumlah_jasa',
         'jenis_pembayaran',
     ];
 

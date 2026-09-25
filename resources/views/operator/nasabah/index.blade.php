@@ -64,6 +64,12 @@
 
         <!-- Main Content -->
         <main class="flex-1 ml-64 p-4 lg:p-8">
+            @if(session('error'))
+                <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3">
+                    <i class="fas fa-exclamation-circle text-red-500"></i>
+                    <p class="text-sm font-medium">{{ session('error') }}</p>
+                </div>
+            @endif
             <!-- Header -->
             <header class="mb-6">
                 <div class="flex justify-between items-start">

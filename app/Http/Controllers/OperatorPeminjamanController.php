@@ -29,30 +29,26 @@ class OperatorPeminjamanController extends Controller
             ->distinct('id_nasabah')
             ->count('id_nasabah');
 
-        $totalCicilanBulanIni = Peminjaman::where('status_verifikasi', 'disetujui')
+        $idPinjamanAktif = Peminjaman::where('status_verifikasi', 'disetujui')
+            ->where('sisa_pinjaman', '>', 0)
+            ->pluck('id_pinjaman');
+
+        $jasaAktif = Angsuran::whereIn('id_pinjaman', $idPinjamanAktif)
+            ->sum('jumlah_jasa');
+
+        $provisiAktif = Peminjaman::where('status_verifikasi', 'disetujui')
             ->where('sisa_pinjaman', '>', 0)
             ->get()
             ->sum(function ($peminjaman) {
-                return $peminjaman->jumlah_pinjaman / $peminjaman->tenor;
+                return $peminjaman->jumlah_pinjaman * 0.01;
             });
-
-        $jumlahCicilanBulanIni = Peminjaman::where('status_verifikasi', 'disetujui')
-            ->where('sisa_pinjaman', '>', 0)
-            ->distinct('id_nasabah')
-            ->count('id_nasabah');
-
-        $jatuhTempoBulanIni = Peminjaman::where('status_verifikasi', 'disetujui')
-            ->where('sisa_pinjaman', '>', 0)
-            ->whereMonth('tanggal_jatuh_tempo', date('m'))
-            ->count();
 
         return view('operator.peminjaman.index', compact(
             'peminjamans',
             'totalAktif',
             'totalPeminjam',
-            'totalCicilanBulanIni',
-            'jumlahCicilanBulanIni',
-            'jatuhTempoBulanIni'
+            'jasaAktif',
+            'provisiAktif'
         ));
     }
 
@@ -259,9 +255,12 @@ class OperatorPeminjamanController extends Controller
                     'tanggal' => \Carbon\Carbon::parse($angsuran->tanggal_pembayaran)->format('d/m/Y'),
                     'keterangan' => 'Pembayaran Cicilan',
                     'debit' => 0,
-                    'kredit' => $angsuran->jumlah,
+                    'kredit' => $angsuran->jumlah_pokok,
+                    'pokok' => $angsuran->jumlah_pokok,
+                    'jasa' => $angsuran->jumlah_jasa,
                     'jenis' => $angsuran->jenis_pembayaran ?? 'pokok',
                 ];
+
                 $totalPembayaran += $angsuran->jumlah;
             }
 

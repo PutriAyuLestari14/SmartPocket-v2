@@ -47,6 +47,9 @@
                 <a href="{{ route('operator.verifikasi.index') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
                     <i class="fas fa-check-circle w-5 text-center"></i> Verifikasi
                 </a>
+                <a href="{{ route('operator.laporan.index') }}" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
+                    <i class="fas fa-chart-bar w-5 text-center"></i> Laporan
+                </a>
             </nav>
 
             <div class="p-4 border-t border-gray-100 space-y-3">
@@ -153,6 +156,7 @@
                                             data-sisa-bunga="{{ $p->sisa_bunga }}"
                                             data-bunga-perbulan="{{ $p->bunga_per_bulan }}"
                                             data-tenor="{{ $p->tenor }}"
+                                            data-jasa-bulan='@json($p->jasa_bulan ?? [])'
                                             {{ $pinjamanTerpilih && $pinjamanTerpilih->id_pinjaman == $p->id_pinjaman ? 'selected' : '' }}>
                                             Pinjaman Rp {{ number_format($p->jumlah_pinjaman, 0, ',', '.') }} (Sisa Pokok: Rp {{ number_format($p->sisa_pinjaman, 0, ',', '.') }})
                                         </option>
@@ -188,7 +192,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1.5">Tanggal Pembayaran</label>
-                                    <input type="date" name="tanggal_pembayaran" value="{{ date('Y-m-d') }}" 
+                                    <input type="date" name="tanggal_pembayaran" id="tanggalPembayaran" value="{{ date('Y-m-d') }}"
                                         class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" required>
                                 </div>
                             </div>
@@ -363,7 +367,23 @@
             } else if (jenis === 'pokok') {
                 nominal = currentPokokPerBulan;
             } else if (jenis === 'keduanya') {
-                nominal = currentPokokPerBulan + currentBungaPerBulan;
+                const selectedOption = selectPinjaman.options[selectPinjaman.selectedIndex];
+                const tanggal = document.getElementById('tanggalPembayaran').value;
+
+                let jasaSudahDibayar = false;
+
+                if (tanggal && selectedOption.dataset.jasaBulan) {
+                    const jasaBulan = JSON.parse(selectedOption.dataset.jasaBulan);
+                    const bulanPembayaran = tanggal.substring(0, 7);
+
+                    jasaSudahDibayar = jasaBulan.includes(bulanPembayaran);
+                }
+
+                if (jasaSudahDibayar) {
+                    nominal = currentPokokPerBulan;
+                } else {
+                    nominal = currentPokokPerBulan + currentBungaPerBulan;
+                }
             }
 
             nominalBayar.value = nominal;
@@ -409,6 +429,11 @@
         if (selectPinjaman.value) {
             selectPinjaman.dispatchEvent(new Event('change'));
         }
+
+        document.getElementById('tanggalPembayaran').addEventListener('change', function() {
+            updateNominalOtomatis();
+            updateEstimasi();
+        });
     </script>
 </body>
 </html>

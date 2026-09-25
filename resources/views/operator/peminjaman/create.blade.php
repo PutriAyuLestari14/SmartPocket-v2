@@ -518,35 +518,25 @@
 
                                 </label>
 
-                                <select
-                                    name="tenor"
-                                    id="tenor"
-                                    required
-
-                                    class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
-                                >
-
-                                    <option value="">
-                                        Pilih Tenor
-                                    </option>
-
-                                    <option value="3" {{ old('tenor') == 3 ? 'selected' : '' }}>
-                                        3 Bulan
-                                    </option>
-
-                                    <option value="6" {{ old('tenor') == 6 ? 'selected' : '' }}>
-                                        6 Bulan
-                                    </option>
-
-                                    <option value="12" {{ old('tenor', 12) == 12 ? 'selected' : '' }}>
-                                        12 Bulan
-                                    </option>
-
-                                    <option value="24" {{ old('tenor') == 24 ? 'selected' : '' }}>
-                                        24 Bulan
-                                    </option>
-
-                                </select>
+                                <div class="relative">
+                                    <input
+                                        type="number"
+                                        name="tenor"
+                                        id="tenor"
+                                        value="{{ old('tenor') }}"
+                                        min="1"
+                                        max="24"
+                                        required
+                                        placeholder="Contoh: 10"
+                                        class="w-full pr-20 px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                                    >
+                                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-medium">
+                                        Bulan
+                                    </span>
+                                </div>
+                                <p class="text-[10px] text-slate-400 mt-1">
+                                    Masukkan tenor.
+                                </p>
 
                                 @error('tenor')
 
@@ -785,30 +775,19 @@
                             Simpan Peminjaman
 
                         </button>
-
-
                         <a
                             href="{{ route('operator.peminjaman.index') }}"
 
                             class="w-full py-2 border border-gray-200 text-slate-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors text-sm text-center block"
                         >
-
                             Batal
-
                         </a>
-
                     </div>
-
                 </div>
-
             </div>
-
         </form>
-
     </main>
-
 </div>
-
 
 <script>
 

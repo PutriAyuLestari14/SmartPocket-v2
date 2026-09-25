@@ -102,9 +102,9 @@
                             <i class="fas fa-calendar-check text-blue-600"></i>
                         </div>
                     </div>
-                    <p class="text-[10px] font-semibold text-slate-500 uppercase mb-1">Cicilan Bulan Ini</p>
-                    <p class="text-2xl font-bold text-slate-900 mb-1">Rp {{ number_format($totalCicilanBulanIni ?? 0, 0, ',', '.') }}</p>
-                    <p class="text-xs text-slate-500">{{ $jumlahCicilanBulanIni ?? 0 }} peminjam</p>
+                    <p class="text-[10px] font-semibold text-slate-500 uppercase mb-1">Jasa</p>
+                    <p class="text-2xl font-bold text-slate-900 mb-1">Rp {{ number_format($jasaAktif, 0, ',', '.') }}</p>
+                    <p class="text-xs text-slate-500">Jasa dari peminjaman</p>
                 </div>
 
                 <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
@@ -113,34 +113,23 @@
                             <i class="fas fa-exclamation-triangle text-amber-600"></i>
                         </div>
                     </div>
-                    <p class="text-[10px] font-semibold text-slate-500 uppercase mb-1">Jatuh Tempo Bulan Ini</p>
-                    <p class="text-2xl font-bold text-slate-900 mb-1">{{ $jatuhTempoBulanIni ?? 0 }}</p>
-                    <p class="text-xs text-slate-500">Perlu ditagih</p>
+                    <p class="text-[10px] font-semibold text-slate-500 uppercase mb-1">Provisi</p>
+                    <p class="text-2xl font-bold text-slate-900 mb-1">Rp {{ number_format($provisiAktif, 0, ',', '.') }}</p>
+                    <p class="text-xs text-slate-500">Provisi 1% pinjaman</p>
                 </div>
             </div>
 
             <!-- Search & Filter -->
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-6">
-                <div class="p-4 border-b border-gray-100">
-                    <div class="flex flex-col lg:flex-row gap-3">
-                        <div class="flex-1 relative">
-                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                            <input type="text" placeholder="Cari nama peminjam atau NIP..." 
-                                class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
-                        </div>
-                        <select class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                            <option>Semua Status</option>
-                            <option>Menunggu</option>
-                            <option>Disetujui</option>
-                            <option>Ditolak</option>
-                            <option>Lunas</option>
-                        </select>
-                        <select class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                            <option>Semua Tenor</option>
-                            <option>6 Bulan</option>
-                            <option>12 Bulan</option>
-                            <option>24 Bulan</option>
-                        </select>
+                <div class="p-4">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input
+                            type="text"
+                            id="searchPeminjaman"
+                            placeholder="Cari nama atau no. rekening..."
+                            class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                            autocomplete="off">
                     </div>
                 </div>
 
@@ -153,7 +142,6 @@
                                 <th class="px-6 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase">Nominal Pinjaman</th>
                                 <th class="px-6 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase">Tenor</th>
                                 <th class="px-6 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase">Sisa Cicilan</th>
-                                <th class="px-6 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase">Status</th>
                                 <th class="px-6 py-3 text-center text-[10px] font-semibold text-slate-500 uppercase">Aksi</th>
                             </tr>
                         </thead>
@@ -161,13 +149,6 @@
                             @forelse($peminjamans as $peminjaman)
                                 @php
                                     $sisaBulan = $peminjaman->tenor;
-                                    $statusClass = 'bg-emerald-100 text-emerald-700';
-                                    $statusText = 'Lancar';
-                                    
-                                    if ($peminjaman->sisa_pinjaman <= 0) {
-                                        $statusClass = 'bg-blue-100 text-blue-700';
-                                        $statusText = 'Lunas';
-                                    }
                                 @endphp
 
                                 <tr class="hover:bg-gray-50">
@@ -185,11 +166,6 @@
                                     </td>
                                     <td class="px-6 py-4 text-xs text-slate-600">
                                         {{ $sisaBulan }} Bulan
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2.5 py-1 {{ $statusClass }} rounded-full text-[10px] font-semibold">
-                                            {{ $statusText }}
-                                        </span>
                                     </td>
                                     <td class="px-6 py-4 text-center">
                                         <div class="flex justify-center gap-2">
@@ -331,7 +307,7 @@
                         data.transaksi.forEach((t) => {
                             totalDebet += t.debit;
                             totalKredit += t.kredit;
-                            saldoBerjalan += (t.debit - t.kredit);
+                            saldoBerjalan += (t.debit - (t.pokok || 0));
                             
                             const row = document.createElement('tr');
                             row.className = 'hover:bg-gray-50 transition-colors';
@@ -381,6 +357,16 @@
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeMutasiModal();
+        });
+
+        document.getElementById('searchPeminjaman').addEventListener('input', function () {
+            const keyword = this.value.toLowerCase().trim();
+            const rows = document.querySelectorAll('table tbody tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(keyword) ? '' : 'none';
+            });
         });
     </script>
 </body>
