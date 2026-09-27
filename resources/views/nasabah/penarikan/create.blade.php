@@ -69,6 +69,7 @@
         
         <div class="flex items-center gap-2">
             <a href="{{ route('nasabah.notifikasi.index') }}" class="w-9 h-9 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 relative">
+                <span class="absolute top-2 right-2 w-2 h-2 bg-mint rounded-full ring-2 ring-white"></span>
                 <i class="far fa-bell text-sm"></i>
                 @php
                     $nasabah = auth()->user()->nasabah;

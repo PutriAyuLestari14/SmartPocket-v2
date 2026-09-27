@@ -53,6 +53,7 @@
         </div>
         <div class="flex items-center gap-2">
             <a href="{{ route('nasabah.notifikasi.index') }}" class="w-9 h-9 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 relative">
+                <span class="absolute top-2 right-2 w-2 h-2 bg-mint rounded-full ring-2 ring-white"></span>
                 <i class="far fa-bell text-sm"></i>
                 @php
                     $nasabah = auth()->user()->nasabah;
@@ -62,15 +63,15 @@
                     <span class="absolute top-2 right-2 w-2 h-2 bg-mint rounded-full ring-2 ring-white"></span>
                 @endif
             </a>
-            <button id="toggleSidebar" class="p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-all">
-                <i class="fas fa-bars text-lg"></i>
+            <button onclick="toggleSidebar()" class="w-9 h-9 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl flex items-center justify-center hover:bg-slate-100 transition-colors">
+                <i class="fas fa-bars text-sm"></i>
             </button>
         </div>
     </header>
 
     <div class="flex flex-1 relative">
         <!-- Sidebar Backdrop untuk Mobile -->
-        <div id="sidebarBackdrop" class="fixed inset-0 bg-forestDark/50 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity"></div>
+        <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-forestDark/50 backdrop-blur-sm z-30 hidden lg:hidden transition-opacity"></div>
 
         <!-- Sidebar Nasabah -->
         <aside id="sidebar" class="w-64 bg-white border-r border-slate-200/80 flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-sm">
@@ -390,17 +391,6 @@
     </div>
 
     <script>
-        const sidebar = document.getElementById('sidebar');
-        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
-        const toggleSidebar = document.getElementById('toggleSidebar');
-        const closeSidebar = document.getElementById('closeSidebar');
-
-        function openMobileSidebar() { sidebar.classList.remove('-translate-x-full'); sidebarBackdrop.classList.remove('hidden'); }
-        function closeMobileSidebar() { sidebar.classList.add('-translate-x-full'); sidebarBackdrop.classList.add('hidden'); }
-        toggleSidebar?.addEventListener('click', openMobileSidebar);
-        closeSidebar?.addEventListener('click', closeMobileSidebar);
-        sidebarBackdrop?.addEventListener('click', closeMobileSidebar);
-
         const modal = document.getElementById('modalKonfirmasi');
         const backdrop = document.getElementById('modalBackdrop');
         const content = document.getElementById('modalContent');
@@ -477,5 +467,34 @@
         // Jalankan sekali saat load
         updateSimulasi();
     </script>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+
+            if (!sidebar || !backdrop) return;
+
+            const isClosed = sidebar.classList.contains('-translate-x-full');
+
+            if (isClosed) {
+                sidebar.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('closeSidebar')?.addEventListener('click', function () {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+
+            sidebar.classList.add('-translate-x-full');
+            backdrop.classList.add('hidden');
+        });
+    </script>
+
+    
 </body>
 </html>

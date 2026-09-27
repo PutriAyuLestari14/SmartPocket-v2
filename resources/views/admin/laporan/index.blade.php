@@ -58,7 +58,7 @@
         <!-- Main Content -->
         <main class="flex-1 ml-64 p-8">
             <h1 class="text-2xl font-bold text-slate-900 mb-2">Laporan</h1>
-            <p class="text-sm text-slate-500">Halaman Laporan Admin - Coming soon</p>
+            <p class="text-sm text-slate-500">Halaman Laporan Adminde - Coming soon</p>
             
             <div class="mt-8 bg-white rounded-xl border border-gray-200 p-8 text-center">
                 <i class="fas fa-tools text-6xl text-gray-300 mb-4"></i>
