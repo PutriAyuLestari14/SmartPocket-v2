@@ -229,6 +229,7 @@
                                                 data-sisa-jasa="{{ $p->sisa_jasa }}"
                                                 data-jasa-perbulan="{{ $p->jasa_per_bulan }}"
                                                 data-tenor="{{ $p->tenor }}"
+                                                data-next-cicilan="{{ $p->next_cicilan_ke }}"
                                                 data-jasa-bulan='@json($p->jasa_bulan ?? [])'
                                                 {{ $pinjamanTerpilih && $pinjamanTerpilih->id_pinjaman == $p->id_pinjaman ? 'selected' : '' }}>
                                                 Pinjaman Rp {{ number_format($p->jumlah_pinjaman, 0, ',', '.') }} (Sisa Pokok: Rp {{ number_format($p->sisa_pinjaman, 0, ',', '.') }})
@@ -467,6 +468,10 @@
                     currentSisaPokok = parseInt(selectedOption.dataset.sisa) || 0;
                     currentSisaJasa = parseInt(selectedOption.dataset.sisaJasa) || 0;
                     const tenor = parseInt(selectedOption.dataset.tenor) || 1;
+
+                    // PERBAIKAN: Auto-fill Cicilan Ke- berdasarkan data dari controller
+                    const nextCicilan = parseInt(selectedOption.dataset.nextCicilan) || 1;
+                    document.getElementById('inputCicilanKe').value = nextCicilan;
 
                     currentJasaPerBulan = parseInt(selectedOption.dataset.jasaPerbulan) || (total * 0.01);
                     currentPokokPerBulan = Math.ceil(total / tenor);

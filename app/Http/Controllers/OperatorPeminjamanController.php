@@ -14,55 +14,58 @@ use Illuminate\Support\Facades\Log;
 class OperatorPeminjamanController extends Controller
 {
     public function index()
-    {
-        $peminjamans = Peminjaman::with('nasabah')
-            ->where('status_verifikasi', 'disetujui')
-            ->where('sisa_pinjaman', '>', 0)
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+{
+    $peminjamans = Peminjaman::with(['nasabah', 'angsurans'])
+        ->where('status_verifikasi', 'disetujui')
+        ->where('sisa_pinjaman', '>', 0)
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
 
-        $totalAktif = Peminjaman::where('status_verifikasi', 'disetujui')
-            ->where('sisa_pinjaman', '>', 0)
-            ->sum('sisa_pinjaman');
+    // Hitung sisa cicilan untuk setiap pinjaman
+    $peminjamans->getCollection()->transform(function ($peminjaman) {
+        // Hitung berapa kali sudah bayar pokok
+        $jumlahSudahDibayar = $peminjaman->angsurans
+            ->where('jumlah_pokok', '>', 0)
+            ->unique('cicilan_ke')  // Gunakan unique() bukan distinct()
+            ->count();              // count() tanpa parameter
+        
+        $peminjaman->sisa_cicilan = max(0, $peminjaman->tenor - $jumlahSudahDibayar);
+        $peminjaman->jumlah_sudah_dibayar = $jumlahSudahDibayar;
+        
+        return $peminjaman;
+    });
 
-        $totalPeminjam = Peminjaman::where('status_verifikasi', 'disetujui')
-            ->where('sisa_pinjaman', '>', 0)
-            ->distinct('id_nasabah')
-            ->count('id_nasabah');
+    $totalAktif = Peminjaman::where('status_verifikasi', 'disetujui')
+        ->where('sisa_pinjaman', '>', 0)
+        ->sum('sisa_pinjaman');
 
-        $idPinjamanAktif = Peminjaman::where('status_verifikasi', 'disetujui')
-            ->where('sisa_pinjaman', '>', 0)
-            ->pluck('id_pinjaman');
+    $totalPeminjam = Peminjaman::where('status_verifikasi', 'disetujui')
+        ->where('sisa_pinjaman', '>', 0)
+        ->distinct('id_nasabah')  // Ini OK karena masih Query Builder
+        ->count('id_nasabah');
 
-        $jasaAktif = Angsuran::whereIn('id_pinjaman', $idPinjamanAktif)
-            ->sum('jumlah_jasa');
+    $idPinjamanAktif = Peminjaman::where('status_verifikasi', 'disetujui')
+        ->where('sisa_pinjaman', '>', 0)
+        ->pluck('id_pinjaman');
 
-        $provisiAktif = Peminjaman::where('status_verifikasi', 'disetujui')
-            ->where('sisa_pinjaman', '>', 0)
-            ->get()
-            ->sum(function ($peminjaman) {
-                return $peminjaman->jumlah_pinjaman * 0.01;
-            });
+    $jasaAktif = Angsuran::whereIn('id_pinjaman', $idPinjamanAktif)
+        ->sum('jumlah_jasa');
 
-        return view('operator.peminjaman.index', compact(
-            'peminjamans',
-            'totalAktif',
-            'totalPeminjam',
-            'jasaAktif',
-            'provisiAktif'
-        ));
-    }
+    $provisiAktif = Peminjaman::where('status_verifikasi', 'disetujui')
+        ->where('sisa_pinjaman', '>', 0)
+        ->get()
+        ->sum(function ($peminjaman) {
+            return $peminjaman->jumlah_pinjaman * 0.01;
+        });
 
-    public function create()
-    {
-        $nasabahs = Nasabah::with(['user', 'rekening'])
-            ->where('kategori', 'guru')
-            ->where('status', 'aktif')
-            ->orderBy('nama', 'asc')
-            ->get();
-
-        return view('operator.peminjaman.create', compact('nasabahs'));
-    }
+    return view('operator.peminjaman.index', compact(
+        'peminjamans',
+        'totalAktif',
+        'totalPeminjam',
+        'jasaAktif',
+        'provisiAktif'
+    ));
+}
 
     public function store(Request $request)
     {
@@ -214,117 +217,111 @@ class OperatorPeminjamanController extends Controller
     /**
      * Get mutasi untuk SATU pinjaman tertentu
      */
-    /**
- * Get mutasi untuk SATU pinjaman tertentu
- */
-/**
- * Get mutasi untuk SATU pinjaman tertentu
- */
-public function getMutasiPerPinjaman($id_pinjaman)
-{
-    try {
-        Log::info('getMutasiPerPinjaman called with ID: ' . $id_pinjaman);
+    public function getMutasiPerPinjaman($id_pinjaman)
+    {
+        try {
+            Log::info('getMutasiPerPinjaman called with ID: ' . $id_pinjaman);
 
-        $pinjaman = Peminjaman::with('nasabah')->findOrFail($id_pinjaman);
-        
-        if (!$pinjaman) {
-            throw new \Exception('Pinjaman tidak ditemukan');
-        }
-
-        $nasabah = $pinjaman->nasabah;
-        
-        if (!$nasabah) {
-            throw new \Exception('Data nasabah tidak ditemukan');
-        }
-
-        Log::info('Pinjaman found: ' . json_encode($pinjaman->toArray()));
-
-        // Get angsuran for this pinjaman only - HANYA yang ada pokoknya
-        $angsurans = Angsuran::where('id_pinjaman', $id_pinjaman)
-            ->where('jumlah_pokok', '>', 0) // FILTER: Hanya yang ada pembayaran pokok
-            ->orderBy('tanggal_pembayaran', 'asc')
-            ->get();
-
-        Log::info('Found ' . $angsurans->count() . ' angsuran records with pokok payment');
-
-        $transaksi = [];
-        $totalDebet = 0;
-        $totalKredit = 0;
-        $saldoBerjalan = 0;
-
-        // 1. Transaksi Pencairan
-        $jumlahPinjaman = (int)$pinjaman->jumlah_pinjaman;
-        $transaksi[] = [
-            'tanggal' => \Carbon\Carbon::parse($pinjaman->tanggal_ajuan)->format('d/m/Y'),
-            'keterangan' => 'Pencairan Pinjaman' . ($pinjaman->keterangan ? ' - ' . $pinjaman->keterangan : ''),
-            'debit' => $jumlahPinjaman,
-            'kredit' => 0,
-            'jenis' => 'pencairan',
-            'jenis_display' => 'PENCAIRAN',
-            'saldo' => $jumlahPinjaman,
-        ];
-        $totalDebet += $jumlahPinjaman;
-        $saldoBerjalan = $jumlahPinjaman;
-
-        // 2. Transaksi Angsuran (HANYA yang ada pokok)
-        foreach ($angsurans as $angsuran) {
-            $jumlahPokok = (int)($angsuran->jumlah_pokok ?? 0);
+            $pinjaman = Peminjaman::with('nasabah')->findOrFail($id_pinjaman);
             
-            // Skip jika tidak ada pokok (hanya jasa)
-            if ($jumlahPokok <= 0) {
-                continue;
+            if (!$pinjaman) {
+                throw new \Exception('Pinjaman tidak ditemukan');
             }
+
+            $nasabah = $pinjaman->nasabah;
             
-            $saldoBerjalan -= $jumlahPokok;
-            
+            if (!$nasabah) {
+                throw new \Exception('Data nasabah tidak ditemukan');
+            }
+
+            Log::info('Pinjaman found: ' . json_encode($pinjaman->toArray()));
+
+            // Get angsuran for this pinjaman only - HANYA yang ada pokoknya
+            $angsurans = Angsuran::where('id_pinjaman', $id_pinjaman)
+                ->where('jumlah_pokok', '>', 0) // FILTER: Hanya yang ada pembayaran pokok
+                ->orderBy('tanggal_pembayaran', 'asc')
+                ->get();
+
+            Log::info('Found ' . $angsurans->count() . ' angsuran records with pokok payment');
+
+            $transaksi = [];
+            $totalDebet = 0;
+            $totalKredit = 0;
+            $saldoBerjalan = 0;
+
+            // 1. Transaksi Pencairan
+            $jumlahPinjaman = (int)$pinjaman->jumlah_pinjaman;
             $transaksi[] = [
-                'tanggal' => \Carbon\Carbon::parse($angsuran->tanggal_pembayaran)->format('d/m/Y'),
-                'keterangan' => 'Pembayaran Cicilan',
-                'debit' => 0,
-                'kredit' => $jumlahPokok,
-                'pokok' => $jumlahPokok,
-                'jasa' => (int)($angsuran->jumlah_jasa ?? 0),
-                'jenis' => 'pembayaran',
-                'jenis_display' => 'PEMBAYARAN',
-                'saldo' => $saldoBerjalan,
+                'tanggal' => \Carbon\Carbon::parse($pinjaman->tanggal_ajuan)->format('d/m/Y'),
+                'keterangan' => 'Pencairan Pinjaman' . ($pinjaman->keterangan ? ' - ' . $pinjaman->keterangan : ''),
+                'debit' => $jumlahPinjaman,
+                'kredit' => 0,
+                'jenis' => 'pencairan',
+                'jenis_display' => 'PENCAIRAN',
+                'saldo' => $jumlahPinjaman,
             ];
-            $totalKredit += $jumlahPokok;
+            $totalDebet += $jumlahPinjaman;
+            $saldoBerjalan = $jumlahPinjaman;
+
+            // 2. Transaksi Angsuran (HANYA yang ada pokok)
+            foreach ($angsurans as $angsuran) {
+                $jumlahPokok = (int)($angsuran->jumlah_pokok ?? 0);
+                
+                if ($jumlahPokok <= 0) {
+                    continue;
+                }
+                
+                $saldoBerjalan -= $jumlahPokok;
+                
+                $transaksi[] = [
+                    'tanggal' => \Carbon\Carbon::parse($angsuran->tanggal_pembayaran)->format('d/m/Y'),
+                    'keterangan' => 'Pembayaran Cicilan',
+                    'debit' => 0,
+                    'kredit' => $jumlahPokok,
+                    'pokok' => $jumlahPokok,
+                    'jasa' => (int)($angsuran->jumlah_jasa ?? 0),
+                    'jenis' => 'pembayaran',
+                    'jenis_display' => 'PEMBAYARAN',
+                    'saldo' => $saldoBerjalan,
+                ];
+                $totalKredit += $jumlahPokok;
+            }
+
+            $responseData = [
+                'success' => true,
+                'pinjaman' => [
+                    'id_pinjaman' => $pinjaman->id_pinjaman,
+                    'tanggal_ajuan' => \Carbon\Carbon::parse($pinjaman->tanggal_ajuan)->format('d/m/Y'),
+                    'jumlah_pinjaman' => $jumlahPinjaman,
+                    'tenor' => $pinjaman->tenor,
+                    'sisa_pinjaman' => (int)$pinjaman->sisa_pinjaman,
+                    'status' => $pinjaman->status_verifikasi,
+                ],
+                'nasabah' => [
+                    'no_rek' => $nasabah->no_rek ?? '-',
+                    'nama' => $nasabah->nama,
+                ],
+                'transaksi' => $transaksi,
+                'total_debet' => $totalDebet,
+                'total_kredit' => $totalKredit,
+                'saldo_akhir' => $saldoBerjalan,
+            ];
+
+            Log::info('Returning response: ' . json_encode($responseData));
+            
+            return response()->json($responseData);
+
+        } catch (\Exception $e) {
+            Log::error('Error in getMutasiPerPinjaman: ' . $e->getMessage());
+            Log::error('Trace: ' . $e->getTraceAsString());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat data: ' . $e->getMessage()
+            ], 500);
         }
-
-        $responseData = [
-            'success' => true,
-            'pinjaman' => [
-                'id_pinjaman' => $pinjaman->id_pinjaman,
-                'tanggal_ajuan' => \Carbon\Carbon::parse($pinjaman->tanggal_ajuan)->format('d/m/Y'),
-                'jumlah_pinjaman' => $jumlahPinjaman,
-                'tenor' => $pinjaman->tenor,
-                'sisa_pinjaman' => (int)$pinjaman->sisa_pinjaman,
-                'status' => $pinjaman->status_verifikasi,
-            ],
-            'nasabah' => [
-                'no_rek' => $nasabah->no_rek ?? '-',
-                'nama' => $nasabah->nama,
-            ],
-            'transaksi' => $transaksi,
-            'total_debet' => $totalDebet,
-            'total_kredit' => $totalKredit,
-            'saldo_akhir' => $saldoBerjalan,
-        ];
-
-        Log::info('Returning response: ' . json_encode($responseData));
-        
-        return response()->json($responseData);
-
-    } catch (\Exception $e) {
-        Log::error('Error in getMutasiPerPinjaman: ' . $e->getMessage());
-        Log::error('Trace: ' . $e->getTraceAsString());
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal memuat data: ' . $e->getMessage()
-        ], 500);
     }
-}
+
     public function getRekeningData($id_nasabah)
     {
         try {
@@ -418,5 +415,20 @@ public function getMutasiPerPinjaman($id_pinjaman)
                 'message' => 'Gagal memuat data: ' . $e->getMessage()
             ], 500);
         }
+
+        
     }
+
+
+    public function create()
+{
+    $nasabahs = Nasabah::with(['user', 'rekening'])
+        ->where('kategori', 'guru')
+        ->where('status', 'aktif')
+        ->orderBy('nama', 'asc')
+        ->get();
+
+    return view('operator.peminjaman.create', compact('nasabahs'));
 }
+}
+

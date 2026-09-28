@@ -4,28 +4,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
 
 class Peminjaman extends Model
 {
     use HasFactory;
 
     protected $table = 'peminjaman';
-
-    protected $primaryKey = 'id_pinjaman'; 
+    protected $primaryKey = 'id_pinjaman';
 
     protected $fillable = [
         'id_nasabah',
         'id_petugas',
-        'tanggal_ajuan',    
-        'tanggal_jatuh_tempo',          
+        'tanggal_ajuan',
+        'tanggal_jatuh_tempo',
         'jumlah_pinjaman',
         'tenor',
         'sisa_pinjaman',
-        'total_jasa',          // ← ganti dari total_bunga
-        'jasa_per_bulan',      // ← ganti dari bunga_per_bulan
-        'sisa_jasa', 
-        'metode_pembayaran',
+        'total_jasa',
+        'jasa_per_bulan',
+        'sisa_jasa',
         'keterangan',
         'status_verifikasi',
     ];
@@ -42,6 +39,12 @@ class Peminjaman extends Model
 
     public function petugas()
     {
-        return $this->belongsTo(User::class, 'id_petugas', 'username'); 
+        return $this->belongsTo(Petugas::class, 'id_petugas', 'id_petugas');
+    }
+
+    // TAMBAHKAN METHOD INI
+    public function angsurans()
+    {
+        return $this->hasMany(Angsuran::class, 'id_pinjaman', 'id_pinjaman');
     }
 }
