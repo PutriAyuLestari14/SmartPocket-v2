@@ -81,6 +81,7 @@
                                 <option value="">Semua Jenis</option>
                                 <option value="setoran" {{ request('jenis') == 'setoran' ? 'selected' : '' }}>Setoran</option>
                                 <option value="penarikan" {{ request('jenis') == 'penarikan' ? 'selected' : '' }}>Penarikan</option>
+                                <input type="date" name="tanggal" value="{{ request('tanggal') }}" onchange="this.form.submit()" class="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                             </select>
                     </div>
                 </div>
@@ -92,8 +93,8 @@
                                 <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider" style="min-width: 140px;">Waktu</th>
                                 <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Nasabah</th>
                                 <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Jenis</th>
-                                <th class="px-6 py-4 text-right text-[10px] font-semibold text-slate-500 uppercase tracking-wider" style="min-width: 130px;">  Tarik</th>
-                                <th class="px-6 py-4 text-right text-[10px] font-semibold text-slate-500 uppercase tracking-wider" style="min-width: 130px;">Setor</th>
+                                <th class="px-6 py-4 text-right text-[10px] font-semibold text-slate-500 uppercase tracking-wider" style="min-width: 130px;">Tarik      </th>
+                                <th class="px-6 py-4 text-right text-[10px] font-semibold text-slate-500 uppercase tracking-wider" style="min-width: 130px;">Setor      </th>
                                 <th class="px-6 py-4 text-center text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Status</th>
                             </tr>
                         </thead>
@@ -103,7 +104,6 @@
                                 @php
                                     // Tentukan jenis transaksi (1 = Setoran, 2 = Penarikan)
                                     $isSetoran = $item->id_jenis_transaksi == 1;
-                                    $isPenarikan = $item->id_jenis_transaksi == 2;
                                     $amountFormatted = 'Rp ' . number_format($item->jumlah, 0, ',', '.');
                                     
                                     // Tentukan warna badge status
@@ -120,7 +120,7 @@
 
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="px-6 py-4 align-middle">
-                                        <p class="text-sm font-bold text-slate-900">{{ $item->tanggal_transaksi->copy()->timezone('Asia/Jakarta')->format('H:i') }} WIB</p>
+                                        <p class="text-sm font-bold text-slate-900">{{ $item->tanggal_transaksi->format('H:i') }} WIB</p>
                                         <p class="text-[10px] text-slate-400 mt-0.5">{{ $item->tanggal_transaksi->format('d M Y') }}</p>
                                     </td>
                                     <td class="px-6 py-4 align-middle">
