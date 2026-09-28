@@ -43,8 +43,8 @@ class NasabahPeminjamanController extends Controller
             $jumlahPinjaman = $validated['jumlah'];
             $tenor = $validated['tenor'];
             
-            $bungaPerBulan = $jumlahPinjaman * 0.01; // 1% per bulan
-            $totalBunga = $bungaPerBulan * $tenor;   // Total bunga selama tenor
+            $jasaPerBulan = $jumlahPinjaman * 0.01; // 1% per bulan
+            $totaljasa = $jasaPerBulan * $tenor;   // Total jasa selama tenor
 
             // 2. Simpan ke tabel peminjaman
             Peminjaman::create([
@@ -56,10 +56,10 @@ class NasabahPeminjamanController extends Controller
                 'tenor' => $tenor,
                 'sisa_pinjaman' => $jumlahPinjaman,
                 
-                // TAMBAHAN KOLOM BUNGA (BIAR TERSIMPAN DI DATABASE)
-                'total_bunga' => $totalBunga,
-                'bunga_per_bulan' => $bungaPerBulan,
-                'sisa_bunga' => $totalBunga, 
+                // TAMBAHAN KOLOM JASA (BIAR TERSIMPAN DI DATABASE)
+                'total_jasa' => $totaljasa,
+                'jasa_per_bulan' => $jasaPerBulan,
+                'sisa_jasa' => $totaljasa, 
                 
                 'keterangan' => $validated['keterangan'],
                 'status_verifikasi' => 'pending',

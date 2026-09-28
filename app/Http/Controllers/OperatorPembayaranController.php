@@ -60,7 +60,7 @@ class OperatorPembayaranController extends Controller
     }
 
     /**
-     * Memproses penyimpanan pembayaran cicilan ke database (Dengan Logika Bunga 1% Flat)
+     * Memproses penyimpanan pembayaran cicilan ke database (Dengan Logika Jasa 1% Flat)
      */
     public function store(Request $request)
     {
@@ -69,7 +69,7 @@ class OperatorPembayaranController extends Controller
             'cicilan_ke' => 'required|integer|min:1',
             'tanggal_pembayaran' => 'required|date',
             'jumlah' => 'required|numeric|min:1',
-            'jenis_pembayaran' => 'required|in:pokok,bunga,keduanya',
+            'jenis_pembayaran' => 'required|in:pokok,jasa,keduanya', // UBAH: 'bunga' jadi 'jasa'
             'keterangan' => 'nullable|string|max:255',
         ]);
 
@@ -97,7 +97,7 @@ class OperatorPembayaranController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $jasaPerBulan = (int) $peminjaman->bunga_per_bulan;
+            $jasaPerBulan = (int) $peminjaman->jasa_per_bulan;
 
             // Total jasa yang sudah dibayar
             $jasaSudahDibayar = (int) Angsuran::where(
@@ -147,7 +147,7 @@ class OperatorPembayaranController extends Controller
                 $jumlahPokok = $jumlahBayar;
                 $jumlahJasa = 0;
 
-            } elseif ($validated['jenis_pembayaran'] === 'bunga') {
+            } elseif ($validated['jenis_pembayaran'] === 'jasa') { // UBAH: dari 'bunga' jadi 'jasa'
 
                 if ($jasaBelumDibayar <= 0) {
                     throw new \Exception(
@@ -190,7 +190,8 @@ class OperatorPembayaranController extends Controller
                         (int) $peminjaman->sisa_pinjaman
                     );
                 }
-            }            /*
+            }
+            /*
             |--------------------------------------------------------------------------
             | SIMPAN PEMBAYARAN
             |--------------------------------------------------------------------------
@@ -225,7 +226,7 @@ class OperatorPembayaranController extends Controller
 
             $totalJasaSudahDibayar = $jasaSudahDibayar + $jumlahJasa;
 
-            $peminjaman->sisa_bunga = max(
+            $peminjaman->sisa_jasa = max(
                 0,
                 $jasaSeharusnya - $totalJasaSudahDibayar
             );
@@ -238,7 +239,7 @@ class OperatorPembayaranController extends Controller
 
             if (
                 $peminjaman->sisa_pinjaman <= 0 &&
-                $peminjaman->sisa_bunga <= 0
+                $peminjaman->sisa_jasa <= 0
             ) {
                 $peminjaman->status_verifikasi = 'lunas';
             }

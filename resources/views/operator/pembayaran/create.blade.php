@@ -64,7 +64,6 @@
 
         <!-- Main Content -->
         <main class="flex-1 ml-64 p-4 lg:p-8">
-            <!-- Alert Success/Error -->
             @if(session('success'))
                 <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-3 text-emerald-800">
                     <i class="fas fa-check-circle text-emerald-600"></i>
@@ -97,7 +96,6 @@
                             </div>
                         </div>
 
-                        <!-- Search Form -->
                         <form action="{{ route('operator.pembayaran.create') }}" method="GET" class="flex gap-3 mb-4">
                             <div class="flex-1 relative">
                                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
@@ -109,7 +107,6 @@
                             </button>
                         </form>
 
-                        <!-- Selected Nasabah Card -->
                         @if($nasabah)
                             <div class="bg-emerald-50/50 border border-emerald-100 rounded-lg p-4">
                                 <div class="flex items-center gap-4">
@@ -153,8 +150,8 @@
                                         <option value="{{ $p->id_pinjaman }}" 
                                             data-jumlah="{{ $p->jumlah_pinjaman }}" 
                                             data-sisa="{{ $p->sisa_pinjaman }}"
-                                            data-sisa-bunga="{{ $p->sisa_bunga }}"
-                                            data-bunga-perbulan="{{ $p->bunga_per_bulan }}"
+                                            data-sisa-jasa="{{ $p->sisa_jasa ?? $p->sisa_bunga }}" 
+                                            data-jasa-perbulan="{{ $p->jasa_per_bulan ?? $p->bunga_per_bulan }}"
                                             data-tenor="{{ $p->tenor }}"
                                             data-jasa-bulan='@json($p->jasa_bulan ?? [])'
                                             {{ $pinjamanTerpilih && $pinjamanTerpilih->id_pinjaman == $p->id_pinjaman ? 'selected' : '' }}>
@@ -164,7 +161,7 @@
                                 </select>
                             </div>
 
-                            <!-- Info Tagihan Bulan Ini (Otomatis Terupdate) -->
+                            <!-- Info Tagihan Bulan Ini -->
                             <div id="infoTagihan" class="mb-4 p-3 bg-emerald-50 rounded-lg border border-emerald-100 hidden">
                                 <p class="text-[10px] font-bold text-emerald-800 uppercase mb-1">Info Tagihan Bulan Ini</p>
                                 <div class="grid grid-cols-2 gap-2 text-xs">
@@ -173,11 +170,11 @@
                                         <span class="font-bold text-slate-900" id="infoPokokPerBulan">Rp 0</span>
                                     </div>
                                     <div>
-                                        <span class="text-slate-600">Bunga/bulan (1%):</span>
-                                        <span class="font-bold text-slate-900" id="infoBungaPerBulan">Rp 0</span>
+                                        <span class="text-slate-600">Jasa/bulan (1%):</span>
+                                        <span class="font-bold text-slate-900" id="infoJasaPerBulan">Rp 0</span>
                                     </div>
                                     <div class="col-span-2 pt-2 border-t border-emerald-200">
-                                        <span class="text-slate-600">Total (Pokok + Bunga):</span>
+                                        <span class="text-slate-600">Total (Pokok + Jasa):</span>
                                         <span class="font-bold text-emerald-700" id="infoTotalBulanIni">Rp 0</span>
                                     </div>
                                 </div>
@@ -197,13 +194,13 @@
                                 </div>
                             </div>
 
-                            <!-- JENIS PEMBAYARAN (DROPDOWN BARU) -->
+                            <!-- JENIS PEMBAYARAN -->
                             <div class="mb-4">
                                 <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1.5">Jenis Pembayaran</label>
                                 <select name="jenis_pembayaran" id="selectJenis" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" required>
                                     <option value="pokok">Bayar Pokok Saja</option>
-                                    <option value="bunga">Bayar Bunga (1%) Saja</option>
-                                    <option value="keduanya">Bayar Pokok & Bunga</option>
+                                    <option value="jasa">Bayar Jasa (1%) Saja</option>
+                                    <option value="keduanya">Bayar Pokok & Jasa</option>
                                 </select>
                                 <p class="text-[10px] text-slate-400 mt-1">* Nominal akan otomatis terisi sesuai pilihan</p>
                             </div>
@@ -264,8 +261,8 @@
                                 <span class="text-sm font-bold text-slate-900" id="infoSisaPokok">Rp 0</span>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-xs text-slate-600">Sisa Bunga</span>
-                                <span class="text-sm font-bold text-amber-600" id="infoSisaBunga">Rp 0</span>
+                                <span class="text-xs text-slate-600">Sisa Jasa</span>
+                                <span class="text-sm font-bold text-amber-600" id="infoSisaJasa">Rp 0</span>
                             </div>
                         </div>
                     </div>
@@ -289,68 +286,60 @@
         
         const infoTotal = document.getElementById('infoTotal');
         const infoSisaPokok = document.getElementById('infoSisaPokok');
-        const infoSisaBunga = document.getElementById('infoSisaBunga');
+        const infoSisaJasa = document.getElementById('infoSisaJasa'); // DIUBAH dari infoSisaBunga
         const estimasiSisa = document.getElementById('estimasiSisa');
         
         const infoTagihan = document.getElementById('infoTagihan');
         const infoPokokPerBulan = document.getElementById('infoPokokPerBulan');
-        const infoBungaPerBulan = document.getElementById('infoBungaPerBulan');
+        const infoJasaPerBulan = document.getElementById('infoJasaPerBulan'); // DIUBAH dari infoBungaPerBulan
         const infoTotalBulanIni = document.getElementById('infoTotalBulanIni');
 
         let currentSisaPokok = 0;
-        let currentSisaBunga = 0;
+        let currentSisaJasa = 0; // DIUBAH dari currentSisaBunga
         let currentPokokPerBulan = 0;
-        let currentBungaPerBulan = 0;
+        let currentJasaPerBulan = 0; // DIUBAH dari currentBungaPerBulan
 
-        // Format Rupiah
         const formatRupiah = (angka) => {
             return 'Rp ' + new Intl.NumberFormat('id-ID').format(angka || 0);
         };
 
-        // Saat pinjaman dipilih
         selectPinjaman.addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
             if (this.value) {
                 const total = parseInt(selectedOption.dataset.jumlah) || 0;
                 currentSisaPokok = parseInt(selectedOption.dataset.sisa) || 0;
-                currentSisaBunga = parseInt(selectedOption.dataset.sisaBunga) || 0;
+                currentSisaJasa = parseInt(selectedOption.dataset.sisaJasa) || 0; // DIUBAH
                 const tenor = parseInt(selectedOption.dataset.tenor) || 1;
                 
-                // AMAN: Ambil dari database, jika 0/null hitung manual 1% sebagai fallback
-                currentBungaPerBulan = parseInt(selectedOption.dataset.bungaPerbulan) || (total * 0.01);
+                currentJasaPerBulan = parseInt(selectedOption.dataset.jasaPerbulan) || (total * 0.01); // DIUBAH
                 
-                // Hitung estimasi pokok per bulan
                 currentPokokPerBulan = Math.ceil(total / tenor); 
 
-                // Update Panel Kanan
                 infoTotal.textContent = formatRupiah(total);
                 infoSisaPokok.textContent = formatRupiah(currentSisaPokok);
-                infoSisaBunga.textContent = formatRupiah(currentSisaBunga);
+                infoSisaJasa.textContent = formatRupiah(currentSisaJasa); // DIUBAH
                 
-                // Update Info Tagihan
                 infoPokokPerBulan.textContent = formatRupiah(currentPokokPerBulan);
-                infoBungaPerBulan.textContent = formatRupiah(currentBungaPerBulan);
-                infoTotalBulanIni.textContent = formatRupiah(currentPokokPerBulan + currentBungaPerBulan);
+                infoJasaPerBulan.textContent = formatRupiah(currentJasaPerBulan); // DIUBAH
+                infoTotalBulanIni.textContent = formatRupiah(currentPokokPerBulan + currentJasaPerBulan); // DIUBAH
                 infoTagihan.classList.remove('hidden');
 
-                // Auto-set nominal berdasarkan jenis pembayaran
                 updateNominalOtomatis();
                 updateEstimasi();
             } else {
                 infoTotal.textContent = 'Rp 0';
                 infoSisaPokok.textContent = 'Rp 0';
-                infoSisaBunga.textContent = 'Rp 0';
+                infoSisaJasa.textContent = 'Rp 0'; // DIUBAH
                 estimasiSisa.textContent = 'Rp 0';
                 infoTagihan.classList.add('hidden');
                 nominalBayar.value = '';
                 currentSisaPokok = 0;
-                currentSisaBunga = 0;
-                currentBungaPerBulan = 0;
+                currentSisaJasa = 0; // DIUBAH
+                currentJasaPerBulan = 0; // DIUBAH
                 currentPokokPerBulan = 0;
             }
         });
 
-        // Saat jenis pembayaran berubah → AUTO FILL NOMINAL!
         selectJenis.addEventListener('change', function() {
             updateNominalOtomatis();
             updateEstimasi();
@@ -362,8 +351,8 @@
             const jenis = selectJenis.value;
             let nominal = 0;
 
-            if (jenis === 'bunga') {
-                nominal = currentBungaPerBulan;
+            if (jenis === 'jasa') { // DIUBAH dari 'bunga'
+                nominal = currentJasaPerBulan; // DIUBAH
             } else if (jenis === 'pokok') {
                 nominal = currentPokokPerBulan;
             } else if (jenis === 'keduanya') {
@@ -375,49 +364,46 @@
                 if (tanggal && selectedOption.dataset.jasaBulan) {
                     const jasaBulan = JSON.parse(selectedOption.dataset.jasaBulan);
                     const bulanPembayaran = tanggal.substring(0, 7);
-
                     jasaSudahDibayar = jasaBulan.includes(bulanPembayaran);
                 }
 
                 if (jasaSudahDibayar) {
                     nominal = currentPokokPerBulan;
                 } else {
-                    nominal = currentPokokPerBulan + currentBungaPerBulan;
+                    nominal = currentPokokPerBulan + currentJasaPerBulan; // DIUBAH
                 }
             }
 
             nominalBayar.value = nominal;
         }
 
-        // Saat nominal diketik manual (jika operator mau ubah)
         nominalBayar.addEventListener('input', updateEstimasi);
 
         function updateEstimasi() {
-            if (currentSisaPokok > 0 || currentSisaBunga > 0) {
+            if (currentSisaPokok > 0 || currentSisaJasa > 0) { // DIUBAH
                 const bayar = parseInt(nominalBayar.value) || 0;
                 const jenis = selectJenis.value;
                 
                 let sisaSetelahBayarPokok = currentSisaPokok;
-                let sisaSetelahBayarBunga = currentSisaBunga;
+                let sisaSetelahBayarJasa = currentSisaJasa; // DIUBAH
 
-                if (jenis === 'bunga') {
-                    sisaSetelahBayarBunga = Math.max(0, currentSisaBunga - bayar);
+                if (jenis === 'jasa') { // DIUBAH dari 'bunga'
+                    sisaSetelahBayarJasa = Math.max(0, currentSisaJasa - bayar); // DIUBAH
                 } else if (jenis === 'pokok') {
                     sisaSetelahBayarPokok = Math.max(0, currentSisaPokok - bayar);
                 } else if (jenis === 'keduanya') {
-                    if (bayar <= currentSisaBunga) {
-                        sisaSetelahBayarBunga = currentSisaBunga - bayar;
+                    if (bayar <= currentSisaJasa) { // DIUBAH
+                        sisaSetelahBayarJasa = currentSisaJasa - bayar; // DIUBAH
                     } else {
-                        sisaSetelahBayarBunga = 0;
-                        sisaSetelahBayarPokok = Math.max(0, currentSisaPokok - (bayar - currentSisaBunga));
+                        sisaSetelahBayarJasa = 0; // DIUBAH
+                        sisaSetelahBayarPokok = Math.max(0, currentSisaPokok - (bayar - currentSisaJasa)); // DIUBAH
                     }
                 }
 
-                const totalSisa = sisaSetelahBayarPokok + sisaSetelahBayarBunga;
+                const totalSisa = sisaSetelahBayarPokok + sisaSetelahBayarJasa; // DIUBAH
                 estimasiSisa.textContent = formatRupiah(totalSisa);
                 
-                // Warning jika bayar lebih besar dari total sisa
-                if (bayar > (currentSisaPokok + currentSisaBunga)) {
+                if (bayar > (currentSisaPokok + currentSisaJasa)) { // DIUBAH
                     estimasiSisa.classList.add('text-red-200');
                 } else {
                     estimasiSisa.classList.remove('text-red-200');
@@ -425,7 +411,6 @@
             }
         }
 
-        // Trigger change event saat halaman load (kalau ada pinjaman terpilih dari redirect)
         if (selectPinjaman.value) {
             selectPinjaman.dispatchEvent(new Event('change'));
         }

@@ -22,9 +22,9 @@ class Peminjaman extends Model
         'jumlah_pinjaman',
         'tenor',
         'sisa_pinjaman',
-        'total_bunga',          // <-- TAMBAH
-        'bunga_per_bulan',      // <-- TAMBAH
-        'sisa_bunga',
+        'total_jasa',          // ← ganti dari total_bunga
+        'jasa_per_bulan',      // ← ganti dari bunga_per_bulan
+        'sisa_jasa', 
         'metode_pembayaran',
         'keterangan',
         'status_verifikasi',

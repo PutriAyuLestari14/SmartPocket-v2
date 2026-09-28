@@ -273,88 +273,88 @@
     };
 
     function openMutasiPinjaman(idPinjaman, namaNasabah, noRek) {
-    console.log('Membuka mutasi untuk pinjaman ID:', idPinjaman);
-    
-    const modal = document.getElementById('mutasiModal');
-    const loading = document.getElementById('modalLoading');
-    const content = document.getElementById('modalContent');
-    const emptyState = document.getElementById('modalEmptyState');
-    const tableBody = document.getElementById('modalTableBody');
+        console.log('Membuka mutasi untuk pinjaman ID:', idPinjaman);
+        
+        const modal = document.getElementById('mutasiModal');
+        const loading = document.getElementById('modalLoading');
+        const content = document.getElementById('modalContent');
+        const emptyState = document.getElementById('modalEmptyState');
+        const tableBody = document.getElementById('modalTableBody');
 
-    modal.classList.remove('hidden');
-    loading.classList.remove('hidden');
-    content.classList.add('hidden');
-    emptyState.classList.add('hidden');
-    tableBody.innerHTML = '';
-    document.getElementById('modalNamaNasabah').textContent = namaNasabah + (noRek ? ' - ' + noRek : '');
+        modal.classList.remove('hidden');
+        loading.classList.remove('hidden');
+        content.classList.add('hidden');
+        emptyState.classList.add('hidden');
+        tableBody.innerHTML = '';
+        document.getElementById('modalNamaNasabah').textContent = namaNasabah + (noRek ? ' - ' + noRek : '');
 
-    const url = `/operator/peminjaman/mutasi/${idPinjaman}`;
-    console.log('Fetching URL:', url);
+        const url = `/operator/peminjaman/mutasi/${idPinjaman}`;
+        console.log('Fetching URL:', url);
 
-    fetch(url)
-        .then(res => {
-            console.log('Response status:', res.status);
-            return res.json();
-        })
-        .then(data => {
-            console.log('Response data:', data);
-            loading.classList.add('hidden');
-            
-            if (!data.success) {
+        fetch(url)
+            .then(res => {
+                console.log('Response status:', res.status);
+                return res.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                loading.classList.add('hidden');
+                
+                if (!data.success) {
+                    content.classList.remove('hidden');
+                    tableBody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-sm text-red-600">${data.message || 'Data tidak ditemukan'}</td></tr>`;
+                    return;
+                }
+
+                if (!data.transaksi || data.transaksi.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    content.classList.remove('hidden');
+                    return;
+                }
+
+                // Render transaksi (HANYA 2 JENIS: PENCAIRAN & PEMBAYARAN)
+                data.transaksi.forEach((t) => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50 transition-colors';
+                    
+                    // Logika badge jenis transaksi yang disederhanakan
+                    const badgeJenis = t.jenis === 'pencairan' 
+                        ? '<span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-[9px] font-bold">PENCAIRAN</span>' 
+                        : '<span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[9px] font-bold">PEMBAYARAN</span>';
+
+                    row.innerHTML = `
+                        <td class="px-3 py-3 text-[10px] font-mono text-slate-600">${data.nasabah.no_rek || '-'}</td>
+                        <td class="px-3 py-3 text-[10px] font-semibold text-slate-900">${namaNasabah.substring(0, 15)}</td>
+                        <td class="px-3 py-3 text-[10px] text-center text-slate-600">${t.tanggal}</td>
+                        <td class="px-3 py-3 text-center">
+                            ${badgeJenis}
+                        </td>
+                        <td class="px-3 py-3 text-[10px] font-semibold text-right ${t.debit > 0 ? 'text-emerald-600' : 'text-gray-400'}">
+                            ${t.debit > 0 ? formatRupiah(t.debit).replace(/\./g, ' ') : '0'}
+                        </td>
+                        <td class="px-3 py-3 text-[10px] font-semibold text-right ${t.kredit > 0 ? 'text-red-600' : 'text-gray-400'}">
+                            ${t.kredit > 0 ? formatRupiah(t.kredit).replace(/\./g, ' ') : '0'}
+                        </td>
+                        <td class="px-3 py-3 text-[10px] font-bold text-right text-slate-900 bg-gray-50">
+                            ${formatRupiah(t.saldo).replace(/\./g, ' ')}
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+                document.getElementById('totalDebet').textContent = formatRupiah(data.total_debet).replace(/\./g, ' ');
+                document.getElementById('totalKredit').textContent = formatRupiah(data.total_kredit).replace(/\./g, ' ');
+                document.getElementById('totalSaldo').textContent = formatRupiah(data.saldo_akhir).replace(/\./g, ' ');
+
                 content.classList.remove('hidden');
-                tableBody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-sm text-red-600">${data.message || 'Data tidak ditemukan'}</td></tr>`;
-                return;
-            }
-
-            if (!data.transaksi || data.transaksi.length === 0) {
-                emptyState.classList.remove('hidden');
+            })
+            .catch(err => {
+                console.error('Error fetching data:', err);
+                loading.classList.add('hidden');
                 content.classList.remove('hidden');
-                return;
-            }
-
-            // Render transaksi
-            data.transaksi.forEach((t) => {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50 transition-colors';
-                row.innerHTML = `
-                    <td class="px-3 py-3 text-[10px] font-mono text-slate-600">${data.nasabah.no_rek || '-'}</td>
-                    <td class="px-3 py-3 text-[10px] font-semibold text-slate-900">${namaNasabah.substring(0, 15)}</td>
-                    <td class="px-3 py-3 text-[10px] text-center text-slate-600">${t.tanggal}</td>
-                    <td class="px-3 py-3 text-center">
-                        ${t.jenis === 'bunga' 
-                            ? '<span class="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-[9px] font-bold">BUNGA</span>' 
-                            : t.jenis === 'pokok' 
-                                ? '<span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-[9px] font-bold">POKOK</span>' 
-                                : t.jenis === 'keduanya'
-                                    ? '<span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[9px] font-bold">POKOK+BUNGA</span>'
-                                    : '<span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-[9px] font-bold">PENCAIRAN</span>'}
-                    </td>
-                    <td class="px-3 py-3 text-[10px] font-semibold text-right ${t.debit > 0 ? 'text-emerald-600' : 'text-gray-400'}">
-                        ${t.debit > 0 ? formatRupiah(t.debit).replace(/\./g, ' ') : '0'}
-                    </td>
-                    <td class="px-3 py-3 text-[10px] font-semibold text-right ${t.kredit > 0 ? 'text-red-600' : 'text-gray-400'}">
-                        ${t.kredit > 0 ? formatRupiah(t.kredit).replace(/\./g, ' ') : '0'}
-                    </td>
-                    <td class="px-3 py-3 text-[10px] font-bold text-right text-slate-900 bg-gray-50">
-                        ${formatRupiah(t.saldo).replace(/\./g, ' ')}
-                    </td>
-                `;
-                tableBody.appendChild(row);
+                tableBody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-sm text-red-600">Gagal memuat data. Lihat console untuk detail error.</td></tr>`;
             });
-
-            document.getElementById('totalDebet').textContent = formatRupiah(data.total_debet).replace(/\./g, ' ');
-            document.getElementById('totalKredit').textContent = formatRupiah(data.total_kredit).replace(/\./g, ' ');
-            document.getElementById('totalSaldo').textContent = formatRupiah(data.saldo_akhir).replace(/\./g, ' ');
-
-            content.classList.remove('hidden');
-        })
-        .catch(err => {
-            console.error('Error fetching data:', err);
-            loading.classList.add('hidden');
-            content.classList.remove('hidden');
-            tableBody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-sm text-red-600">Gagal memuat data. Lihat console untuk detail error.</td></tr>`;
-        });
-}
+    }
 
     function closeMutasiModal() {
         document.getElementById('mutasiModal').classList.add('hidden');
@@ -373,4 +373,6 @@
             row.style.display = text.includes(keyword) ? '' : 'none';
         });
     });
-</script>
+    </script>
+</body>
+</html>
