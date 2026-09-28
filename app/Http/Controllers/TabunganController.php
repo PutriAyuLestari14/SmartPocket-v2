@@ -135,12 +135,12 @@ class TabunganController extends Controller
             ->where('sisa_pinjaman', '>', 0)
             ->sum('sisa_pinjaman') ?? 0;
 
-        $totalSisaBunga = Peminjaman::where('id_nasabah', $id_nasabah)
+        $totalSisaJasa = Peminjaman::where('id_nasabah', $id_nasabah)
             ->where('status_verifikasi', 'disetujui')
             ->where('sisa_pinjaman', '>', 0)
-            ->sum('sisa_bunga') ?? 0;
+            ->sum('sisa_jasa') ?? 0;
 
-        $totalKewajiban = $totalSisaPokok + $totalSisaBunga;
+        $totalKewajiban = $totalSisaPokok + $totalSisaJasa;
 
         return view('nasabah.dashboard', compact(
             'rekening',
@@ -149,7 +149,7 @@ class TabunganController extends Controller
             'pengajuanPeminjaman',
             'pinjamanAktif',
             'totalSisaPokok',      // <-- Baru
-            'totalSisaBunga',      // <-- Baru
+            'totalSisaJasa',       // <-- Baru
             'totalKewajiban'       // <-- Baru
         ));
     

@@ -103,7 +103,23 @@
         </aside>
 
         <!-- Main Content -->
+<<<<<<< HEAD
         <main class="flex-1 lg:ml-64 min-w-0">
+=======
+        <main class="flex-1 ml-64 p-4 lg:p-8">
+            @if(session('success'))
+                <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-3 text-emerald-800">
+                    <i class="fas fa-check-circle text-emerald-600"></i>
+                    <span class="text-sm font-medium">{{ session('success') }}</span>
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-800">
+                    <i class="fas fa-exclamation-circle text-red-600"></i>
+                    <span class="text-sm font-medium">{{ session('error') }}</span>
+                </div>
+            @endif
+>>>>>>> 6c9ba9b3658fb3ad75786b0a6f3878568557cf9f
 
             <!-- Mobile Top Bar -->
             <header class="lg:hidden bg-white border-b border-slate-200/80 sticky top-0 z-30 px-4 py-3 flex items-center justify-between">
@@ -141,6 +157,7 @@
                             <span class="text-forest font-bold">Input Pembayaran</span>
                         </div>
 
+<<<<<<< HEAD
                         <h2 class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-tight">
                             Input Pembayaran Cicilan
                         </h2>
@@ -202,6 +219,33 @@
                                 <div>
                                     <h3 class="text-sm font-extrabold text-slate-900">Data Peminjam</h3>
                                     <p class="text-[11px] text-slate-500">Cari guru/staf yang akan melakukan pembayaran</p>
+=======
+                        <form action="{{ route('operator.pembayaran.create') }}" method="GET" class="flex gap-3 mb-4">
+                            <div class="flex-1 relative">
+                                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                                <input type="text" name="cari" value="{{ request('cari') }}" placeholder="Cari Nama atau Username/NIP..." 
+                                    class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                            </div>
+                            <button type="submit" class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-semibold transition-colors">
+                                Cari
+                            </button>
+                        </form>
+
+                        @if($nasabah)
+                            <div class="bg-emerald-50/50 border border-emerald-100 rounded-lg p-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-emerald-200 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <span class="text-emerald-700 font-bold text-lg">{{ substr($nasabah->nama, 0, 2) }}</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-base font-bold text-slate-900">{{ $nasabah->nama }}</p>
+                                        <p class="text-[10px] text-slate-500">No. Rek: {{ $nasabah->no_rek }} • {{ ucfirst($nasabah->kategori) }}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-[10px] text-slate-500 uppercase font-semibold">Status Nasabah</p>
+                                        <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-bold">{{ ucfirst($nasabah->status) }}</span>
+                                    </div>
+>>>>>>> 6c9ba9b3658fb3ad75786b0a6f3878568557cf9f
                                 </div>
                             </div>
 
@@ -395,6 +439,7 @@
                             </div>
                         </div>
 
+<<<<<<< HEAD
                         <!-- Estimasi Total Sisa -->
                         <div class="gradient-mint rounded-2xl p-5 lg:p-6 text-white shadow-xl shadow-mint/30 relative overflow-hidden lg:sticky lg:top-6">
                             <div class="absolute -top-12 -right-12 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
@@ -404,6 +449,133 @@
                                 <p class="text-[10px] text-emerald-100 flex items-center gap-1.5">
                                     <i class="fas fa-sync-alt text-[8px]"></i> Akan terupdate saat nominal diisi
                                 </p>
+=======
+                        <form action="{{ route('operator.pembayaran.store') }}" method="POST">
+                            @csrf
+                            
+                            <!-- Pilih Pinjaman Aktif -->
+                            <div class="mb-4">
+                                <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1.5">Pinjaman Aktif</label>
+                                <select name="id_pinjaman" id="selectPinjaman" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" required>
+                                    <option value="">-- Pilih Pinjaman --</option>
+                                    @foreach($peminjamanAktif as $p)
+                                        <option value="{{ $p->id_pinjaman }}" 
+                                            data-jumlah="{{ $p->jumlah_pinjaman }}" 
+                                            data-sisa="{{ $p->sisa_pinjaman }}"
+                                            data-sisa-jasa="{{ $p->sisa_jasa ?? $p->sisa_bunga }}" 
+                                            data-jasa-perbulan="{{ $p->jasa_per_bulan ?? $p->bunga_per_bulan }}"
+                                            data-tenor="{{ $p->tenor }}"
+                                            data-jasa-bulan='@json($p->jasa_bulan ?? [])'
+                                            {{ $pinjamanTerpilih && $pinjamanTerpilih->id_pinjaman == $p->id_pinjaman ? 'selected' : '' }}>
+                                            Pinjaman Rp {{ number_format($p->jumlah_pinjaman, 0, ',', '.') }} (Sisa Pokok: Rp {{ number_format($p->sisa_pinjaman, 0, ',', '.') }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Info Tagihan Bulan Ini -->
+                            <div id="infoTagihan" class="mb-4 p-3 bg-emerald-50 rounded-lg border border-emerald-100 hidden">
+                                <p class="text-[10px] font-bold text-emerald-800 uppercase mb-1">Info Tagihan Bulan Ini</p>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <span class="text-slate-600">Pokok/bulan:</span>
+                                        <span class="font-bold text-slate-900" id="infoPokokPerBulan">Rp 0</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-600">Jasa/bulan (1%):</span>
+                                        <span class="font-bold text-slate-900" id="infoJasaPerBulan">Rp 0</span>
+                                    </div>
+                                    <div class="col-span-2 pt-2 border-t border-emerald-200">
+                                        <span class="text-slate-600">Total (Pokok + Jasa):</span>
+                                        <span class="font-bold text-emerald-700" id="infoTotalBulanIni">Rp 0</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cicilan Ke & Tanggal -->
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1.5">Cicilan Ke-</label>
+                                    <input type="number" name="cicilan_ke" id="inputCicilanKe" min="1" value="1"
+                                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" required>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1.5">Tanggal Pembayaran</label>
+                                    <input type="date" name="tanggal_pembayaran" id="tanggalPembayaran" value="{{ date('Y-m-d') }}"
+                                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" required>
+                                </div>
+                            </div>
+
+                            <!-- JENIS PEMBAYARAN -->
+                            <div class="mb-4">
+                                <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1.5">Jenis Pembayaran</label>
+                                <select name="jenis_pembayaran" id="selectJenis" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" required>
+                                    <option value="pokok">Bayar Pokok Saja</option>
+                                    <option value="jasa">Bayar Jasa (1%) Saja</option>
+                                    <option value="keduanya">Bayar Pokok & Jasa</option>
+                                </select>
+                                <p class="text-[10px] text-slate-400 mt-1">* Nominal akan otomatis terisi sesuai pilihan</p>
+                            </div>
+
+                            <!-- Nominal Bayar -->
+                            <div class="mb-4">
+                                <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1.5">Nominal Pembayaran</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-semibold">Rp</span>
+                                    <input type="number" name="jumlah" id="nominalBayar" value="0" 
+                                        class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-right" required>
+                                </div>
+                                <p class="text-[10px] text-slate-400 mt-1">* Bisa diubah manual jika ada uang lebih/kurang</p>
+                            </div>
+
+                            <!-- Keterangan -->
+                            <div class="mb-5">
+                                <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1.5">Keterangan</label>
+                                <input type="text" name="keterangan" placeholder="Opsional (contoh: Pembayaran via transfer)..." 
+                                    class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex gap-3">
+                                <a href="{{ route('operator.peminjaman.index') }}" class="flex-1 px-4 py-2.5 border border-gray-200 text-slate-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors text-sm text-center">
+                                    Batal
+                                </a>
+                                <button type="submit" class="flex-1 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 text-sm shadow-sm">
+                                    <i class="fas fa-check-circle text-xs"></i> Proses Pembayaran
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    @elseif($nasabah)
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
+                            <i class="fas fa-check-circle text-4xl text-emerald-500 mb-3"></i>
+                            <p class="text-slate-600 font-medium">Nasabah ini tidak memiliki pinjaman aktif yang perlu dibayar.</p>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Right Column: Summary & Schedule -->
+                <div class="lg:col-span-1 space-y-4">
+                    
+                    <!-- Info Pinjaman (Dinamis) -->
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                        <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <i class="fas fa-info-circle text-emerald-500"></i> Info Pinjaman Terpilih
+                        </h3>
+                        
+                        <div class="space-y-3" id="infoPinjaman">
+                            <div class="flex justify-between items-center pb-3 border-b border-gray-100">
+                                <span class="text-xs text-slate-600">Total Pinjaman</span>
+                                <span class="text-sm font-bold text-slate-900" id="infoTotal">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between items-center pb-3 border-b border-gray-100">
+                                <span class="text-xs text-slate-600">Sisa Pokok</span>
+                                <span class="text-sm font-bold text-slate-900" id="infoSisaPokok">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-slate-600">Sisa Jasa</span>
+                                <span class="text-sm font-bold text-amber-600" id="infoSisaJasa">Rp 0</span>
+>>>>>>> 6c9ba9b3658fb3ad75786b0a6f3878568557cf9f
                             </div>
                         </div>
                     </div>
@@ -479,18 +651,18 @@
 
         const infoTotal = document.getElementById('infoTotal');
         const infoSisaPokok = document.getElementById('infoSisaPokok');
-        const infoSisaBunga = document.getElementById('infoSisaBunga');
+        const infoSisaJasa = document.getElementById('infoSisaJasa'); // DIUBAH dari infoSisaBunga
         const estimasiSisa = document.getElementById('estimasiSisa');
 
         const infoTagihan = document.getElementById('infoTagihan');
         const infoPokokPerBulan = document.getElementById('infoPokokPerBulan');
-        const infoBungaPerBulan = document.getElementById('infoBungaPerBulan');
+        const infoJasaPerBulan = document.getElementById('infoJasaPerBulan'); // DIUBAH dari infoBungaPerBulan
         const infoTotalBulanIni = document.getElementById('infoTotalBulanIni');
 
         let currentSisaPokok = 0;
-        let currentSisaBunga = 0;
+        let currentSisaJasa = 0; // DIUBAH dari currentSisaBunga
         let currentPokokPerBulan = 0;
-        let currentBungaPerBulan = 0;
+        let currentJasaPerBulan = 0; // DIUBAH dari currentBungaPerBulan
 
         const formatRupiah = (angka) => {
             return 'Rp ' + new Intl.NumberFormat('id-ID').format(angka || 0);
@@ -554,8 +726,8 @@
             const jenis = selectJenis.value;
             let nominal = 0;
 
-            if (jenis === 'bunga') {
-                nominal = currentBungaPerBulan;
+            if (jenis === 'jasa') { // DIUBAH dari 'bunga'
+                nominal = currentJasaPerBulan; // DIUBAH
             } else if (jenis === 'pokok') {
                 nominal = currentPokokPerBulan;
             } else if (jenis === 'keduanya') {
@@ -567,49 +739,57 @@
                 if (tanggal && selectedOption.dataset.jasaBulan) {
                     const jasaBulan = JSON.parse(selectedOption.dataset.jasaBulan);
                     const bulanPembayaran = tanggal.substring(0, 7);
-
                     jasaSudahDibayar = jasaBulan.includes(bulanPembayaran);
                 }
 
                 if (jasaSudahDibayar) {
                     nominal = currentPokokPerBulan;
                 } else {
-                    nominal = currentPokokPerBulan + currentBungaPerBulan;
+                    nominal = currentPokokPerBulan + currentJasaPerBulan; // DIUBAH
                 }
             }
 
             nominalBayar.value = nominal;
         }
 
+<<<<<<< HEAD
         if (nominalBayar) {
             nominalBayar.addEventListener('input', updateEstimasi);
         }
+=======
+        nominalBayar.addEventListener('input', updateEstimasi);
+>>>>>>> 6c9ba9b3658fb3ad75786b0a6f3878568557cf9f
 
         function updateEstimasi() {
-            if (currentSisaPokok > 0 || currentSisaBunga > 0) {
+            if (currentSisaPokok > 0 || currentSisaJasa > 0) { // DIUBAH
                 const bayar = parseInt(nominalBayar.value) || 0;
                 const jenis = selectJenis.value;
 
                 let sisaSetelahBayarPokok = currentSisaPokok;
-                let sisaSetelahBayarBunga = currentSisaBunga;
+                let sisaSetelahBayarJasa = currentSisaJasa; // DIUBAH
 
-                if (jenis === 'bunga') {
-                    sisaSetelahBayarBunga = Math.max(0, currentSisaBunga - bayar);
+                if (jenis === 'jasa') { // DIUBAH dari 'bunga'
+                    sisaSetelahBayarJasa = Math.max(0, currentSisaJasa - bayar); // DIUBAH
                 } else if (jenis === 'pokok') {
                     sisaSetelahBayarPokok = Math.max(0, currentSisaPokok - bayar);
                 } else if (jenis === 'keduanya') {
-                    if (bayar <= currentSisaBunga) {
-                        sisaSetelahBayarBunga = currentSisaBunga - bayar;
+                    if (bayar <= currentSisaJasa) { // DIUBAH
+                        sisaSetelahBayarJasa = currentSisaJasa - bayar; // DIUBAH
                     } else {
-                        sisaSetelahBayarBunga = 0;
-                        sisaSetelahBayarPokok = Math.max(0, currentSisaPokok - (bayar - currentSisaBunga));
+                        sisaSetelahBayarJasa = 0; // DIUBAH
+                        sisaSetelahBayarPokok = Math.max(0, currentSisaPokok - (bayar - currentSisaJasa)); // DIUBAH
                     }
                 }
 
-                const totalSisa = sisaSetelahBayarPokok + sisaSetelahBayarBunga;
+                const totalSisa = sisaSetelahBayarPokok + sisaSetelahBayarJasa; // DIUBAH
                 estimasiSisa.textContent = formatRupiah(totalSisa);
+<<<<<<< HEAD
 
                 if (bayar > (currentSisaPokok + currentSisaBunga)) {
+=======
+                
+                if (bayar > (currentSisaPokok + currentSisaJasa)) { // DIUBAH
+>>>>>>> 6c9ba9b3658fb3ad75786b0a6f3878568557cf9f
                     estimasiSisa.classList.add('text-red-200');
                 } else {
                     estimasiSisa.classList.remove('text-red-200');
@@ -617,7 +797,11 @@
             }
         }
 
+<<<<<<< HEAD
         if (selectPinjaman && selectPinjaman.value) {
+=======
+        if (selectPinjaman.value) {
+>>>>>>> 6c9ba9b3658fb3ad75786b0a6f3878568557cf9f
             selectPinjaman.dispatchEvent(new Event('change'));
         }
 
