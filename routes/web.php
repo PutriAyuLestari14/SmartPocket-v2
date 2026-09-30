@@ -37,6 +37,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/nasabah', [AdminNasabahController::class, 'index'])->name('admin.nasabah.index');
         Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('admin.laporan.index');
         Route::get('/saldo', [AdminSaldoController::class, 'index'])->name('admin.saldo.index');
+        Route::post('/saldo/proses', [AdminSaldoController::class, 'proses'])->name('admin.saldo.proses');
     });
 
     // OPERATOR
