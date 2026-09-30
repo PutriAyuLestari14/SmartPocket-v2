@@ -6,6 +6,7 @@ use App\Models\DetailTabungan;
 use App\Models\Peminjaman;
 use App\Models\Angsuran;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class OperatorLaporanController extends Controller
 {
@@ -15,243 +16,199 @@ class OperatorLaporanController extends Controller
         $tanggalSelesai = $request->tanggal_akhir;
         $jenis = $request->jenis ?? 'semua';
 
-        $laporan = collect();
+        // Kita gunakan Collection untuk menampung entri jurnal
+        $jurnalEntries = collect();
 
         /*
         |--------------------------------------------------------------------------
-        | TABUNGAN
+        | 1. TRANSAKSI TABUNGAN (Setor & Tarik)
         |--------------------------------------------------------------------------
         */
-
         if ($jenis === 'semua' || $jenis === 'tabungan') {
-
-            $tabungan = DetailTabungan::query()
-
-                ->when($tanggalMulai, function ($query) use ($tanggalMulai) {
-                    $query->whereDate(
-                        'tanggal_transaksi',
-                        '>=',
-                        $tanggalMulai
-                    );
-                })
-
-                ->when($tanggalSelesai, function ($query) use ($tanggalSelesai) {
-                    $query->whereDate(
-                        'tanggal_transaksi',
-                        '<=',
-                        $tanggalSelesai
-                    );
-                })
-
+            $tabungans = DetailTabungan::query()
+                ->when($tanggalMulai, fn($q) => $q->whereDate('tanggal_transaksi', '>=', $tanggalMulai))
+                ->when($tanggalSelesai, fn($q) => $q->whereDate('tanggal_transaksi', '<=', $tanggalSelesai))
                 ->orderBy('tanggal_transaksi', 'desc')
                 ->get();
 
-            foreach ($tabungan as $item) {
+            foreach ($tabungans as $item) {
+                $noBukti = 'TAB-' . $item->id;
+                $tanggal = $item->tanggal_transaksi;
+                $jumlah = (int) $item->jumlah;
+                $keterangan = (int) $item->id_jenis_transaksi === 1 ? 'Setoran Tabungan' : 'Penarikan Tabungan';
 
-                // SETORAN
-                if ((int) $item->id_jenis_transaksi === 1) {
-
-                    $laporan->push([
-                        'tanggal' => $item->tanggal_transaksi,
-                        'jenis' => 'Tabungan',
-                        'debit' => (int) $item->jumlah,
+                if ((int) $item->id_jenis_transaksi === 1) { // SETORAN
+                    // Debit: Kas bertambah
+                    $jurnalEntries->push([
+                        'no_bukti' => $noBukti,
+                        'tanggal' => $tanggal,
+                        'akun' => 'Kas',
+                        'debit' => $jumlah,
                         'kredit' => 0,
+                        'keterangan' => $keterangan,
                     ]);
-                }
-
-                // PENARIKAN
-                elseif ((int) $item->id_jenis_transaksi === 2) {
-
-                    $laporan->push([
-                        'tanggal' => $item->tanggal_transaksi,
-                        'jenis' => 'Tabungan',
+                    // Kredit: Kewajiban Tabungan Nasabah bertambah
+                    $jurnalEntries->push([
+                        'no_bukti' => $noBukti,
+                        'tanggal' => $tanggal,
+                        'akun' => 'Tabungan Nasabah',
                         'debit' => 0,
-                        'kredit' => (int) $item->jumlah,
+                        'kredit' => $jumlah,
+                        'keterangan' => $keterangan,
+                    ]);
+                } else { // PENARIKAN
+                    // Debit: Kewajiban Tabungan Nasabah berkurang
+                    $jurnalEntries->push([
+                        'no_bukti' => $noBukti,
+                        'tanggal' => $tanggal,
+                        'akun' => 'Tabungan Nasabah',
+                        'debit' => $jumlah,
+                        'kredit' => 0,
+                        'keterangan' => $keterangan,
+                    ]);
+                    // Kredit: Kas berkurang
+                    $jurnalEntries->push([
+                        'no_bukti' => $noBukti,
+                        'tanggal' => $tanggal,
+                        'akun' => 'Kas',
+                        'debit' => 0,
+                        'kredit' => $jumlah,
+                        'keterangan' => $keterangan,
                     ]);
                 }
             }
         }
 
-
         /*
         |--------------------------------------------------------------------------
-        | PEMINJAMAN
+        | 2. TRANSAKSI PEMINJAMAN (Pencairan)
         |--------------------------------------------------------------------------
         */
-
-        if (
-            $jenis === 'semua' ||
-            $jenis === 'peminjaman' ||
-            $jenis === 'provisi' ||
-            $jenis === 'kas'
-        ) {
-
-            $peminjamans = Peminjaman::where(
-                'status_verifikasi',
-                'disetujui'
-            )
-
-            ->when($tanggalMulai, function ($query) use ($tanggalMulai) {
-                $query->whereDate(
-                    'tanggal_ajuan',
-                    '>=',
-                    $tanggalMulai
-                );
-            })
-
-            ->when($tanggalSelesai, function ($query) use ($tanggalSelesai) {
-                $query->whereDate(
-                    'tanggal_ajuan',
-                    '<=',
-                    $tanggalSelesai
-                );
-            })
-
-            ->orderBy('tanggal_ajuan', 'desc')
-            ->get();
-
+        if ($jenis === 'semua' || $jenis === 'peminjaman') {
+            $peminjamans = Peminjaman::where('status_verifikasi', 'disetujui')
+                ->when($tanggalMulai, fn($q) => $q->whereDate('tanggal_ajuan', '>=', $tanggalMulai))
+                ->when($tanggalSelesai, fn($q) => $q->whereDate('tanggal_ajuan', '<=', $tanggalSelesai))
+                ->orderBy('tanggal_ajuan', 'desc')
+                ->get();
 
             foreach ($peminjamans as $pinjaman) {
+                $noBukti = 'PIN-' . $pinjaman->id;
+                $tanggal = $pinjaman->tanggal_ajuan;
+                
+                $jumlahPinjaman = (int) $pinjaman->jumlah_pinjaman;
+                $provisi = (int) ($jumlahPinjaman * 0.01); // Asumsi 1%
+                $kasDiterima = $jumlahPinjaman - $provisi;
 
-                $provisi = (int) ($pinjaman->jumlah_pinjaman * 0.01);
+                // 1. Debit: Piutang Pembiayaan (Hak tagih BMT sebesar full amount)
+                $jurnalEntries->push([
+                    'no_bukti' => $noBukti,
+                    'tanggal' => $tanggal,
+                    'akun' => 'Piutang Pembiayaan',
+                    'debit' => $jumlahPinjaman,
+                    'kredit' => 0,
+                    'keterangan' => 'Pencairan Pinjaman',
+                ]);
 
-                $kasDiterima =
-                    (int) $pinjaman->jumlah_pinjaman - $provisi;
+                // 2. Kredit: Pendapatan Provisi (Potongan di awal)
+                $jurnalEntries->push([
+                    'no_bukti' => $noBukti,
+                    'tanggal' => $tanggal,
+                    'akun' => 'Pendapatan Provisi',
+                    'debit' => 0,
+                    'kredit' => $provisi,
+                    'keterangan' => 'Potongan Provisi',
+                ]);
 
-
-                // UANG PINJAMAN KELUAR
-                if (
-                    $jenis === 'semua' ||
-                    $jenis === 'peminjaman'
-                ) {
-
-                    $laporan->push([
-                        'tanggal' => $pinjaman->tanggal_ajuan,
-                        'jenis' => 'Peminjaman',
-                        'debit' => 0,
-                        'kredit' => $kasDiterima,
-                    ]);
-                }
-
-
-                // PROVISI MASUK
-                if (
-                    $jenis === 'semua' ||
-                    $jenis === 'provisi'
-                ) {
-
-                    $laporan->push([
-                        'tanggal' => $pinjaman->tanggal_ajuan,
-                        'jenis' => 'Provisi',
-                        'debit' => $provisi,
-                        'kredit' => 0,
-                    ]);
-                }
-
-
-                // KAS KELUAR
-                if (
-                    $jenis === 'semua' ||
-                    $jenis === 'kas'
-                ) {
-
-                    $laporan->push([
-                        'tanggal' => $pinjaman->tanggal_ajuan,
-                        'jenis' => 'Kas',
-                        'debit' => 0,
-                        'kredit' => $kasDiterima,
-                    ]);
-                }
+                // 3. Kredit: Kas (Uang yang benar-benar keluar ke nasabah)
+                $jurnalEntries->push([
+                    'no_bukti' => $noBukti,
+                    'tanggal' => $tanggal,
+                    'akun' => 'Kas',
+                    'debit' => 0,
+                    'kredit' => $kasDiterima,
+                    'keterangan' => 'Pencairan Pinjaman',
+                ]);
             }
         }
 
-
         /*
         |--------------------------------------------------------------------------
-        | ANGSURAN
+        | 3. TRANSAKSI ANGSURAN (Pembayaran Cicilan)
         |--------------------------------------------------------------------------
         */
-
-        if (
-            $jenis === 'semua' ||
-            $jenis === 'peminjaman' ||
-            $jenis === 'jasa'
-        ) {
-
-            $angsuran = Angsuran::query()
-
-                ->when($tanggalMulai, function ($query) use ($tanggalMulai) {
-                    $query->whereDate(
-                        'tanggal_pembayaran',
-                        '>=',
-                        $tanggalMulai
-                    );
-                })
-
-                ->when($tanggalSelesai, function ($query) use ($tanggalSelesai) {
-                    $query->whereDate(
-                        'tanggal_pembayaran',
-                        '<=',
-                        $tanggalSelesai
-                    );
-                })
-
+        // Filter 'peminjaman' di UI sebaiknya juga menampilkan angsuran
+        if ($jenis === 'semua' || $jenis === 'peminjaman' || $jenis === 'jasa') {
+            $angsurans = Angsuran::query()
+                ->when($tanggalMulai, fn($q) => $q->whereDate('tanggal_pembayaran', '>=', $tanggalMulai))
+                ->when($tanggalSelesai, fn($q) => $q->whereDate('tanggal_pembayaran', '<=', $tanggalSelesai))
                 ->orderBy('tanggal_pembayaran', 'desc')
                 ->get();
 
+            foreach ($angsurans as $item) {
+                $noBukti = 'ANG-' . $item->id;
+                $tanggal = $item->tanggal_pembayaran;
+                
+                $pokok = (int) $item->jumlah_pokok;
+                $jasa = (int) $item->jumlah_jasa;
+                $totalBayar = $pokok + $jasa;
 
-            foreach ($angsuran as $item) {
-
-                // POKOK
-                if (
-                    ($jenis === 'semua' ||
-                     $jenis === 'peminjaman') &&
-                    (int) $item->jumlah_pokok > 0
-                ) {
-
-                    $laporan->push([
-                        'tanggal' => $item->tanggal_pembayaran,
-                        'jenis' => 'Peminjaman',
-                        'debit' => (int) $item->jumlah_pokok,
+                if ($totalBayar > 0) {
+                    // 1. Debit: Kas (Uang masuk ke BMT)
+                    $jurnalEntries->push([
+                        'no_bukti' => $noBukti,
+                        'tanggal' => $tanggal,
+                        'akun' => 'Kas',
+                        'debit' => $totalBayar,
                         'kredit' => 0,
+                        'keterangan' => 'Pembayaran Angsuran',
                     ]);
-                }
 
+                    // 2. Kredit: Piutang Pembiayaan (Mengurangi hutang nasabah)
+                    if ($pokok > 0) {
+                        $jurnalEntries->push([
+                            'no_bukti' => $noBukti,
+                            'tanggal' => $tanggal,
+                            'akun' => 'Piutang Pembiayaan',
+                            'debit' => 0,
+                            'kredit' => $pokok,
+                            'keterangan' => 'Pembayaran Pokok',
+                        ]);
+                    }
 
-                // JASA
-                if (
-                    ($jenis === 'semua' ||
-                     $jenis === 'jasa') &&
-                    (int) $item->jumlah_jasa > 0
-                ) {
-
-                    $laporan->push([
-                        'tanggal' => $item->tanggal_pembayaran,
-                        'jenis' => 'Jasa',
-                        'debit' => (int) $item->jumlah_jasa,
-                        'kredit' => 0,
-                    ]);
+                    // 3. Kredit: Pendapatan Jasa (Keuntungan BMT)
+                    if ($jasa > 0) {
+                        $jurnalEntries->push([
+                            'no_bukti' => $noBukti,
+                            'tanggal' => $tanggal,
+                            'akun' => 'Pendapatan Jasa',
+                            'debit' => 0,
+                            'kredit' => $jasa,
+                            'keterangan' => 'Pembayaran Jasa',
+                        ]);
+                    }
                 }
             }
         }
 
-
         /*
         |--------------------------------------------------------------------------
-        | TOTAL
+        | 4. PROSES FINAL: Grouping & Sorting
         |--------------------------------------------------------------------------
         */
+        
+        // Kelompokkan berdasarkan no_bukti agar 1 transaksi tampil sebagai 1 blok di Blade
+        $jurnalData = $jurnalEntries
+            ->groupBy('no_bukti')
+            ->sortByDesc(function ($group) {
+                return $group->first()['tanggal']; // Urutkan berdasarkan tanggal transaksi terbaru
+            });
 
-        $laporan = $laporan
-            ->sortByDesc('tanggal')
-            ->values();
-
-        $totalDebit = $laporan->sum('debit');
-        $totalKredit = $laporan->sum('kredit');
-
+        // Hitung total keseluruhan (flatten dulu agar semua baris dihitung)
+        $totalDebit = $jurnalEntries->sum('debit');
+        $totalKredit = $jurnalEntries->sum('kredit');
 
         return view('operator.laporan.index', compact(
-            'laporan',
+            'jurnalData', // Perhatikan: variabel ini diganti dari $laporan menjadi $jurnalData
             'tanggalMulai',
             'tanggalSelesai',
             'jenis',

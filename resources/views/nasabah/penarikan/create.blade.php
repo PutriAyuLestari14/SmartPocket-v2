@@ -20,11 +20,14 @@
             theme: {
                 extend: {
                     colors: {
-                        bgMain: '#FAFAFA',      /* Latar Utama */
-                        forest: '#1A4D2E',      /* Sekunder Forest Green */
-                        forestDark: '#123720',  /* Deep Forest */
-                        mint: '#4E9F3D',        /* Aksen Mint Green */
-                        mintLight: '#E8F5E9',   /* Soft Tint Mint */
+                        bgMain: '#FAFAFA',
+                        primary: '#15803d',
+                        primaryDark: '#166534',
+                        primaryLight: '#16a34a',
+                        secondary: '#22c55e',
+                        accent: '#4ade80',
+                        mint: '#15803d',
+                        mintLight: '#dcfce7',
                     },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
@@ -40,44 +43,42 @@
         ::-webkit-scrollbar-track { background: #FAFAFA; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
 
-        /* Card Gradasi Forest Green */
-        .card-forest {
-            background: linear-gradient(135deg, #1A4D2E 0%, #123720 100%);
-            box-shadow: 0 12px 28px -6px rgba(26, 77, 46, 0.35);
-        }
+        /* Variasi Gradient yang TIDAK MONOTON */
+        .gradient-primary { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
+        .gradient-soft { background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%); }
+        .gradient-vibrant { background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%); }
 
         .input-premium { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .input-premium:focus { transform: translateY(-1px); }
     </style>
 </head>
-<body class="bg-bgMain text-slate-800 antialiased">
+<body class="bg-bgMain text-slate-800 antialiased selection:bg-mintLight selection:text-primary">
 
     <!-- Mobile Sidebar Backdrop -->
-    <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-forestDark/50 backdrop-blur-sm z-30 hidden lg:hidden transition-opacity"></div>
+    <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-primaryDark/50 backdrop-blur-sm z-30 hidden lg:hidden transition-opacity"></div>
 
-    <!-- MOBILE TOPBAR HEADER (DITAMBAHKAN NOTIFIKASI) -->
-    <header class="lg:hidden bg-white border-b border-slate-100 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
+    <!-- MOBILE TOPBAR HEADER -->
+    <header class="lg:hidden bg-white border-b border-slate-200/80 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
         <div class="flex items-center gap-3">
-            <div class="w-9 h-9 bg-forest rounded-xl flex items-center justify-center text-white shadow-sm">
+            <div class="w-9 h-9 gradient-soft rounded-xl flex items-center justify-center text-white shadow-sm shadow-primary/30">
                 <i class="fas fa-wallet text-sm"></i>
             </div>
             <div>
-                <h1 class="text-sm font-extrabold text-forest leading-none">Smart Pocket</h1>
-                <p class="text-[9px] font-bold text-mint tracking-wider mt-0.5">BMT SMKN 11</p>
+                <h1 class="text-sm font-black text-primary leading-none">Smart Pocket</h1>
+                <p class="text-[9px] font-bold text-primaryDark tracking-wider mt-0.5">BMT SMKN 11</p>
             </div>
         </div>
         
         <div class="flex items-center gap-2">
             <a href="{{ route('nasabah.notifikasi.index') }}" class="w-9 h-9 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 relative">
-                <span class="absolute top-2 right-2 w-2 h-2 bg-mint rounded-full ring-2 ring-white"></span>
-                <i class="far fa-bell text-sm"></i>
                 @php
                     $nasabah = auth()->user()->nasabah;
                     $unreadCount = $nasabah ? ($nasabah->unreadNotifications ? $nasabah->unreadNotifications->count() : 0) : 0;
                 @endphp
                 @if($unreadCount > 0)
-                    <span class="absolute top-2 right-2 w-2 h-2 bg-mint rounded-full ring-2 ring-white"></span>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
                 @endif
+                <i class="far fa-bell text-sm"></i>
             </a>
             <button onclick="toggleSidebar()" class="w-9 h-9 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl flex items-center justify-center hover:bg-slate-100 transition-colors">
                 <i class="fas fa-bars text-sm"></i>
@@ -88,48 +89,48 @@
     <div class="flex flex-col lg:flex-row min-h-screen">
         
         <!-- SIDEBAR DESKTOP & MOBILE -->
-        <aside id="sidebar" class="w-64 bg-white border-r border-slate-200/80 flex flex-col fixed inset-y-0 left-0 z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-sm">
+        <aside id="sidebar" class="w-64 bg-white border-r border-slate-200/80 flex flex-col fixed inset-y-0 left-0 z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl shadow-slate-200/50">
             
             <!-- Brand Header Sidebar -->
             <div class="p-5 border-b border-slate-100 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-forest rounded-xl flex items-center justify-center text-white shadow-md shadow-forest/20">
+                    <div class="w-10 h-10 gradient-vibrant rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/30">
                         <i class="fas fa-wallet text-lg"></i>
                     </div>
                     <div>
-                        <h1 class="text-base font-extrabold text-forest tracking-tight leading-none">SmartPocket</h1>
-                        <p class="text-[10px] font-bold text-mint tracking-wider mt-1">BMT SMKN 11 BANDUNG</p>
+                        <h1 class="text-base font-black text-primary tracking-tight leading-none">SmartPocket</h1>
+                        <p class="text-[10px] font-bold text-primaryDark tracking-wider mt-1">BMT SMKN 11 BANDUNG</p>
                     </div>
                 </div>
-                <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-forest">
+                <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-primary">
                     <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
             
             <!-- Navigation Links -->
             <nav class="p-4 space-y-1.5 flex-1 overflow-y-auto">
-                <p class="px-3 py-1.5 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Menu Utama</p>
+                <p class="px-3 py-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Menu Utama</p>
 
-                <a href="{{ route('nasabah.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                <a href="{{ route('nasabah.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-home w-5 text-center text-slate-400"></i> Dashboard
                 </a>
                 
-                <a href="{{ route('nasabah.penarikan.create') }}" class="flex items-center gap-3 px-4 py-3 bg-mintLight text-forest rounded-xl text-sm font-bold transition-all shadow-sm border border-mint/20">
-                    <i class="fas fa-money-bill-wave w-5 text-center text-mint"></i> Penarikan 
+                <a href="{{ route('nasabah.penarikan.create') }}" class="flex items-center gap-3 px-4 py-3 bg-mintLight text-primary rounded-xl text-sm font-bold transition-all shadow-sm border border-primary/20">
+                    <i class="fas fa-money-bill-wave w-5 text-center text-primary"></i> Penarikan 
                 </a>
 
                 @if(auth()->user()->nasabah->kategori == 'guru')
-                    <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                    <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                         <i class="fas fa-hand-holding-usd w-5 text-center text-slate-400"></i> Peminjaman 
                     </a>
                 @endif
                 
-                <a href="{{ route('nasabah.riwayat') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                <a href="{{ route('nasabah.riwayat') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-history w-5 text-center text-slate-400"></i> Riwayat Transaksi
                 </a>
                 
-                <p class="px-3 pt-6 pb-1.5 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Sistem</p>
-                <a href="{{ route('nasabah.profile.edit')}}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                <p class="px-3 pt-6 pb-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sistem</p>
+                <a href="{{ route('nasabah.profile.edit')}}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-cog w-5 text-center text-slate-400"></i> Pengaturan Profile
                 </a>
             </nav>
@@ -148,18 +149,19 @@
         <!-- MAIN CONTENT AREA -->
         <main class="flex-1 lg:ml-64 p-4 sm:p-6 lg:p-8 min-w-0">
             
-            <!-- HEADER PRESISI DESAIN (DITAMBAHKAN PROFILE DESKTOP) -->
+            <!-- HEADER PRESISI DESAIN -->
             <header class="mb-6 lg:mb-8 flex items-start justify-between gap-4">
                 <div>
                     <nav class="flex items-center gap-1.5 text-xs sm:text-sm text-slate-400 font-medium mb-2">
-                        <a href="{{ route('nasabah.dashboard') }}" class="hover:text-forest transition-colors">Dashboard</a>
+                        <a href="{{ route('nasabah.dashboard') }}" class="hover:text-primary transition-colors">Dashboard</a>
                         <i class="fas fa-chevron-right text-[10px] text-slate-300"></i>
-                        <span class="text-slate-700 font-bold">Ajukan Penarikan</span>
+                        <span class="text-primary font-bold">Ajukan Penarikan</span>
                     </nav>
                     <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
                         Pengajuan Penarikan Saldo
                     </h1>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    <p class="text-xs sm:text-sm text-slate-500 mt-2 flex items-center gap-2 font-medium">
+                        <i class="fas fa-money-bill-wave text-primary"></i>
                         Tarik saldo tabungan Anda dengan mudah dan cepat melalui konfirmasi BMT.
                     </p>
                 </div>
@@ -168,12 +170,12 @@
                 <div class="hidden lg:flex items-center gap-3 pt-1 flex-shrink-0">
                     <div class="w-px h-8 bg-slate-200 my-auto mx-1"></div>
                     <div class="text-right">
-                        <p class="text-xs font-bold text-slate-800 leading-tight">{{ auth()->user()->name }}</p>
-                        <p class="text-[10px] font-semibold text-slate-400 capitalize mt-0.5">
+                        <p class="text-xs font-black text-slate-800 leading-tight">{{ auth()->user()->name }}</p>
+                        <p class="text-[10px] font-bold text-slate-400 capitalize mt-0.5">
                             {{ auth()->user()->nasabah->kategori ?? 'Siswa' }}
                         </p>
                     </div>
-                    <div class="w-10 h-10 rounded-xl overflow-hidden bg-forest text-white font-bold text-sm flex items-center justify-center border border-slate-200 shadow-sm flex-shrink-0">
+                    <div class="w-10 h-10 rounded-xl overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
                         @if(auth()->user()->nasabah && auth()->user()->nasabah->photo)
                             <img src="{{ asset('storage/' . auth()->user()->nasabah->photo) }}" alt="Profile" class="w-full h-full object-cover">
                         @else
@@ -189,21 +191,22 @@
                 <!-- KOLOM KIRI: Informasi & Saldo -->
                 <div class="space-y-6">
                     <!-- Kartu Saldo Tabungan -->
-                    <div class="card-forest rounded-2xl p-6 text-white relative overflow-hidden flex flex-col justify-between min-h-[190px]">
+                    <div class="gradient-primary rounded-2xl p-6 text-white relative overflow-hidden flex flex-col justify-between min-h-[190px] group">
+                        <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
                         <div class="flex justify-between items-start relative z-10">
                             <div>
-                                <p class="text-[10px] font-bold text-emerald-200 uppercase tracking-widest">Saldo Tersedia</p>
+                                <p class="text-[10px] font-bold text-emerald-100 uppercase tracking-widest">Saldo Tersedia</p>
                                 <h3 class="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1 break-all">
                                     Rp {{ number_format($saldoTersedia, 0, ',', '.') }}
                                 </h3>
                             </div>
-                            <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-mint border border-white/20 flex-shrink-0">
+                            <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-accent border border-white/20 flex-shrink-0">
                                 <i class="fas fa-wallet text-lg"></i>
                             </div>
                         </div>
 
                         <div class="pt-4 border-t border-white/15 flex items-center gap-2 text-xs text-emerald-100/90 relative z-10">
-                            <i class="fas fa-shield-alt text-mint"></i>
+                            <i class="fas fa-shield-alt text-accent"></i>
                             <span class="font-medium">Saldo terverifikasi aman di BMT</span>
                         </div>
 
@@ -229,21 +232,21 @@
                     </div>
 
                     <!-- Kartu Aturan Penarikan -->
-                    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
-                        <h3 class="text-xs font-extrabold text-forest uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <i class="fas fa-info-circle text-mint text-sm"></i> Ketentuan Penarikan
+                    <div class="bg-white rounded-2xl border border-slate-200/60 shadow-xl shadow-slate-200/50 p-5">
+                        <h3 class="text-xs font-black text-primary uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <i class="fas fa-info-circle text-primary text-sm"></i> Ketentuan Penarikan
                         </h3>
                         <ul class="space-y-3">
                             <li class="flex items-start gap-3 text-xs text-slate-600">
-                                <i class="fas fa-check-circle text-mint mt-0.5 flex-shrink-0"></i>
-                                <span>Minimal penarikan sebesar <strong class="text-forest">Rp 10.000</strong>.</span>
+                                <i class="fas fa-check-circle text-primary mt-0.5 flex-shrink-0"></i>
+                                <span>Minimal penarikan sebesar <strong class="text-primary">Rp 10.000</strong>.</span>
                             </li>
                             <li class="flex items-start gap-3 text-xs text-slate-600">
-                                <i class="fas fa-check-circle text-mint mt-0.5 flex-shrink-0"></i>
-                                <span>Kelipatan nominal penarikan adalah <strong class="text-forest">Rp 1.000</strong>.</span>
+                                <i class="fas fa-check-circle text-primary mt-0.5 flex-shrink-0"></i>
+                                <span>Kelipatan nominal penarikan adalah <strong class="text-primary">Rp 1.000</strong>.</span>
                             </li>
                             <li class="flex items-start gap-3 text-xs text-slate-600">
-                                <i class="fas fa-check-circle text-mint mt-0.5 flex-shrink-0"></i>
+                                <i class="fas fa-check-circle text-primary mt-0.5 flex-shrink-0"></i>
                                 <span>Dana diproses sesuai antrean konfirmasi petugas BMT.</span>
                             </li>
                         </ul>
@@ -252,19 +255,19 @@
 
                 <!-- KOLOM KANAN: Form Pengajuan -->
                 <div class="lg:col-span-2">
-                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 sm:p-6 lg:p-8">
+                    <div class="bg-white rounded-2xl border border-slate-200/60 shadow-xl shadow-slate-200/50 p-5 sm:p-6 lg:p-8">
                         
                         <form action="{{ route('nasabah.penarikan.store') }}" method="POST" id="formPenarikan">
                             @csrf
 
                             <!-- Input Jumlah -->
                             <div class="mb-6">
-                                <label for="jumlah" class="block text-xs font-bold uppercase tracking-wider text-forest mb-2">
-                                    Jumlah Penarikan <span class="text-red-500">*</span>
+                                <label for="jumlah" class="block text-xs font-black uppercase tracking-wider text-primary mb-2">
+                                    Jumlah Penarikan <span class="text-rose-500">*</span>
                                 </label>
                                 <div class="relative group">
                                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <span class="text-slate-400 font-bold text-sm">Rp</span>
+                                        <span class="text-primary font-black text-sm">Rp</span>
                                     </div>
                                     <input 
                                         type="number" 
@@ -275,20 +278,20 @@
                                         max="{{ $maksimalPenarikan }}"
                                         step="1000"
                                         placeholder="0"
-                                        class="input-premium w-full pl-12 pr-4 py-3.5 bg-bgMain border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-mint/20 focus:border-mint text-base font-bold text-slate-900 placeholder-slate-400" 
+                                        class="input-premium w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-base font-black text-slate-900 placeholder-slate-400" 
                                         required
                                         oninput="validasiAngka(this)"
                                     >
                                 </div>
                                 <p class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
-                                    <i class="fas fa-lightbulb text-amber-500"></i>
+                                    <i class="fas fa-lightbulb text-primary"></i>
                                     Masukkan nominal tanpa titik/koma, contoh: 50000
                                 </p>
 
                                 <div class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
                                     <div class="flex items-start gap-2">
                                         <i class="fas fa-info-circle text-amber-500 mt-0.5"></i>
-                                        <p class="text-xs text-amber-700 leading-relaxed">
+                                        <p class="text-xs text-amber-700 leading-relaxed font-medium">
                                             Saldo mengendap sebesar
                                             <strong>Rp {{ number_format($saldoMengendap, 0, ',', '.') }}</strong>
                                             harus tetap tersimpan.
@@ -298,7 +301,7 @@
                                     </div>
                                 </div>
 
-                                <p id="pesanBatasPenarikan" class="hidden mt-2 text-xs text-red-600 font-semibold">
+                                <p id="pesanBatasPenarikan" class="hidden mt-2 text-xs text-rose-600 font-bold">
                                     <i class="fas fa-exclamation-circle mr-1"></i>
                                     Nominal penarikan melebihi batas maksimal.
                                 </p>
@@ -306,44 +309,44 @@
 
                             <!-- Input Tanggal Penarikan -->
                             <div class="mb-6">
-                                <label for="tanggal_transaksi" class="block text-xs font-bold uppercase tracking-wider text-forest mb-2">
-                                    Tanggal Penarikan <span class="text-red-500">*</span>
+                                <label for="tanggal_transaksi" class="block text-xs font-black uppercase tracking-wider text-primary mb-2">
+                                    Tanggal Penarikan <span class="text-rose-500">*</span>
                                 </label>
                                 <div class="relative group">
                                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <i class="fas fa-calendar-alt text-slate-400"></i>
+                                        <i class="fas fa-calendar-alt text-primary"></i>
                                     </div>
                                     <input 
                                         type="date" 
                                         name="tanggal_transaksi" 
                                         id="tanggal_transaksi" 
                                         value="{{ old('tanggal_transaksi', date('Y-m-d')) }}" 
-                                        class="input-premium w-full pl-12 pr-4 py-3.5 bg-bgMain border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-mint/20 focus:border-mint text-sm font-semibold text-slate-800" 
+                                        class="input-premium w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm font-bold text-slate-800" 
                                         required
                                     >
                                 </div>
                                 <p class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
-                                    <i class="fas fa-info-circle text-mint"></i>
+                                    <i class="fas fa-info-circle text-primary"></i>
                                     Tentukan tanggal rencana pencairan saldo.
                                 </p>
                             </div>
 
                             <!-- Input Keterangan -->
                             <div class="mb-8">
-                                <label for="keterangan" class="block text-xs font-bold uppercase tracking-wider text-forest mb-2">
-                                    Keterangan / Keperluan <span class="text-red-500">*</span>
+                                <label for="keterangan" class="block text-xs font-black uppercase tracking-wider text-primary mb-2">
+                                    Keterangan / Keperluan <span class="text-rose-500">*</span>
                                 </label>
                                 <textarea 
                                     name="keterangan" 
                                     id="keterangan" 
                                     rows="4" 
                                     placeholder="Contoh: Untuk keperluan pembelian peralatan sekolah / uang saku..."
-                                    class="input-premium w-full px-4 py-3.5 bg-bgMain border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-mint/20 focus:border-mint text-sm text-slate-800 placeholder-slate-400 resize-none" 
+                                    class="input-premium w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm font-medium text-slate-800 placeholder-slate-400 resize-none" 
                                     required
                                 >{{ old('keterangan') }}</textarea>
                                 <div class="flex justify-between mt-2">
-                                    <p class="text-xs text-slate-400">Berikan penjelasan singkat mengenai penarikan ini.</p>
-                                    <p class="text-xs text-slate-400 font-mono"><span id="charCount">0</span>/255</p>
+                                    <p class="text-xs text-slate-400 font-medium">Berikan penjelasan singkat mengenai penarikan ini.</p>
+                                    <p class="text-xs text-slate-400 font-mono font-bold"><span id="charCount">0</span>/255</p>
                                 </div>
                             </div>
 
@@ -352,7 +355,7 @@
                                 <a href="{{ route('nasabah.dashboard') }}" class="w-full sm:w-auto px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-bold hover:bg-slate-50 transition-all text-xs text-center">
                                     Batal
                                 </a>
-                                <button type="submit" id="btnSubmit" class="w-full sm:w-auto px-8 py-3 bg-mint hover:bg-forest text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-mint/20 text-xs">
+                                <button type="submit" id="btnSubmit" class="w-full sm:w-auto px-8 py-3 bg-primary hover:bg-primaryDark text-white rounded-xl font-black flex items-center justify-center gap-2 transition-all shadow-md shadow-primary/30 text-xs">
                                     <i class="fas fa-paper-plane text-xs" id="btnIcon"></i> 
                                     <span id="btnText">Ajukan Penarikan</span>
                                 </button>
@@ -381,7 +384,7 @@
                 icon: 'success',
                 title: 'Pengajuan Berhasil! 🎉',
                 text: '{{ session('success') }}',
-                confirmButtonColor: '#1A4D2E',
+                confirmButtonColor: '#15803d',
                 confirmButtonText: 'Ke Riwayat Transaksi',
                 customClass: {
                     popup: 'rounded-2xl p-4 sm:p-6',
@@ -402,7 +405,7 @@
                 icon: 'error',
                 title: 'Gagal Mengajukan',
                 text: '{{ session('error') }}',
-                confirmButtonColor: '#DC2626',
+                confirmButtonColor: '#e11d48',
                 confirmButtonText: 'Coba Lagi',
                 customClass: {
                     popup: 'rounded-2xl p-4 sm:p-6',

@@ -357,9 +357,7 @@
                     <button type="submit" class="btn-submit">Masuk Sekarang</button>
                 </form>
 
-                <p class="signup-link">
-                    Belum punya akun? <a href="#">Daftar di sini</a>
-                </p>
+
             </div>
         </div>
 

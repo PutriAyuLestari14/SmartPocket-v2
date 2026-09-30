@@ -20,6 +20,8 @@
                         accent: '#4ade80',
                         mint: '#15803d',
                         mintLight: '#dcfce7',
+                        infoYellow: '#eab308',
+                        infoYellowLight: '#fef9c3',
                     },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
@@ -34,7 +36,6 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
         
-        /* Variasi Gradient yang TIDAK MONOTON */
         .gradient-primary { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
         .gradient-mint { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); }
         .gradient-soft { background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%); }
@@ -43,6 +44,9 @@
         
         .hover-lift { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 12px 20px -8px rgba(21, 128, 61, 0.15); }
+        
+        /* Indentasi standar akuntansi untuk akun Kredit */
+        .account-credit { padding-left: 2rem; font-style: italic; }
     </style>
 </head>
 <body class="bg-bgMain text-slate-800 antialiased">
@@ -68,27 +72,21 @@
 
             <nav class="p-4 space-y-1.5 flex-1 overflow-y-auto">
                 <p class="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">Menu Utama</p>
-
                 <a href="{{ route('operator.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-home w-5 text-center text-slate-400"></i> Dashboard
                 </a>
-
                 <a href="{{ route('operator.nasabah.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-users w-5 text-center text-slate-400"></i> Data Nasabah
                 </a>
-
                 <a href="{{ route('operator.transaksi.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-exchange-alt w-5 text-center text-slate-400"></i> Transaksi
                 </a>
-
                 <a href="{{ route('operator.peminjaman.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-hand-holding-usd w-5 text-center text-slate-400"></i> Peminjaman
                 </a>
-
                 <a href="{{ route('operator.verifikasi.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-check-circle w-5 text-center text-slate-400"></i> Verifikasi
                 </a>
-
                 <a href="{{ route('operator.laporan.index') }}" class="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-mintLight to-white text-primary rounded-xl text-sm font-bold transition-all shadow-sm border border-primary/30">
                     <i class="fas fa-chart-pie w-5 text-center text-primary"></i> Laporan
                 </a>
@@ -118,12 +116,7 @@
                         <p class="text-[10px] text-primaryDark font-bold tracking-wider mt-1">BMT SMKN 11</p>
                     </div>
                 </div>
-
                 <div class="flex items-center gap-2">
-                    <a href="{{ route('operator.notifikasi.index') }}" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 relative active:scale-95 transition-transform shadow-sm">
-                        <i class="far fa-bell text-base"></i>
-                        <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
-                    </a>
                     <button onclick="toggleSidebar()" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-700 active:scale-95 transition-transform shadow-sm">
                         <i class="fas fa-bars text-base"></i>
                     </button>
@@ -140,12 +133,10 @@
                             <i class="fas fa-chevron-right text-[9px]"></i>
                             <span class="text-primary font-bold">Jurnal Umum</span>
                         </div>
-                        <h2 class="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-tight">
-                            Jurnal Umum
-                        </h2>
+                        <h2 class="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-tight">Jurnal Umum</h2>
                         <p class="text-sm text-slate-500 mt-2 flex items-center gap-2 font-medium">
-                            <i class="fas fa-file-lines text-primary"></i>
-                            Catatan transaksi tabungan dan peminjaman BMT.
+                            <i class="fas fa-book text-infoYellow"></i>
+                            Catatan transaksi berpasangan (Double-Entry System) BMT.
                         </p>
                     </div>
 
@@ -159,276 +150,166 @@
                         <div class="w-10 h-10 rounded-xl overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
                             {{ strtoupper(substr(auth()->user()->petugas->nama_lengkap ?? auth()->user()->name, 0, 1)) }}
                         </div>
-                        <a href="{{ route('operator.notifikasi.index') }}" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:text-primary hover:border-primary transition-all relative shadow-sm ml-1">
-                            <i class="far fa-bell text-base"></i>
-                            @php $pendingNotif = \App\Models\DetailTabungan::where('status', 'pending')->count(); @endphp
-                            @if($pendingNotif > 0)
-                                <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
-                            @endif
-                        </a>
                     </div>
                 </header>
 
                 <!-- Summary Cards -->
-                <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-5">
-
-                    <!-- Total Jurnal -->
-                    <div class="bg-white rounded-2xl p-4 lg:p-5 border border-slate-200/60 shadow-xl shadow-slate-200/50 hover-lift">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="w-9 h-9 lg:w-11 lg:h-11 bg-slate-100 rounded-xl flex items-center justify-center">
-                                <i class="fas fa-file-lines text-slate-600 text-sm lg:text-lg"></i>
-                            </div>
-                        </div>
-                        <p class="text-[10px] lg:text-xs text-slate-500 font-black uppercase tracking-wider mb-0.5 lg:mb-1">Total Jurnal</p>
-                        <p class="text-lg lg:text-2xl font-black text-slate-900">{{ $laporan->count() }}</p>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-lg hover-lift">
+                        <p class="text-xs text-slate-500 font-black uppercase tracking-wider mb-1">Total Transaksi</p>
+                        <p class="text-2xl font-black text-slate-900">{{ $jurnalData->count() }} <span class="text-sm font-bold text-slate-400">Bukti</span></p>
                     </div>
-
-                    <!-- Total Debit -->
-                    <div class="gradient-soft rounded-2xl p-4 lg:p-5 shadow-xl shadow-primary/20 relative overflow-hidden hover-lift group">
-                        <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
-                        <div class="relative z-10">
-                            <div class="w-9 h-9 lg:w-11 lg:h-11 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center mb-3 border border-white/30">
-                                <i class="fas fa-arrow-down text-white text-sm lg:text-lg"></i>
-                            </div>
-                            <p class="text-[10px] lg:text-xs text-emerald-100 font-black uppercase tracking-wider mb-0.5 lg:mb-1">Total Debit</p>
-                            <p class="text-base lg:text-2xl font-black text-white break-all leading-tight">Rp {{ number_format($totalDebit ?? $laporan->sum('debit'), 0, ',', '.') }}</p>
-                        </div>
+                    <div class="bg-gradient-to-br from-primary to-primaryDark rounded-2xl p-5 shadow-lg shadow-primary/20 hover-lift text-white">
+                        <p class="text-xs text-emerald-100 font-black uppercase tracking-wider mb-1">Total Debit</p>
+                        <p class="text-2xl font-black">Rp {{ number_format($totalDebit, 0, ',', '.') }}</p>
                     </div>
-
-                    <!-- Total Kredit -->
-                    <div class="col-span-2 lg:col-span-1 bg-white rounded-2xl p-4 lg:p-5 border border-rose-100 shadow-xl shadow-rose-500/5 hover-lift relative overflow-hidden group">
-                        <div class="absolute top-0 right-0 w-24 h-24 bg-rose-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-                        <div class="relative z-10">
-                            <div class="w-9 h-9 lg:w-11 lg:h-11 bg-gradient-to-br from-rose-400 to-rose-600 rounded-xl flex items-center justify-center mb-3 shadow-lg shadow-rose-500/30">
-                                <i class="fas fa-arrow-up text-white text-sm lg:text-lg"></i>
-                            </div>
-                            <p class="text-[10px] lg:text-xs text-slate-500 font-black uppercase tracking-wider mb-0.5 lg:mb-1">Total Kredit</p>
-                            <p class="text-base lg:text-2xl font-black text-rose-600 break-all leading-tight">Rp {{ number_format($totalKredit ?? $laporan->sum('kredit'), 0, ',', '.') }}</p>
-                        </div>
+                    <div class="bg-white rounded-2xl p-5 border border-yellow-200 shadow-lg hover-lift relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-20 h-20 bg-infoYellowLight rounded-bl-full -mr-4 -mt-4"></div>
+                        <p class="text-xs text-slate-500 font-black uppercase tracking-wider mb-1 relative z-10">Total Kredit</p>
+                        <p class="text-2xl font-black text-slate-900 relative z-10">Rp {{ number_format($totalKredit, 0, ',', '.') }}</p>
+                        @if($totalDebit == $totalKredit)
+                            <span class="inline-flex items-center gap-1 mt-2 px-2 py-1 rounded-lg bg-infoYellowLight text-infoYellow text-[10px] font-black">
+                                <i class="fas fa-check-circle"></i> SEIMBANG (BALANCE)
+                            </span>
+                        @endif
                     </div>
                 </div>
 
                 <!-- Filter Card -->
-                <div class="bg-white rounded-2xl border border-slate-200/60 shadow-xl shadow-slate-200/50 p-5 lg:p-6">
-                    <div class="flex items-center gap-3 mb-5">
-                        <div class="w-10 h-10 bg-mintLight rounded-xl flex items-center justify-center">
-                            <i class="fas fa-filter text-primary text-lg"></i>
+                <div class="bg-white rounded-2xl border border-slate-200/60 shadow-lg p-5">
+                    <form action="{{ route('operator.laporan.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Tanggal Mulai</label>
+                            <input type="date" name="tanggal_mulai" value="{{ request('tanggal_mulai') }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-slate-50 font-semibold">
                         </div>
                         <div>
-                            <h3 class="text-sm font-black text-slate-900">Filter Jurnal</h3>
-                            <p class="text-[11px] text-slate-500">Pilih periode dan jenis transaksi</p>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Tanggal Akhir</label>
+                            <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-slate-50 font-semibold">
                         </div>
-                    </div>
-
-                    <form action="{{ route('operator.laporan.index') }}" method="GET">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-
-                            <!-- Tanggal Mulai -->
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Tanggal Mulai</label>
-                                <input type="date" name="tanggal_mulai" value="{{ request('tanggal_mulai') }}"
-                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-slate-50 focus:bg-white transition-all font-semibold">
-                            </div>
-
-                            <!-- Tanggal Akhir -->
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Tanggal Akhir</label>
-                                <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}"
-                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-slate-50 focus:bg-white transition-all font-semibold">
-                            </div>
-
-                            <!-- Jenis -->
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Jenis</label>
-                                <select name="jenis"
-                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all cursor-pointer font-bold">
-                                    <option value="semua" {{ request('jenis', 'semua') == 'semua' ? 'selected' : '' }}>Semua</option>
-                                    <option value="tabungan" {{ request('jenis') == 'tabungan' ? 'selected' : '' }}>Tabungan</option>
-                                    <option value="peminjaman" {{ request('jenis') == 'peminjaman' ? 'selected' : '' }}>Peminjaman</option>
-                                    <option value="jasa" {{ request('jenis') == 'jasa' ? 'selected' : '' }}>Jasa</option>
-                                    <option value="provisi" {{ request('jenis') == 'provisi' ? 'selected' : '' }}>Provisi</option>
-                                    <option value="kas" {{ request('jenis') == 'kas' ? 'selected' : '' }}>Kas</option>
-                                </select>
-                            </div>
-
-                            <!-- Buttons -->
-                            <div class="flex gap-2">
-                                <button type="submit" class="flex-1 px-5 py-2.5 rounded-xl bg-primary hover:bg-primaryDark text-white text-sm font-black transition-colors shadow-md shadow-primary/30 flex items-center justify-center gap-2">
-                                    <i class="fas fa-filter text-xs"></i> Filter
-                                </button>
-                                <a href="{{ route('operator.laporan.index') }}"
-                                    class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-600 text-sm font-bold hover:bg-slate-200 transition-colors flex items-center justify-center">
-                                    <i class="fas fa-rotate-left text-xs"></i>
-                                </a>
-                            </div>
+                        <div class="md:col-span-2 flex gap-2">
+                            <button type="submit" class="flex-1 px-5 py-2.5 rounded-xl bg-primary hover:bg-primaryDark text-white text-sm font-black transition-colors shadow-md shadow-primary/30 flex items-center justify-center gap-2">
+                                <i class="fas fa-filter text-xs"></i> Terapkan Filter
+                            </button>
+                            <a href="{{ route('operator.laporan.index') }}" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-600 text-sm font-bold hover:bg-slate-200 transition-colors flex items-center justify-center">
+                                <i class="fas fa-rotate-left"></i>
+                            </a>
                         </div>
                     </form>
                 </div>
 
-                <!-- Table Card -->
-                <div class="bg-white rounded-2xl border border-slate-200/60 shadow-xl shadow-slate-200/50 overflow-hidden">
-
-                    <div class="p-4 lg:p-5 border-b border-slate-100 flex items-center gap-2">
-                        <div class="w-1 h-5 bg-gradient-to-b from-primary to-primaryDark rounded-full"></div>
+                <!-- TABEL JURNAL UMUM (4 KOLOM - LEBIH BERSIH) -->
+                <div class="bg-white rounded-2xl border border-slate-200/60 shadow-lg overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 flex items-center gap-3">
+                        <div class="w-10 h-10 bg-infoYellowLight rounded-xl flex items-center justify-center">
+                            <i class="fas fa-book-open text-infoYellow text-lg"></i>
+                        </div>
                         <div>
-                            <h3 class="text-sm lg:text-base font-black text-slate-900">Jurnal Transaksi</h3>
-                            <p class="text-[11px] text-slate-500">Pemasukan dan pengeluaran BMT</p>
+                            <h3 class="text-base font-black text-slate-900">Buku Jurnal Umum</h3>
+                            <p class="text-[11px] text-slate-500">Format standar akuntansi berpasangan</p>
                         </div>
                     </div>
 
-                    <!-- Desktop Table -->
-                    <div class="hidden md:block overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-slate-50/80">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-slate-50/80 border-b border-slate-200">
                                 <tr>
-                                    <th class="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider">Tanggal</th>
-                                    <th class="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider">Jenis</th>
-                                    <th class="px-6 py-4 text-right text-[10px] font-black text-slate-500 uppercase tracking-wider">Debit</th>
-                                    <th class="px-6 py-4 text-right text-[10px] font-black text-slate-500 uppercase tracking-wider">Kredit</th>
+                                    <th class="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider w-32">Tanggal</th>
+                                    <th class="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider">Nama Akun (CoA) & Keterangan</th>
+                                    <th class="px-6 py-4 text-right text-[10px] font-black text-slate-500 uppercase tracking-wider w-40">Debit (Rp)</th>
+                                    <th class="px-6 py-4 text-right text-[10px] font-black text-slate-500 uppercase tracking-wider w-40">Kredit (Rp)</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
-                                @forelse ($laporan as $item)
+                                @forelse ($jurnalData as $noBukti => $entries)
                                     @php
-                                        $jenis = strtolower($item['jenis'] ?? '');
-                                        $badge = match ($jenis) {
-                                            'tabungan' => 'bg-blue-50 text-blue-700 border-blue-200',
-                                            'peminjaman' => 'bg-purple-50 text-purple-700 border-purple-200',
-                                            'jasa' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                            'provisi' => 'bg-amber-50 text-amber-700 border-amber-200',
-                                            'kas' => 'bg-slate-100 text-slate-700 border-slate-200',
-                                            default => 'bg-slate-100 text-slate-700 border-slate-200',
-                                        };
+                                        $firstEntry = $entries->first();
+                                        $totalDebitTransaksi = $entries->sum('debit');
+                                        $totalKreditTransaksi = $entries->sum('kredit');
                                     @endphp
 
-                                    <tr class="hover:bg-mintLight/20 transition-colors">
-                                        <td class="px-6 py-4 text-xs font-bold text-slate-700 whitespace-nowrap">
-                                            {{ \Carbon\Carbon::parse($item['tanggal'])->format('d/m/Y') }}
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <span class="inline-flex px-3 py-1.5 rounded-xl text-[10px] font-black border {{ $badge }}">
-                                                {{ ucfirst($item['jenis'] ?? '-') }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 text-right text-sm font-black text-primary whitespace-nowrap">
-                                            @if (!empty($item['debit']) && $item['debit'] > 0)
-                                                Rp {{ number_format($item['debit'], 0, ',', '.') }}
-                                            @else
-                                                <span class="text-slate-300">—</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4 text-right text-sm font-black text-rose-600 whitespace-nowrap">
-                                            @if (!empty($item['kredit']) && $item['kredit'] > 0)
-                                                Rp {{ number_format($item['kredit'], 0, ',', '.') }}
-                                            @else
-                                                <span class="text-slate-300">—</span>
-                                            @endif
+                                    @foreach ($entries as $index => $entry)
+                                        <tr class="hover:bg-mintLight/10 transition-colors group">
+                                            
+                                            <!-- Tanggal (Hanya muncul di baris pertama per grup) -->
+                                            <td class="px-6 py-3 align-top whitespace-nowrap font-bold text-slate-700">
+                                                @if($index === 0)
+                                                    {{ \Carbon\Carbon::parse($firstEntry['tanggal'])->format('d/m/Y') }}
+                                                @endif
+                                            </td>
+
+                                            <!-- Nama Akun & Keterangan -->
+                                            <td class="px-6 py-3 align-top">
+                                                @if($entry['kredit'] > 0)
+                                                    <!-- Akun Kredit: Indentasi & Italic -->
+                                                    <div class="account-credit text-slate-600 font-semibold">
+                                                        {{ $entry['akun'] }}
+                                                    </div>
+                                                @else
+                                                    <!-- Akun Debit: Bold & Rata Kiri -->
+                                                    <div class="text-slate-900 font-bold">
+                                                        {{ $entry['akun'] }}
+                                                    </div>
+                                                @endif
+                                                
+                                                <!-- Keterangan Transaksi (Hanya muncul di baris pertama) -->
+                                                @if($index === 0 && isset($firstEntry['keterangan']) && $firstEntry['keterangan'])
+                                                    <p class="text-[10px] text-slate-400 mt-1 italic max-w-[250px] leading-tight">
+                                                        "{{ Str::limit($firstEntry['keterangan'], 50) }}"
+                                                    </p>
+                                                @endif
+                                            </td>
+
+                                            <!-- Kolom Debit -->
+                                            <td class="px-6 py-3 text-right align-top font-mono font-semibold text-slate-700">
+                                                @if($entry['debit'] > 0)
+                                                    {{ number_format($entry['debit'], 0, ',', '.') }}
+                                                @endif
+                                            </td>
+
+                                            <!-- Kolom Kredit -->
+                                            <td class="px-6 py-3 text-right align-top font-mono font-semibold text-slate-700">
+                                                @if($entry['kredit'] > 0)
+                                                    {{ number_format($entry['kredit'], 0, ',', '.') }}
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+
+                                    <!-- Garis Pemisah & Subtotal per Transaksi -->
+                                    <tr class="bg-slate-50/50">
+                                        <td colspan="4" class="px-6 py-1 border-b border-slate-200">
+                                            <div class="flex justify-end gap-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                                                <span>Subtotal: Dr {{ number_format($totalDebitTransaksi, 0, ',', '.') }} = Cr {{ number_format($totalKreditTransaksi, 0, ',', '.') }}</span>
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
                                         <td colspan="4" class="px-6 py-16 text-center">
                                             <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                                <i class="fas fa-file-circle-xmark text-slate-400 text-2xl"></i>
+                                                <i class="fas fa-book-open text-slate-300 text-2xl"></i>
                                             </div>
                                             <p class="text-sm font-bold text-slate-900">Belum ada data jurnal</p>
-                                            <p class="text-xs text-slate-500 mt-1">Data transaksi akan muncul di sini.</p>
                                         </td>
                                     </tr>
                                 @endforelse
                             </tbody>
 
-                            <!-- Total -->
-                            <tfoot class="gradient-primary text-white">
+                            <!-- Footer Total Keseluruhan -->
+                            <tfoot class="bg-primary text-white border-t-2 border-primaryDark">
                                 <tr>
-                                    <td colspan="2" class="px-6 py-4 font-black text-sm tracking-wide">TOTAL</td>
-                                    <td class="px-6 py-4 text-right font-black text-accent whitespace-nowrap">
-                                        Rp {{ number_format($totalDebit ?? $laporan->sum('debit'), 0, ',', '.') }}
+                                    <td colspan="2" class="px-6 py-4 font-black text-sm tracking-wide text-right">
+                                        TOTAL KESELURUHAN
                                     </td>
-                                    <td class="px-6 py-4 text-right font-black text-rose-300 whitespace-nowrap">
-                                        Rp {{ number_format($totalKredit ?? $laporan->sum('kredit'), 0, ',', '.') }}
+                                    <td class="px-6 py-4 text-right font-black text-accent font-mono text-base">
+                                        Rp {{ number_format($totalDebit, 0, ',', '.') }}
+                                    </td>
+                                    <td class="px-6 py-4 text-right font-black text-yellow-300 font-mono text-base">
+                                        Rp {{ number_format($totalKredit, 0, ',', '.') }}
                                     </td>
                                 </tr>
                             </tfoot>
                         </table>
-                    </div>
-
-                    <!-- Mobile Card List -->
-                    <div class="md:hidden divide-y divide-slate-100">
-                        @forelse ($laporan as $item)
-                            @php
-                                $jenis = strtolower($item['jenis'] ?? '');
-                                $badge = match ($jenis) {
-                                    'tabungan' => 'bg-blue-50 text-blue-700 border-blue-200',
-                                    'peminjaman' => 'bg-purple-50 text-purple-700 border-purple-200',
-                                    'jasa' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                    'provisi' => 'bg-amber-50 text-amber-700 border-amber-200',
-                                    'kas' => 'bg-slate-100 text-slate-700 border-slate-200',
-                                    default => 'bg-slate-100 text-slate-700 border-slate-200',
-                                };
-                            @endphp
-                            <div class="p-4 active:bg-slate-50 transition-colors">
-                                <div class="flex justify-between items-start gap-3 mb-3">
-                                    <span class="inline-flex px-3 py-1.5 rounded-xl text-[10px] font-black border {{ $badge }}">
-                                        {{ ucfirst($item['jenis'] ?? '-') }}
-                                    </span>
-                                    <p class="text-[11px] text-slate-500 font-bold whitespace-nowrap">
-                                        {{ \Carbon\Carbon::parse($item['tanggal'])->format('d/m/Y') }}
-                                    </p>
-                                </div>
-
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div class="bg-mintLight rounded-xl px-3 py-2 border border-primary/20">
-                                        <p class="text-[9px] font-bold text-primary uppercase tracking-wider mb-0.5">Debit</p>
-                                        <p class="text-xs font-black text-primary truncate">
-                                            @if (!empty($item['debit']) && $item['debit'] > 0)
-                                                Rp {{ number_format($item['debit'], 0, ',', '.') }}
-                                            @else
-                                                —
-                                            @endif
-                                        </p>
-                                    </div>
-                                    <div class="bg-rose-50 rounded-xl px-3 py-2 border border-rose-100">
-                                        <p class="text-[9px] font-bold text-rose-600 uppercase tracking-wider mb-0.5">Kredit</p>
-                                        <p class="text-xs font-black text-rose-700 truncate">
-                                            @if (!empty($item['kredit']) && $item['kredit'] > 0)
-                                                Rp {{ number_format($item['kredit'], 0, ',', '.') }}
-                                            @else
-                                                —
-                                            @endif
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="px-4 py-16 text-center">
-                                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                    <i class="fas fa-file-circle-xmark text-slate-400 text-2xl"></i>
-                                </div>
-                                <p class="text-sm font-bold text-slate-900">Belum ada data jurnal</p>
-                                <p class="text-xs text-slate-500 mt-1">Data transaksi akan muncul di sini.</p>
-                            </div>
-                        @endforelse
-
-                        @if($laporan->count() > 0)
-                            <div class="p-4 gradient-primary text-white">
-                                <p class="text-[10px] font-black tracking-widest text-emerald-100 uppercase mb-3">Total Keseluruhan</p>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <p class="text-[9px] text-emerald-100 font-bold uppercase tracking-wider mb-0.5">Debit</p>
-                                        <p class="text-sm font-black text-accent break-all">
-                                            Rp {{ number_format($totalDebit ?? $laporan->sum('debit'), 0, ',', '.') }}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p class="text-[9px] text-emerald-100 font-bold uppercase tracking-wider mb-0.5">Kredit</p>
-                                        <p class="text-sm font-black text-rose-300 break-all">
-                                            Rp {{ number_format($totalKredit ?? $laporan->sum('kredit'), 0, ',', '.') }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
                     </div>
                 </div>
 

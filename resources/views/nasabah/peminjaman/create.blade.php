@@ -13,10 +13,13 @@
                 extend: {
                     colors: {
                         bgMain: '#FAFAFA',
-                        forest: '#1A4D2E',
-                        forestDark: '#123720',
-                        mint: '#4E9F3D',
-                        mintLight: '#E8F5E9',
+                        primary: '#15803d',
+                        primaryDark: '#166534',
+                        primaryLight: '#16a34a',
+                        secondary: '#22c55e',
+                        accent: '#4ade80',
+                        mint: '#15803d',
+                        mintLight: '#dcfce7',
                     },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
@@ -32,36 +35,40 @@
         ::-webkit-scrollbar-track { background: #FAFAFA; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
         
+        /* Variasi Gradient yang TIDAK MONOTON */
+        .gradient-primary { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
+        .gradient-soft { background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%); }
+        .gradient-vibrant { background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%); }
+
         .input-premium { transition: all 0.2s ease-in-out; }
-        .input-premium:focus-within { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(26, 77, 46, 0.1); }
+        .input-premium:focus-within { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(21, 128, 61, 0.1); }
         .modal-backdrop { transition: opacity 0.3s ease-out; }
         .modal-box { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
     </style>
 </head>
-<body class="bg-bgMain text-slate-800 antialiased selection:bg-mintLight selection:text-forest min-h-screen flex flex-col">
+<body class="bg-bgMain text-slate-800 antialiased selection:bg-mintLight selection:text-primary min-h-screen flex flex-col">
 
     <!-- Topbar Khusus Mobile -->
     <header class="lg:hidden bg-white border-b border-slate-200/80 sticky top-0 z-30 px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <div class="w-9 h-9 bg-forest rounded-xl flex items-center justify-center text-white shadow-sm">
+            <div class="w-9 h-9 gradient-soft rounded-xl flex items-center justify-center text-white shadow-sm shadow-primary/30">
                 <i class="fas fa-wallet text-sm"></i>
             </div>
             <div>
-                <h1 class="text-sm font-extrabold text-forest leading-none">Smart Pocket</h1>
-                <p class="text-[9px] font-bold text-mint tracking-wider mt-0.5">BMT SMKN 11</p>
+                <h1 class="text-sm font-black text-primary leading-none">Smart Pocket</h1>
+                <p class="text-[9px] font-bold text-primaryDark tracking-wider mt-0.5">BMT SMKN 11</p>
             </div>
         </div>
         <div class="flex items-center gap-2">
             <a href="{{ route('nasabah.notifikasi.index') }}" class="w-9 h-9 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 relative">
-                <span class="absolute top-2 right-2 w-2 h-2 bg-mint rounded-full ring-2 ring-white"></span>
-                <i class="far fa-bell text-sm"></i>
                 @php
                     $nasabah = auth()->user()->nasabah;
                     $unreadCount = $nasabah ? ($nasabah->unreadNotifications ? $nasabah->unreadNotifications->count() : 0) : 0;
                 @endphp
                 @if($unreadCount > 0)
-                    <span class="absolute top-2 right-2 w-2 h-2 bg-mint rounded-full ring-2 ring-white"></span>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
                 @endif
+                <i class="far fa-bell text-sm"></i>
             </a>
             <button onclick="toggleSidebar()" class="w-9 h-9 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl flex items-center justify-center hover:bg-slate-100 transition-colors">
                 <i class="fas fa-bars text-sm"></i>
@@ -71,44 +78,44 @@
 
     <div class="flex flex-1 relative">
         <!-- Sidebar Backdrop untuk Mobile -->
-        <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-forestDark/50 backdrop-blur-sm z-30 hidden lg:hidden transition-opacity"></div>
+        <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-primaryDark/50 backdrop-blur-sm z-30 hidden lg:hidden transition-opacity"></div>
 
         <!-- Sidebar Nasabah -->
-        <aside id="sidebar" class="w-64 bg-white border-r border-slate-200/80 flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-sm">
+        <aside id="sidebar" class="w-64 bg-white border-r border-slate-200/80 flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl shadow-slate-200/50">
             <div class="p-5 border-b border-slate-100 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-forest rounded-xl flex items-center justify-center text-white shadow-md shadow-forest/20">
+                    <div class="w-10 h-10 gradient-vibrant rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/30">
                         <i class="fas fa-wallet text-lg"></i>
                     </div>
                     <div>
-                        <h1 class="text-base font-extrabold text-forest tracking-tight leading-none">SmartPocket</h1>
-                        <p class="text-[10px] font-bold text-mint tracking-wider mt-1">BMT SMKN 11 BANDUNG</p>
+                        <h1 class="text-base font-black text-primary tracking-tight leading-none">SmartPocket</h1>
+                        <p class="text-[10px] font-bold text-primaryDark tracking-wider mt-1">BMT SMKN 11 BANDUNG</p>
                     </div>
                 </div>
-                <button id="closeSidebar" class="lg:hidden text-slate-400 hover:text-forest">
+                <button id="closeSidebar" class="lg:hidden text-slate-400 hover:text-primary">
                     <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
             
             <nav class="p-4 space-y-1.5 flex-1 overflow-y-auto">
-                <p class="px-3 py-2 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Menu Utama</p>
-                <a href="{{ route('nasabah.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                <p class="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">Menu Utama</p>
+                <a href="{{ route('nasabah.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-home w-5 text-center text-slate-400"></i> Dashboard
                 </a>
-                <a href="{{ route('nasabah.penarikan.create') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                <a href="{{ route('nasabah.penarikan.create') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-money-bill-wave w-5 text-center text-slate-400"></i> Penarikan
                 </a>
                 @if(auth()->user()->nasabah->kategori == 'guru')
-                    <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-3 bg-mintLight text-forest rounded-xl text-sm font-bold transition-all shadow-sm border border-mint/20">
-                        <i class="fas fa-hand-holding-usd w-5 text-center text-mint"></i> Peminjaman
+                    <a href="{{ route('nasabah.peminjaman.create') }}" class="flex items-center gap-3 px-4 py-3 bg-mintLight text-primary rounded-xl text-sm font-bold transition-all shadow-sm border border-primary/20">
+                        <i class="fas fa-hand-holding-usd w-5 text-center text-primary"></i> Peminjaman
                     </a>
                 @endif
-                <a href="{{ route('nasabah.riwayat') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                <a href="{{ route('nasabah.riwayat') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-history w-5 text-center text-slate-400"></i> Riwayat Transaksi
                 </a>
                 
-                <p class="px-3 pt-6 pb-1.5 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Sistem</p>
-                <a href="{{ route('nasabah.profile.edit')}}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                <p class="px-3 pt-6 pb-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sistem</p>
+                <a href="{{ route('nasabah.profile.edit')}}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-cog w-5 text-center text-slate-400"></i> Pengaturan Profile
                 </a>
             </nav>
@@ -129,28 +136,31 @@
             <!-- Header Halaman -->
             <div class="mb-6 lg:mb-8 flex items-start justify-between gap-4">
                 <div>
-                    <div class="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-1">
+                    <div class="flex items-center gap-2 text-xs font-bold text-slate-400 mb-1">
                         <span>Utama</span>
                         <i class="fas fa-chevron-right text-[9px]"></i>
-                        <span class="text-forest font-bold">Ajukan Peminjaman</span>
+                        <span class="text-primary font-bold">Ajukan Peminjaman</span>
                     </div>
                     <h1 class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-tight">Pengajuan Pinjaman Dana</h1>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Dapatkan fasilitas peminjaman dana khusus anggota dengan proses kilat.</p>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-2 flex items-center gap-2 font-medium">
+                        <i class="fas fa-hand-holding-usd text-primary"></i>
+                        Dapatkan fasilitas peminjaman dana khusus anggota dengan proses kilat.
+                    </p>
                 </div>
 
                 <!-- Profile Desktop Header -->
                 <div class="hidden lg:flex items-center gap-3 pt-1 flex-shrink-0">
-                    <button class="px-4 py-2.5 bg-white border border-slate-200/80 hover:border-mint text-slate-700 hover:text-forest text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-2">
-                        <i class="fas fa-download text-mint text-xs"></i> Export
+                    <button class="px-4 py-2.5 bg-white border border-slate-200/80 hover:border-primary text-slate-700 hover:text-primary text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-2">
+                        <i class="fas fa-download text-primary text-xs"></i> Export
                     </button>
                     <div class="w-px h-8 bg-slate-200 my-auto mx-1"></div>
                     <div class="text-right">
-                        <p class="text-xs font-bold text-slate-800 leading-tight">{{ auth()->user()->name }}</p>
-                        <p class="text-[10px] font-semibold text-slate-400 capitalize mt-0.5">
+                        <p class="text-xs font-black text-slate-800 leading-tight">{{ auth()->user()->name }}</p>
+                        <p class="text-[10px] font-bold text-slate-400 capitalize mt-0.5">
                             {{ auth()->user()->nasabah->kategori ?? 'Siswa' }}
                         </p>
                     </div>
-                    <div class="w-10 h-10 rounded-xl overflow-hidden bg-forest text-white font-bold text-sm flex items-center justify-center border border-slate-200 shadow-sm flex-shrink-0">
+                    <div class="w-10 h-10 rounded-xl overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
                         @if(auth()->user()->nasabah && auth()->user()->nasabah->photo)
                             <img src="{{ asset('storage/' . auth()->user()->nasabah->photo) }}" alt="Profile" class="w-full h-full object-cover">
                         @else
@@ -165,27 +175,27 @@
                 
                 <!-- KOLOM RINGKASAN INFO -->
                 <div class="lg:col-span-4 space-y-4 sm:space-y-6">
-                    <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-forest via-forestDark to-forest p-5 sm:p-6 text-white shadow-xl shadow-forest/20">
-                        <div class="absolute -right-10 -bottom-10 w-32 sm:w-40 h-32 sm:h-40 bg-mint/20 rounded-full blur-3xl"></div>
+                    <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl gradient-primary p-5 sm:p-6 text-white shadow-xl shadow-primary/20">
+                        <div class="absolute -right-10 -bottom-10 w-32 sm:w-40 h-32 sm:h-40 bg-white/10 rounded-full blur-3xl"></div>
                         <div class="relative z-10 flex flex-col justify-between h-full">
                             <div>
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-mint/20 border border-mint/30 text-[9px] sm:text-[10px] font-bold text-mint tracking-wide uppercase mb-3 sm:mb-4">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-mint animate-pulse"></span> Maksimal Fasilitas
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/20 text-[9px] sm:text-[10px] font-bold text-accent tracking-wide uppercase mb-3 sm:mb-4">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span> Maksimal Fasilitas
                                 </span>
                                 <p class="text-xs text-emerald-100 font-medium">Limit Pinjaman Tersisa</p>
                                 <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">Rp 5.000.000</h2>
                             </div>
                             <div class="mt-6 sm:mt-8 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-emerald-100">
-                                <span class="flex items-center gap-1.5"><i class="fas fa-check-circle text-mint"></i> Akun Verifikasi</span>
+                                <span class="flex items-center gap-1.5"><i class="fas fa-check-circle text-accent"></i> Akun Verifikasi</span>
                                 <span class="font-semibold text-white">Guru / Staf</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- RINGKASAN SIMULASI (SUDAH DIUPDATE - GABUNG RINCIAN PENCAIRAN) -->
-                    <div class="bg-mintLight/60 border border-mint/20 rounded-2xl p-4 sm:p-5 space-y-3">
-                        <h4 class="text-xs font-bold text-forest uppercase tracking-wider flex items-center gap-2">
-                            <i class="fas fa-calculator text-mint"></i> Ringkasan Simulasi
+                    <!-- RINGKASAN SIMULASI -->
+                    <div class="bg-mintLight/60 border border-primary/20 rounded-2xl p-4 sm:p-5 space-y-3">
+                        <h4 class="text-xs font-black text-primary uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-calculator text-primary"></i> Ringkasan Simulasi
                         </h4>
                         
                         <!-- Info Cicilan -->
@@ -201,9 +211,9 @@
                         </div>
 
                         <!-- Divider -->
-                        <div class="h-px bg-mint/30 my-2"></div>
+                        <div class="h-px bg-primary/30 my-2"></div>
 
-                        <!-- Rincian Pencairan (BARU - DIGABUNG DI SINI) -->
+                        <!-- Rincian Pencairan -->
                         <div class="space-y-2 text-xs">
                             <div class="flex justify-between items-center text-slate-600">
                                 <span>Nominal Pinjaman</span>
@@ -213,32 +223,32 @@
                                 <span>Potongan Provisi (1%)</span>
                                 <span id="rincianProvisi" class="font-semibold">- Rp 0</span>
                             </div>
-                            <div class="flex justify-between items-center pt-1 border-t border-mint/30">
-                                <span class="font-bold text-forest">Dana Diterima</span>
-                                <span id="rincianDiterima" class="font-black text-sm text-forest">Rp 0</span>
+                            <div class="flex justify-between items-center pt-1 border-t border-primary/30">
+                                <span class="font-bold text-primary">Dana Diterima</span>
+                                <span id="rincianDiterima" class="font-black text-sm text-primary">Rp 0</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-sm space-y-3">
-                        <h3 class="text-xs font-bold text-forest uppercase tracking-wider flex items-center gap-2">
-                            <i class="fas fa-info-circle text-mint"></i> Syarat & Ketentuan
+                    <div class="bg-white rounded-2xl border border-slate-200/60 shadow-xl shadow-slate-200/50 p-4 sm:p-5 space-y-3">
+                        <h3 class="text-xs font-black text-primary uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-info-circle text-primary"></i> Syarat & Ketentuan
                         </h3>
                         <ul class="space-y-2 text-xs text-slate-600">
                             <li class="flex items-start gap-2">
-                                <i class="fas fa-check text-mint mt-0.5 text-[10px]"></i>
-                                <span>Nominal pengajuan minimal <strong class="text-forest">Rp 50.000</strong>.</span>
+                                <i class="fas fa-check text-primary mt-0.5 text-[10px]"></i>
+                                <span>Nominal pengajuan minimal <strong class="text-primary">Rp 50.000</strong>.</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <i class="fas fa-check text-mint mt-0.5 text-[10px]"></i>
+                                <i class="fas fa-check text-primary mt-0.5 text-[10px]"></i>
                                 <span>Memiliki rekening tabungan aktif.</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <i class="fas fa-check text-mint mt-0.5 text-[10px]"></i>
+                                <i class="fas fa-check text-primary mt-0.5 text-[10px]"></i>
                                 <span>Riwayat angsuran lancar.</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <i class="fas fa-check text-mint mt-0.5 text-[10px]"></i>
+                                <i class="fas fa-check text-primary mt-0.5 text-[10px]"></i>
                                 <span>Dana diambil tunai di kantor BMT setelah disetujui.</span>
                             </li>
                         </ul>
@@ -247,7 +257,7 @@
 
                 <!-- KOLOM FORMULIR -->
                 <div class="lg:col-span-8">
-                    <div class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-sm p-4 sm:p-6 lg:p-8">
+                    <div class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/60 shadow-xl shadow-slate-200/50 p-4 sm:p-6 lg:p-8">
                         
                         @if ($errors->any())
                             <div class="mb-5 p-3.5 bg-rose-50 border border-rose-200/80 rounded-2xl flex items-start gap-3">
@@ -264,11 +274,11 @@
                         @endif
 
                         @if (session('success'))
-                            <div class="mb-5 p-3.5 bg-emerald-50 border border-emerald-200/80 rounded-2xl flex items-start gap-3">
-                                <i class="fas fa-check-circle text-emerald-500 text-sm mt-0.5"></i>
+                            <div class="mb-5 p-3.5 bg-mintLight border border-primary/30 rounded-2xl flex items-start gap-3">
+                                <i class="fas fa-check-circle text-primary text-sm mt-0.5"></i>
                                 <div>
-                                    <h4 class="text-xs font-bold text-emerald-900">Pengajuan Berhasil!</h4>
-                                    <p class="text-[11px] text-emerald-700 mt-0.5">{{ session('success') }}</p>
+                                    <h4 class="text-xs font-bold text-primaryDark">Pengajuan Berhasil!</h4>
+                                    <p class="text-[11px] text-primaryDark mt-0.5">{{ session('success') }}</p>
                                 </div>
                             </div>
                         @endif
@@ -277,12 +287,12 @@
                             @csrf
 
                             <div>
-                                <label for="jumlah" class="block text-xs font-bold text-forest uppercase tracking-wider mb-2">
+                                <label for="jumlah" class="block text-xs font-black text-primary uppercase tracking-wider mb-2">
                                     Nominal Pinjaman <span class="text-rose-500">*</span>
                                 </label>
-                                <div class="input-premium relative rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 focus-within:border-mint focus-within:bg-white transition-all">
+                                <div class="input-premium relative rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 focus-within:border-primary focus-within:bg-white transition-all">
                                     <div class="absolute inset-y-0 left-0 pl-3.5 sm:pl-4 flex items-center pointer-events-none">
-                                        <span class="text-slate-400 font-extrabold text-sm">Rp</span>
+                                        <span class="text-primary font-black text-sm">Rp</span>
                                     </div>
                                     <input type="number" name="jumlah" id="jumlah" value="{{ old('jumlah') }}" min="50000" step="10000" placeholder="0" class="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-transparent text-base sm:text-lg font-black text-slate-900 placeholder-slate-300 focus:outline-none" required oninput="updateSimulasi()">
                                 </div>
@@ -293,10 +303,10 @@
                             </div>
 
                             <div>
-                                <label for="tenor" class="block text-xs font-bold text-forest uppercase tracking-wider mb-2">
+                                <label for="tenor" class="block text-xs font-black text-primary uppercase tracking-wider mb-2">
                                     Tenor / Jangka Waktu <span class="text-rose-500">*</span>
                                 </label>
-                                <div class="input-premium relative rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 focus-within:border-mint focus-within:bg-white transition-all">
+                                <div class="input-premium relative rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 focus-within:border-primary focus-within:bg-white transition-all">
                                     <input type="number" name="tenor" id="tenor" value="{{ old('tenor', 12) }}" min="1" max="24" placeholder="12" class="w-full pl-4 pr-16 py-3 sm:py-3.5 bg-transparent text-xs sm:text-sm font-bold text-slate-900 focus:outline-none" required oninput="updateSimulasi()">
                                     <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                         <span class="text-slate-400 font-bold text-xs uppercase tracking-wider">Bulan</span>
@@ -307,37 +317,37 @@
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                                 <div>
-                                    <label for="tanggal_pinjam" class="block text-xs font-bold text-forest uppercase tracking-wider mb-2">
+                                    <label for="tanggal_pinjam" class="block text-xs font-black text-primary uppercase tracking-wider mb-2">
                                         Tanggal Pinjam <span class="text-rose-500">*</span>
                                     </label>
-                                    <div class="input-premium rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 focus-within:border-mint focus-within:bg-white transition-all">
+                                    <div class="input-premium rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 focus-within:border-primary focus-within:bg-white transition-all">
                                         <input type="date" name="tanggal_pinjam" id="tanggal_pinjam" value="{{ old('tanggal_pinjam', date('Y-m-d')) }}" class="w-full px-3.5 py-3 sm:py-3.5 bg-transparent text-xs font-bold text-slate-800 focus:outline-none" required>
                                     </div>
                                 </div>
                                 <div>
-                                    <label for="tanggal_jatuh_tempo" class="block text-xs font-bold text-forest uppercase tracking-wider mb-2">
+                                    <label for="tanggal_jatuh_tempo" class="block text-xs font-black text-primary uppercase tracking-wider mb-2">
                                         Tanggal Jatuh Tempo <span class="text-rose-500">*</span>
                                     </label>
-                                    <div class="input-premium rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 focus-within:border-mint focus-within:bg-white transition-all">
+                                    <div class="input-premium rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 focus-within:border-primary focus-within:bg-white transition-all">
                                         <input type="date" name="tanggal_jatuh_tempo" id="tanggal_jatuh_tempo" value="{{ old('tanggal_jatuh_tempo') }}" min="{{ date('Y-m-d', strtotime('+1 month')) }}" class="w-full px-3.5 py-3 sm:py-3.5 bg-transparent text-xs font-bold text-slate-800 focus:outline-none" required onchange="updateSimulasi()">
                                     </div>
                                 </div>
                             </div>
 
                             <div>
-                                <label for="keterangan" class="block text-xs font-bold text-forest uppercase tracking-wider mb-2">
-                                    Keperluan / Catatan <span class="text-slate-400 font-normal lowercase">(opsional)</span>
+                                <label for="keterangan" class="block text-xs font-black text-primary uppercase tracking-wider mb-2">
+                                    Keperluan / Catatan <span class="text-slate-400 font-bold lowercase">(opsional)</span>
                                 </label>
-                                <div class="input-premium rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 focus-within:border-mint focus-within:bg-white transition-all">
+                                <div class="input-premium rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 focus-within:border-primary focus-within:bg-white transition-all">
                                     <textarea name="keterangan" id="keterangan" rows="3" placeholder="Tuliskan alasan peminjaman..." class="w-full p-3.5 bg-transparent text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none resize-none">{{ old('keterangan') }}</textarea>
                                 </div>
                             </div>
 
                             <div class="pt-3 sm:pt-4 flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 sm:gap-3 border-t border-slate-100">
-                                <a href="{{ route('nasabah.dashboard') }}" class="w-full sm:w-auto px-5 py-3 text-center text-xs font-bold text-slate-500 hover:text-forest rounded-xl hover:bg-slate-100 transition-all">
+                                <a href="{{ route('nasabah.dashboard') }}" class="w-full sm:w-auto px-5 py-3 text-center text-xs font-bold text-slate-500 hover:text-primary rounded-xl hover:bg-slate-100 transition-all">
                                     Batal
                                 </a>
-                                <button type="button" onclick="bukaModalKonfirmasi()" class="w-full sm:w-auto px-7 py-3.5 bg-mint hover:bg-forest text-white rounded-xl font-bold shadow-md shadow-mint/20 transition-all flex items-center justify-center gap-2">
+                                <button type="button" onclick="bukaModalKonfirmasi()" class="w-full sm:w-auto px-7 py-3.5 bg-primary hover:bg-primaryDark text-white rounded-xl font-black shadow-md shadow-primary/30 transition-all flex items-center justify-center gap-2">
                                     <i class="fas fa-paper-plane text-xs"></i> Lanjutkan Pengajuan
                                 </button>
                             </div>
@@ -350,13 +360,13 @@
 
     <!-- MODAL POP-UP KONFIRMASI -->
     <div id="modalKonfirmasi" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
-        <div id="modalBackdrop" class="modal-backdrop fixed inset-0 bg-forestDark/60 backdrop-blur-sm opacity-0" onclick="tutupModal()"></div>
+        <div id="modalBackdrop" class="modal-backdrop fixed inset-0 bg-primaryDark/60 backdrop-blur-sm opacity-0" onclick="tutupModal()"></div>
         <div id="modalContent" class="modal-box bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-100 max-w-xs sm:max-w-sm w-full p-5 sm:p-6 relative z-10 opacity-0 scale-95 transform">
             <div class="text-center">
-                <div class="w-12 h-12 bg-mintLight text-mint rounded-2xl border border-mint/20 flex items-center justify-center mx-auto mb-3 text-lg">
+                <div class="w-12 h-12 bg-mintLight text-primary rounded-2xl border border-primary/20 flex items-center justify-center mx-auto mb-3 text-lg">
                     <i class="fas fa-file-invoice-dollar"></i>
                 </div>
-                <h3 class="text-sm sm:text-base font-extrabold text-slate-900">Konfirmasi Pinjaman</h3>
+                <h3 class="text-sm sm:text-base font-black text-slate-900">Konfirmasi Pinjaman</h3>
                 <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Periksa rincian sebelum dikirim ke sistem.</p>
             </div>
             <div class="my-4 p-3.5 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100 space-y-2.5 text-xs" id="modalDetails">
@@ -369,8 +379,8 @@
                     <span id="previewProvisi" class="font-bold">- Rp 0</span>
                 </div>
                 <div class="flex justify-between items-center pt-2 border-t border-slate-200">
-                    <span class="text-forest font-bold">Dana Diterima</span>
-                    <span id="previewDiterima" class="font-black text-mint">Rp 0</span>
+                    <span class="text-primary font-bold">Dana Diterima</span>
+                    <span id="previewDiterima" class="font-black text-primary">Rp 0</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-slate-400 font-medium">Tenor</span>
@@ -378,12 +388,12 @@
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-slate-400 font-medium">Jatuh Tempo</span>
-                    <span id="previewJatuhTempo" class="font-bold text-mint">-</span>
+                    <span id="previewJatuhTempo" class="font-bold text-primary">-</span>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-2.5">
                 <button type="button" onclick="tutupModal()" class="py-2.5 px-3 border border-slate-200 text-slate-600 rounded-xl font-bold hover:bg-slate-50 transition-all text-xs">Cek Lagi</button>
-                <button type="button" onclick="kirimFormulir()" class="py-2.5 px-3 bg-mint hover:bg-forest text-white rounded-xl font-bold shadow-md shadow-mint/20 transition-all text-xs flex items-center justify-center gap-1.5">
+                <button type="button" onclick="kirimFormulir()" class="py-2.5 px-3 bg-primary hover:bg-primaryDark text-white rounded-xl font-black shadow-md shadow-primary/30 transition-all text-xs flex items-center justify-center gap-1.5">
                     <i class="fas fa-check"></i> Ya, Kirim
                 </button>
             </div>
@@ -494,7 +504,5 @@
             backdrop.classList.add('hidden');
         });
     </script>
-
-    
 </body>
 </html>
