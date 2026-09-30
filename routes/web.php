@@ -83,6 +83,7 @@ Route::middleware(['auth'])->group(function () {
 
         // laporan
         Route::get('/laporan', [OperatorLaporanController::class, 'index'])->name('operator.laporan.index');
+        Route::get('/operator/laporan/export', [OperatorLaporanController::class, 'export'])->name('operator.laporan.export');
 
         // Notifikasi Operator
         Route::get('/operator/notifikasi', [OperatorNotifikasiController::class, 'index'])->name('operator.notifikasi.index');

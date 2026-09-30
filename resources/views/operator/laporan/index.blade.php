@@ -175,7 +175,7 @@
                     </div>
                 </div>
 
-                <!-- Filter Card -->
+                <!-- Filter Card (SUDAH DITAMBAHKAN TOMBOL EXPORT EXCEL) -->
                 <div class="bg-white rounded-2xl border border-slate-200/60 shadow-lg p-5">
                     <form action="{{ route('operator.laporan.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                         <div>
@@ -190,6 +190,14 @@
                             <button type="submit" class="flex-1 px-5 py-2.5 rounded-xl bg-primary hover:bg-primaryDark text-white text-sm font-black transition-colors shadow-md shadow-primary/30 flex items-center justify-center gap-2">
                                 <i class="fas fa-filter text-xs"></i> Terapkan Filter
                             </button>
+                            
+                            <!-- TOMBOL EXPORT EXCEL -->
+                            <a href="{{ route('operator.laporan.export', request()->query()) }}" 
+                                class="px-5 py-2.5 rounded-xl bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 group shadow-sm hover:shadow-md">
+                                <i class="fas fa-file-excel text-lg group-hover:scale-110 transition-transform"></i> 
+                                <span>Export Excel</span>
+                            </a>
+
                             <a href="{{ route('operator.laporan.index') }}" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-600 text-sm font-bold hover:bg-slate-200 transition-colors flex items-center justify-center">
                                 <i class="fas fa-rotate-left"></i>
                             </a>
