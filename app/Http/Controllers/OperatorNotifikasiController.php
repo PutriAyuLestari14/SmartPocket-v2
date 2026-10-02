@@ -13,24 +13,30 @@ class OperatorNotifikasiController extends Controller
         // Notifikasi dari penarikan pending
         $penarikanPending = DetailTabungan::with('rekening.nasabah')
             ->where('status', 'pending')
-            ->where('id_jenis_transaksi', 2) // Penarikan
+            ->where('id_jenis_transaksi', 2)
             ->orderBy('tanggal_transaksi', 'desc')
             ->get();
 
-        // Notifikasi dari peminjaman pending (kalau ada)
-        // $peminjamanPending = Peminjaman::with('nasabah')
-        //     ->where('status', 'pending')
-        //     ->orderBy('tanggal_pengajuan', 'desc')
-        //     ->get();
+        // Notifikasi dari pengajuan peminjaman pending
+        $peminjamanPending = Peminjaman::with('nasabah')
+            ->where('status_verifikasi', 'pending')
+            ->orderBy('tanggal_ajuan', 'desc')
+            ->get();
 
-        $totalPending = $penarikanPending->count();
+        // Total semua notifikasi pending
+        $totalPending = $penarikanPending->count()
+            + $peminjamanPending->count();
 
-        return view('operator.notifikasi.index', compact('penarikanPending', 'totalPending'));
+        return view('operator.notifikasi.index', compact(
+            'penarikanPending',
+            'peminjamanPending',
+            'totalPending'
+        ));
     }
 
     public function markAllAsRead()
     {
-        // Reset badge dengan mengubah status (opsional)
-        return redirect()->back()->with('success', 'Notifikasi dibaca');
+        return redirect()->back()
+            ->with('success', 'Notifikasi dibaca');
     }
 }

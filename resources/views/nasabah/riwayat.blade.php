@@ -152,9 +152,6 @@
 
                 <!-- Profile Desktop -->
                 <div class="hidden lg:flex items-center gap-3 pt-1 flex-shrink-0">
-                    <button class="px-4 py-2.5 bg-white border border-slate-200/80 hover:border-primary text-slate-700 hover:text-primary text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-2">
-                        <i class="fas fa-download text-primary text-xs"></i> Export PDF/Excel
-                    </button>
                     <div class="w-px h-8 bg-slate-200 my-auto mx-1"></div>
                     <div class="text-right">
                         <p class="text-xs font-black text-slate-800 leading-tight">{{ auth()->user()->name }}</p>
@@ -292,7 +289,7 @@
                                         <p class="text-[11px] font-semibold text-slate-400 mt-0.5">
                                             {{ \Carbon\Carbon::parse($trx->tanggal_transaksi)->timezone('Asia/Jakarta')->format('d M Y • H:i') }} WIB
                                         </p>
-                                    </div>
+                                    </div>                                
                                 @elseif($isAngsuran)
                                     <div class="w-11 h-11 bg-mintLight text-primary rounded-xl flex items-center justify-center font-bold flex-shrink-0">
                                         <i class="fas fa-check-circle text-base"></i>

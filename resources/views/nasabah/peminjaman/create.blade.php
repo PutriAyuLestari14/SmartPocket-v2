@@ -150,9 +150,6 @@
 
                 <!-- Profile Desktop Header -->
                 <div class="hidden lg:flex items-center gap-3 pt-1 flex-shrink-0">
-                    <button class="px-4 py-2.5 bg-white border border-slate-200/80 hover:border-primary text-slate-700 hover:text-primary text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-2">
-                        <i class="fas fa-download text-primary text-xs"></i> Export
-                    </button>
                     <div class="w-px h-8 bg-slate-200 my-auto mx-1"></div>
                     <div class="text-right">
                         <p class="text-xs font-black text-slate-800 leading-tight">{{ auth()->user()->name }}</p>
@@ -210,7 +207,7 @@
                             </div>
                         </div>
 
-                        <!-- Divider -->
+                        <!-- pemisah -->
                         <div class="h-px bg-primary/30 my-2"></div>
 
                         <!-- Rincian Pencairan -->

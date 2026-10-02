@@ -11,16 +11,20 @@ use Illuminate\Http\Request;
 
 class TabunganController extends Controller
 {
+    // method buat nampilin dashboard nasabah
     public function index()
     {
+        // user yang lagi login
         $user = auth()->user();
+
+        // id nasabah dari user
         $id_nasabah = $user->nasabah->id_nasabah;
 
-        // Cari rekening milik user yang login
+        // rekening milik nasabah ini
         $rekening = RekeningTabungan::where('id_nasabah', $id_nasabah)->first();
 
-        // 1. Transaksi tabungan yang sudah diproses
-        // Berhasil dan gagal tampil, pending tidak tampil
+        // transaksi tabungan (setoran/penarikan)
+        // cuma yang berhasil & gagal, pending gak muncul
         $transaksiTabungan = DetailTabungan::whereHas(
             'rekening.nasabah',
             function ($query) use ($user) {
@@ -42,8 +46,7 @@ class TabunganController extends Controller
             ];
         });
 
-        // 2. Peminjaman yang sudah diproses
-        // Pending tidak tampil
+        // peminjaman yang udah diproses (disetujui/ditolak)
         $transaksiPeminjaman = Peminjaman::where(
             'id_nasabah',
             $id_nasabah
@@ -63,12 +66,13 @@ class TabunganController extends Controller
             ];
         });
 
-        // 3. Pembayaran angsuran yang sudah dilakukan
+        // id semua pinjaman nasabah ini
         $idPinjamanList = Peminjaman::where(
             'id_nasabah',
             $id_nasabah
         )->pluck('id_pinjaman');
 
+        // angsuran dari pinjaman-pinjaman itu
         $transaksiAngsuran = Angsuran::whereIn(
             'id_pinjaman',
             $idPinjamanList
@@ -87,8 +91,7 @@ class TabunganController extends Controller
             ];
         });
 
-        // 4. Gabungkan semua transaksi
-        // Yang paling baru selalu berada di paling atas
+        // gabung semua, urut dari yang paling baru, ambil 5
         $transaksiTerbaru = $transaksiTabungan
             ->concat($transaksiPeminjaman)
             ->concat($transaksiAngsuran)
@@ -98,7 +101,7 @@ class TabunganController extends Controller
             ->take(5)
             ->values();
 
-        // Pengajuan penarikan yang masih pending
+        // pengajuan penarikan yang masih pending
         $pengajuanPenarikan = null;
 
         if ($rekening) {
@@ -112,7 +115,7 @@ class TabunganController extends Controller
             ->first();
         }
 
-        // Pengajuan peminjaman yang masih pending
+        // pengajuan peminjaman yang masih pending
         $pengajuanPeminjaman = Peminjaman::where(
             'id_nasabah',
             $id_nasabah
@@ -121,48 +124,49 @@ class TabunganController extends Controller
         ->latest('created_at')
         ->first();
 
+        // pinjaman aktif (disetujui & sisa > 0)
         $pinjamanAktif = Peminjaman::where('id_nasabah', $id_nasabah)
             ->where('status_verifikasi', 'disetujui')
             ->where('sisa_pinjaman', '>', 0)
             ->orderBy('tanggal_jatuh_tempo', 'asc')
             ->first();
 
-        // ==========================================
-        // PERBAIKAN: Pisah hitungan Pokok dan Bunga
-        // ==========================================
+        // total sisa pokok semua pinjaman aktif
         $totalSisaPokok = Peminjaman::where('id_nasabah', $id_nasabah)
             ->where('status_verifikasi', 'disetujui')
             ->where('sisa_pinjaman', '>', 0)
             ->sum('sisa_pinjaman') ?? 0;
 
+        // total sisa jasa (bunga)
         $totalSisaJasa = Peminjaman::where('id_nasabah', $id_nasabah)
             ->where('status_verifikasi', 'disetujui')
             ->where('sisa_pinjaman', '>', 0)
             ->sum('sisa_jasa') ?? 0;
 
+        // total kewajiban = pokok + jasa
         $totalKewajiban = $totalSisaPokok + $totalSisaJasa;
 
+        // kirim ke view dashboard nasabah
         return view('nasabah.dashboard', compact(
             'rekening',
             'transaksiTerbaru',
             'pengajuanPenarikan',
             'pengajuanPeminjaman',
             'pinjamanAktif',
-            'totalSisaPokok',      // <-- Baru
-            'totalSisaJasa',       // <-- Baru
-            'totalKewajiban'       // <-- Baru
+            'totalSisaPokok',
+            'totalSisaJasa',
+            'totalKewajiban'
         ));
-    
     }
 
+    // method buat nampilin riwayat transaksi nasabah
     public function riwayat(Request $request)
     {
+        // user yang lagi login
         $user = auth()->user();
         $idNasabah = $user->nasabah->id_nasabah;
 
-        // 1. Setoran dan penarikan yang sudah diproses
-        // Berhasil dan gagal tampil
-        // Pending tidak tampil
+        // transaksi tabungan (setoran/penarikan)
         $transaksiTabungan = DetailTabungan::whereHas(
             'rekening.nasabah',
             function ($query) use ($user) {
@@ -190,9 +194,7 @@ class TabunganController extends Controller
             ];
         });
 
-        // 2. Pinjaman yang sudah diproses
-        // Disetujui dan ditolak tampil
-        // Pending tidak tampil
+        // peminjaman yang udah diproses
         $transaksiPeminjaman = Peminjaman::where(
             'id_nasabah',
             $idNasabah
@@ -215,12 +217,13 @@ class TabunganController extends Controller
             ];
         });
 
-        // 3. Pembayaran angsuran yang sudah dilakukan
+        // id pinjaman nasabah ini
         $idPinjamanList = Peminjaman::where(
             'id_nasabah',
             $idNasabah
         )->pluck('id_pinjaman');
 
+        // angsuran dari pinjaman itu
         $transaksiAngsuran = Angsuran::whereIn(
             'id_pinjaman',
             $idPinjamanList
@@ -239,8 +242,7 @@ class TabunganController extends Controller
             ];
         });
 
-        // 4. Gabungkan semua transaksi
-        // Transaksi terbaru selalu di atas
+        // gabung semua, urut paling baru
         $semuaTransaksi = $transaksiTabungan
             ->concat($transaksiPeminjaman)
             ->concat($transaksiAngsuran)
@@ -249,8 +251,7 @@ class TabunganController extends Controller
             })
             ->values();
 
-        // Total pemasukan
-        // Hanya SETORAN yang berhasil
+        // total pemasukan = setoran yang berhasil
         $totalPemasukan = $transaksiTabungan
             ->filter(function ($trx) {
                 return $trx->sub_tipe === 'Setoran'
@@ -258,9 +259,7 @@ class TabunganController extends Controller
             })
             ->sum('jumlah');
 
-        // Total pengeluaran
-        // Hanya PENARIKAN yang berhasil
-        // Penarikan gagal tidak dihitung
+        // total pengeluaran = penarikan yang berhasil
         $totalPengeluaran = $transaksiTabungan
             ->filter(function ($trx) {
                 return $trx->sub_tipe === 'Penarikan'
@@ -268,10 +267,11 @@ class TabunganController extends Controller
             })
             ->sum('jumlah');
 
-        // Pagination manual
+        // pagination manual, 10 per halaman
         $perPage = 10;
         $currentPage = (int) $request->input('page', 1);
 
+        // potong data sesuai halaman
         $items = $semuaTransaksi
             ->slice(
                 ($currentPage - 1) * $perPage,
@@ -279,6 +279,7 @@ class TabunganController extends Controller
             )
             ->values();
 
+        // bikin paginator manual
         $transaksi = new \Illuminate\Pagination\LengthAwarePaginator(
             $items,
             $semuaTransaksi->count(),
@@ -290,6 +291,7 @@ class TabunganController extends Controller
             ]
         );
 
+        // kirim ke view riwayat
         return view('nasabah.riwayat', compact(
             'transaksi',
             'totalPemasukan',

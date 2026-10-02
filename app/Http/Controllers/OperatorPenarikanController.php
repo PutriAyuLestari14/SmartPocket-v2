@@ -12,17 +12,21 @@ class OperatorPenarikanController extends Controller
 {
     public function create()
     {
+        // ambil semua nasabah aktif + relasi user & rekeningnya
+        // urut dari nama a-z
         $nasabah = Nasabah::with(['user', 'rekening'])
             ->where('status', 'aktif')
             ->orderBy('nama', 'asc')
             ->get();
 
+        // kirim ke view
         return view('operator.penarikan.create', compact('nasabah'));
     }
 
-    // Memproses data "Simpan"
+    // proses simpan penarikan
     public function store(Request $request)
     {
+        // validasi input: id_nasabah harus ada di tabel, jumlah min 1rb, ket wajib
         $request->validate([
             'id_nasabah' => 'required|exists:nasabah,id_nasabah',
             'jumlah' => 'required|numeric|min:1000',
@@ -31,40 +35,46 @@ class OperatorPenarikanController extends Controller
             'jumlah.min' => 'Minimal penarikan adalah Rp 1.000',
         ]);
 
-        // jika ada 1 langkah yang gagal, semua perubahan dibatalkan    
+        // mulai transaksi, kalau ada 1 aja yang gagal semua dibatalin
         DB::beginTransaction();
         try {
 
-            // cari rek 
+            // cari rekening nasabah yang mau ditarik
             $rekening = RekeningTabungan::where('id_nasabah', $request->id_nasabah)->first();
             
+            // kalau rekening gak ada, balikin
             if (!$rekening) {
                 return back()->with('error', 'Nasabah belum memiliki rekening tabungan')->withInput();
             }
 
+            // kalau saldo kurang dari jumlah penarikan, tolak
             if ($rekening->saldo < $request->jumlah) {
                 return back()->with('error', 'Saldo nasabah tidak mencukupi. Saldo saat ini: Rp ' . number_format($rekening->saldo, 0, ',', '.'))->withInput();
             }
 
-            // potong saldo
+            // potong saldo nasabah di sinilah gais 
             $rekening->saldo -= $request->jumlah;
             $rekening->save();
 
+            // catat transaksi penarikan di detail tabungan
             DetailTabungan::create([
                 'no_rek' => $rekening->no_rek,
                 'id_petugas' => auth()->user()->petugas->id_petugas,
-                'id_jenis_transaksi' => 2,
+                'id_jenis_transaksi' => 2, // 2 = penarikan
                 'jumlah' => $request->jumlah,
                 'tanggal_transaksi' => now()->timezone('Asia/Jakarta'),
-                'status' => 'berhasil',
+                'status' => 'berhasil', // langsung berhasil karena diproses teller
             ]);
 
-            // simpen perubahan
+            // simpan permanen
             DB::commit();
+
+            // balikin ke form dengan pesan sukses
             return redirect()->route('operator.penarikan.create')
                 ->with('success', 'Penarikan berhasil! Saldo a.n ' . $rekening->nasabah->nama . ' berkurang sebesar Rp ' . number_format($request->jumlah, 0, ',', '.'));
 
         } catch (\Exception $e) {
+            // kalau error, batalkan semua perubahan
             DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }

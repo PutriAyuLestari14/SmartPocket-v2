@@ -227,10 +227,17 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-black text-slate-700 mb-2">Nama Lengkap</label>
+                                    <label class="block text-xs font-black text-slate-700 mb-2">
+                                        Nama Lengkap
+                                    </label>
                                     <div class="relative">
-                                        <input type="text" name="nama" value="{{ old('nama', auth()->user()->nasabah->nama ?? '') }}" required class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all pl-10">
-                                        <i class="fas fa-user absolute left-3.5 top-3.5 text-primary text-xs"></i>
+                                        <input
+                                            type="text"
+                                            value="{{ auth()->user()->nasabah->nama ?? '' }}"
+                                            readonly
+                                            class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-500 cursor-not-allowed pl-10"
+                                        >
+                                        <i class="fas fa-lock absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
                                     </div>
                                 </div>
                             </div>

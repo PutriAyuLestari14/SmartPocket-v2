@@ -29,15 +29,17 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::middleware(['auth'])->group(function () {
-
     // ADMIN
-    Route::middleware(['role:admin'])->prefix('admin')->group(function () {
+    Route::middleware(['auth'])->group(function () {
+        Route::middleware(['role:admin'])->prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
         Route::get('/nasabah', [AdminNasabahController::class, 'index'])->name('admin.nasabah.index');
         Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('admin.laporan.index');
         Route::get('/saldo', [AdminSaldoController::class, 'index'])->name('admin.saldo.index');
         Route::post('/saldo/proses', [AdminSaldoController::class, 'proses'])->name('admin.saldo.proses');
+
+        Route::get('/nasabah/mutasi/{idNasabah}', [AdminSaldoController::class, 'mutasiNasabah'])
+            ->name('admin.nasabah.mutasi');
     });
 
     // OPERATOR

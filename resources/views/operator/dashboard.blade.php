@@ -158,22 +158,23 @@
 
                     <!-- Profil + notif desktop -->
                     <div class="hidden lg:flex items-center gap-3 pt-1 flex-shrink-0">
-                        <div class="text-right">
-                            <p class="text-xs font-black text-slate-800 leading-tight">
-                                {{ auth()->user()->petugas->nama_lengkap ?? auth()->user()->name }}
-                            </p>
-                            <p class="text-[10px] font-bold text-slate-400 mt-0.5">Operator Shift Pagi</p>
-                        </div>
-                        <div class="w-10 h-10 rounded-xl overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
-                            {{ strtoupper(substr(auth()->user()->petugas->nama_lengkap ?? auth()->user()->name, 0, 1)) }}
-                        </div>
-                        <a href="{{ route('operator.notifikasi.index') }}" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:text-primary hover:border-primary transition-all relative shadow-sm ml-1">
+                        <a href="{{ route('operator.notifikasi.index') }}" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:text-primary hover:border-primary transition-all relative shadow-sm">
                             <i class="far fa-bell text-base"></i>
                             @php $pendingNotif = \App\Models\DetailTabungan::where('status', 'pending')->count(); @endphp
                             @if($pendingNotif > 0)
                                 <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
                             @endif
                         </a>
+                        <div class="w-px h-8 bg-slate-200"></div>
+                        <div class="text-right">
+                            <p class="text-xs font-black text-slate-800 leading-tight">
+                                {{ auth()->user()->petugas->nama_lengkap ?? auth()->user()->name }}
+                            </p>
+                            <p class="text-[10px] font-bold text-slate-400 mt-0.5">Operator</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
+                            {{ strtoupper(substr(auth()->user()->petugas->nama_lengkap ?? auth()->user()->name, 0, 1)) }}
+                        </div>
                     </div>
                 </header>
 
@@ -184,11 +185,11 @@
                     <div class="bg-white rounded-2xl p-5 border border-blue-100 shadow-lg shadow-blue-500/5 hover-lift relative overflow-hidden group">
                         <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                         <div class="relative z-10">
-                            <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30">
-                                <i class="fas fa-users text-white text-xl"></i>
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30">
+                                <i class="fas fa-users text-white text-base"></i>
                             </div>
                             <p class="text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1">Total Nasabah</p>
-                            <p class="text-2xl lg:text-3xl font-black text-slate-900">{{ $totalNasabah ?? 0 }}</p>
+                            <p class="text-1xl lg:text-2xl font-black text-slate-900">{{ $totalNasabah ?? 0 }}</p>
                             <p class="text-[10px] font-bold text-blue-600 mt-3 flex items-center gap-1 bg-blue-50 w-fit px-2 py-1 rounded-lg">
                                 <i class="fas fa-arrow-up"></i> +5 bulan ini
                             </p>
@@ -199,11 +200,11 @@
                     <div class="gradient-soft rounded-2xl p-5 shadow-xl shadow-primary/20 relative overflow-hidden hover-lift group">
                         <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
                         <div class="relative z-10">
-                            <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-4 border border-white/30">
-                                <i class="fas fa-wallet text-white text-xl"></i>
+                            <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-4 border border-white/30">
+                                <i class="fas fa-wallet text-white text-base"></i>
                             </div>
                             <p class="text-[10px] text-emerald-100 font-black uppercase tracking-wider mb-1">Saldo Kas BMT</p>
-                            <p class="text-2xl lg:text-3xl font-black text-white mb-2 break-all leading-tight">Rp {{ number_format($totalSaldo ?? 0, 0, ',', '.') }}</p>
+                            <p class="text-1xl lg:text-2xl font-black text-white mb-2 break-all leading-tight">Rp {{ number_format($totalSaldo ?? 0, 0, ',', '.') }}</p>
                             <p class="text-[10px] font-bold text-emerald-100 flex items-center gap-1 bg-white/10 w-fit px-2 py-1 rounded-lg backdrop-blur-sm border border-white/20">
                                 <i class="fas fa-sync-alt fa-spin"></i> Live Update
                             </p>
@@ -214,11 +215,11 @@
                     <div class="bg-white rounded-2xl p-5 border border-primary/20 shadow-lg shadow-primary/5 hover-lift relative overflow-hidden group">
                         <div class="absolute top-0 right-0 w-24 h-24 bg-mintLight rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                         <div class="relative z-10">
-                            <div class="w-12 h-12 gradient-vibrant rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-primary/30">
+                            <div class="w-10 h-10 gradient-vibrant rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-primary/30">
                                 <i class="fas fa-check-circle text-white text-xl"></i>
                             </div>
                             <p class="text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1">Transaksi Sukses</p>
-                            <p class="text-2xl lg:text-3xl font-black text-slate-900">{{ $transaksiHariIni ?? 0 }}</p>
+                            <p class="text-1xl lg:text-2xl font-black text-slate-900">{{ $transaksiHariIni ?? 0 }}</p>
                             <p class="text-[10px] font-bold text-primary mt-3 flex items-center gap-1 bg-mintLight w-fit px-2 py-1 rounded-lg">
                                 <i class="fas fa-arrow-trend-up"></i> {{ $transaksiMingguIni ?? 0 }} minggu ini
                             </p>
@@ -229,11 +230,11 @@
                     <div class="bg-white rounded-2xl p-5 border border-amber-100 shadow-lg shadow-amber-500/5 hover-lift relative overflow-hidden group">
                         <div class="absolute top-0 right-0 w-24 h-24 bg-amber-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                         <div class="relative z-10">
-                            <div class="w-12 h-12 gradient-mint rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-amber-500/30">
+                            <div class="w-10 h-10 gradient-mint rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-amber-500/30">
                                 <i class="fas fa-clock text-white text-xl"></i>
                             </div>
                             <p class="text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1">Menunggu Verifikasi</p>
-                            <p class="text-2xl lg:text-3xl font-black text-slate-900">{{ $penarikanPending ?? 0 }}</p>
+                            <p class="text-1xl lg:text-2xl font-black text-slate-900">{{ $penarikanPending ?? 0 }}</p>
                             <p class="text-[10px] font-bold text-amber-600 mt-3 flex items-center gap-1 bg-amber-50 w-fit px-2 py-1 rounded-lg">
                                 <i class="fas fa-exclamation-circle"></i> Butuh tindakan
                             </p>
@@ -255,15 +256,15 @@
                             <div class="grid grid-cols-3 gap-2.5 sm:gap-4">
 
                                 <a href="{{ route('operator.setoran.create')}}" class="group bg-gradient-to-br from-emerald-50 to-emerald-100/50 hover:from-emerald-100 hover:to-emerald-200 border-2 border-emerald-200/60 hover:border-emerald-300 rounded-2xl p-3 sm:p-5 text-center transition-all hover-lift">
-                                    <div class="w-10 h-10 sm:w-14 sm:h-14 bg-emerald-500 group-hover:bg-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 transition-all shadow-lg shadow-emerald-500/30">
-                                        <i class="fas fa-plus-circle text-white text-sm sm:text-xl"></i>
+                                    <div class="w-9 h-9 sm:w-11 sm:h-11 bg-emerald-500 group-hover:bg-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 transition-all shadow-lg shadow-emerald-500/30">
+                                        <i class="fas fa-plus-circle text-white text-sm sm:text-base"></i>
                                     </div>
                                     <p class="text-[11px] sm:text-sm font-bold text-slate-900">Setoran</p>
                                     <p class="hidden sm:block text-[10px] text-slate-500 mt-0.5">Setor tunai</p>
                                 </a>
 
                                 <a href="{{ route('operator.penarikan.create')}}" class="group bg-gradient-to-br from-red-50 to-red-100/50 hover:from-red-100 hover:to-red-200 border-2 border-red-200/60 hover:border-red-300 rounded-2xl p-3 sm:p-5 text-center transition-all hover-lift">
-                                    <div class="w-10 h-10 sm:w-14 sm:h-14 bg-red-500 group-hover:bg-red-600 rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 transition-all shadow-lg shadow-red-500/30">
+                                    <div class="w-9 h-9 sm:w-11 sm:h-11 bg-red-500 group-hover:bg-red-600 rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 transition-all shadow-lg shadow-red-500/30">
                                         <i class="fas fa-minus-circle text-white text-sm sm:text-xl"></i>
                                     </div>
                                     <p class="text-[11px] sm:text-sm font-bold text-slate-900">Penarikan</p>
@@ -271,7 +272,7 @@
                                 </a>
 
                                 <a href="{{route('operator.pembayaran.create')}}" class="group bg-gradient-to-br from-blue-50 to-blue-100/50 hover:from-blue-100 hover:to-blue-200 border-2 border-blue-200/60 hover:border-blue-300 rounded-2xl p-3 sm:p-5 text-center transition-all hover-lift">
-                                    <div class="w-10 h-10 sm:w-14 sm:h-14 bg-blue-500 group-hover:bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 transition-all shadow-lg shadow-blue-500/30">
+                                    <div class="w-9 h-9 sm:w-11 sm:h-11 bg-blue-500 group-hover:bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 transition-all shadow-lg shadow-blue-500/30">
                                         <i class="fas fa-hand-holding-usd text-white text-sm sm:text-xl"></i>
                                     </div>
                                     <p class="text-[11px] sm:text-sm font-bold text-slate-900">Pembayaran</p>
