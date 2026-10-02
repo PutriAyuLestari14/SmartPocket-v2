@@ -43,6 +43,16 @@
         .gradient-soft { 
             background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%); 
         }
+        /* ⬇️ INI YANG SEMULANYA HILANG — WAJIB ADA KARENA DIPAKAI DI SIDEBAR & AVATAR ⬇️ */
+        .gradient-vibrant { 
+            background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%); 
+        }
+        .gradient-mint { 
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); 
+        }
+        .gradient-fresh { 
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); 
+        }
 
         .card-peminjaman {
             background: #FFFFFF;
