@@ -66,5 +66,10 @@ class DatabaseSeeder extends Seeder
             ['id_nasabah' => $nasabah->id_nasabah],
             ['no_rek' => 'RK-0001', 'saldo' => 500000]
         );
+
+        $this->call([
+            AkunSeeder::class,
+            JenisTransaksiSeeder::class,
+        ]);
     }
 }

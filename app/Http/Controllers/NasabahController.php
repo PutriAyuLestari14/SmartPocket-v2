@@ -12,151 +12,157 @@ use Illuminate\Support\Facades\DB;
 
 class NasabahController extends Controller
 {
-    // Tampil daftar nasabah di tabel
     public function index(Request $request)
     {
         $query = Nasabah::with(['user', 'rekening']);
 
-        // SEARCH BERDASARKAN ANGKATAN / NO REK 
         if ($request->filled('search')) {
             $search = $request->search;
 
-            // Mencari no_rek yang DI AWALI dengan angka yang diketik
-            $query->whereHas('rekening', function($q) use ($search) {
-                $q->where('no_rek', 'like', $search . '%');
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', '%' . $search . '%')
+                    ->orWhere('username', 'like', '%' . $search . '%')
+                    ->orWhere('no_rek', 'like', '%' . $search . '%');
             });
         }
 
-        // Filter Status
-        if ($request->filled('status_filter')) {
-            $query->where('status', $request->status_filter);
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
         }
 
-        // Hitung statistik untuk kartu di atas
-        $totalNasabah = Nasabah::where('status', 'aktif')->count();
-        $nasabahBaru = Nasabah::whereMonth('created_at', now()->month)->count();
-        $totalSaldo = RekeningTabungan::sum('saldo');
+        // ambil data nasabah
+        $nasabahs = $query->latest('id_nasabah')
+            ->paginate(10)
+            ->withQueryString();
 
-        // Eksekusi QUERY dengan pagination
-        $nasabahs = $query->orderBy('created_at', 'desc')->paginate(10);
+        $totalNasabah = Nasabah::count();
+        $nasabahAktif = Nasabah::where('status', 'aktif')->count();
+        $nasabahNonaktif = Nasabah::where('status', '!=', 'aktif')->count();
 
-        return view(
-            'operator.nasabah.index',
-            compact(
-                'nasabahs',
-                'totalNasabah',
-                'nasabahBaru',
-                'totalSaldo'
-            )
-        );
+        // kirim data ke halaman
+        return view('operator.nasabah.index', compact(
+            'nasabahs',
+            'totalNasabah',
+            'nasabahAktif',
+            'nasabahNonaktif'
+        ));
     }
 
-    // Tambah nasabah (Tampilan Form)
     public function create()
     {
         return view('operator.nasabah.create');
     }
 
-    // Simpan data nasabah baru
     public function store(Request $request)
     {
         $request->validate([
-            'username' => 'required|string|unique:users,username',
+            'username' => 'required|string|max:255|unique:users,username',
             'nama' => 'required|string|max:255',
-            'kategori' => 'required|in:siswa,guru',
-            'prefix' => 'required|string|max:4',
-            'password' => 'nullable|string|min:6',
-            'alamat' => 'required|string',
+            'kategori' => 'required|string|max:100',
+            'prefix' => 'required|string|max:10',
+            'alamat' => 'nullable|string',
             'saldo' => 'nullable|numeric|min:0',
             'tanggal_daftar' => 'required|date',
-            'status' => 'required|in:aktif,nonaktif',
+            'status' => 'required|string',
+            'password' => 'nullable|string|min:6',
+            'buku_tabungan' => 'required|in:tidak,terpisah,potong',
         ]);
 
         DB::beginTransaction();
 
         try {
-            // 1. Tentukan prefix yang dimasukkan operator
+            $saldoAwal = (int) ($request->saldo ?? 0);
+            $biayaBuku = 5000;
+
+            // tentukan saldo yang masuk ke rekening
+            $saldoMasukRekening = $saldoAwal;
+            $totalDibayarNasabah = $saldoAwal;
+            $keteranganSetoran = 'Saldo Awal';
+
+            if ($request->buku_tabungan === 'terpisah') {
+                $totalDibayarNasabah = $saldoAwal + $biayaBuku;
+                $keteranganSetoran = 'Saldo Awal + Buku Tabungan';
+            }
+
+            if ($request->buku_tabungan === 'potong') {
+                if ($saldoAwal < $biayaBuku) {
+                    DB::rollBack();
+
+                    return redirect()
+                        ->back()
+                        ->withInput()
+                        ->with('error', 'Saldo awal harus minimal Rp 5.000 jika biaya buku dipotong dari saldo.');
+                }
+
+                $saldoMasukRekening = $saldoAwal - $biayaBuku;
+                $keteranganSetoran = 'Saldo Awal + Buku Tabungan';
+            }
+
             $prefix = strtoupper(trim($request->prefix));
 
-            // 2. Cari nomor rekening terakhir dengan prefix yang sama
-            $rekeningTerakhir = RekeningTabungan::where(
-                'no_rek',
-                'like',
-                $prefix . '%'
-            )
-            ->orderBy('no_rek', 'desc')
-            ->first();
+            // buat nomor rekening berikutnya
+            $lastRekening = RekeningTabungan::where('no_rek', 'like', $prefix . '%')
+                ->orderBy('no_rek', 'desc')
+                ->first();
 
-            // 3. Tentukan nomor urut berikutnya
-            if ($rekeningTerakhir) {
-                $nomorTerakhir = (int) substr(
-                    $rekeningTerakhir->no_rek,
+            if ($lastRekening) {
+                $lastNumber = (int) substr(
+                    $lastRekening->no_rek,
                     strlen($prefix)
                 );
 
-                $nomorBerikutnya = $nomorTerakhir + 1;
+                $nextNumber = $lastNumber + 1;
             } else {
-                $nomorBerikutnya = 1;
+                $nextNumber = 1;
             }
 
-            // 4. Bentuk nomor rekening otomatis
-            // Contoh: 24 -> 24001, GK -> GK001
-            $noRek = $prefix . str_pad(
-                $nomorBerikutnya,
-                3,
-                '0',
-                STR_PAD_LEFT
-            );
+            $noRek = $prefix . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
 
-            // 5. Buat user
-            $finalPassword = $request->password ?: 'nasabah123';
-
+            // buat akun user nasabah
             $user = User::create([
                 'username' => $request->username,
                 'name' => $request->nama,
-                'password' => Hash::make($finalPassword),
+                'password' => Hash::make($request->password ?? 'nasabah123'),
                 'role' => 'nasabah',
             ]);
 
-            // 6. Buat data nasabah
+            // buat data nasabah
             $nasabah = Nasabah::create([
-                'username' => $request->username,
+                'username' => $user->username,
                 'no_rek' => $noRek,
                 'nama' => $request->nama,
                 'kategori' => $request->kategori,
                 'alamat' => $request->alamat,
                 'tanggal_daftar' => $request->tanggal_daftar,
                 'status' => $request->status,
-                'photo' => null,
             ]);
 
-            // 7. Buat rekening tabungan
+            // buat rekening tabungan
             RekeningTabungan::create([
                 'no_rek' => $noRek,
                 'id_nasabah' => $nasabah->id_nasabah,
-                'saldo' => $request->saldo ?? 0,
+                'saldo' => $saldoMasukRekening,
             ]);
 
-            // 8. Simpan saldo awal sebagai transaksi setoran
-            if (($request->saldo ?? 0) > 0) {
-                $jenisTransaksi = DB::table('jenis_transaksi')
+            // catat saldo awal yang benar-benar masuk ke tabungan
+            if ($saldoMasukRekening > 0) {
+                $jenisSetoran = DB::table('jenis_transaksi')
                     ->where('setoran', 'setoran')
                     ->first();
 
-                if (!$jenisTransaksi) {
-                    throw new \Exception(
-                        'Jenis transaksi Setoran tidak ditemukan di database.'
-                    );
-                }
+                if ($jenisSetoran) {
+                    $petugas = auth()->user()->petugas;
 
-                DetailTabungan::create([
-                    'no_rek' => $noRek,
-                    'id_petugas' => auth()->user()->petugas->id_petugas,
-                    'id_jenis_transaksi' => $jenisTransaksi->id_jenis_transaksi,
-                    'jumlah' => $request->saldo,
-                    'status' => 'berhasil',
-                    'tanggal_transaksi' => now()->timezone('Asia/Jakarta'),
-                ]);
+                    DetailTabungan::create([
+                        'no_rek' => $noRek,
+                        'id_petugas' => $petugas->id_petugas,
+                        'id_jenis_transaksi' => $jenisSetoran->id_jenis_transaksi,
+                        'jumlah' => $saldoMasukRekening,
+                        'tanggal_transaksi' => now('Asia/Jakarta'),
+                        'status' => 'berhasil',
+                        'keterangan' => $keteranganSetoran,
+                    ]);
+                }
             }
 
             DB::commit();
@@ -165,146 +171,118 @@ class NasabahController extends Controller
                 ->route('operator.nasabah.index')
                 ->with(
                     'success',
-                    'Nasabah berhasil ditambahkan! No. Rekening: ' . $noRek
+                    'Nasabah berhasil ditambahkan. Total pembayaran Rp ' .
+                    number_format($totalDibayarNasabah, 0, ',', '.') .
+                    ', saldo masuk rekening Rp ' .
+                    number_format($saldoMasukRekening, 0, ',', '.') . '.'
                 );
-
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
 
-            return back()
+            return redirect()
+                ->back()
                 ->withInput()
-                ->withErrors([
-                    'error' => 'Gagal menambah nasabah: ' . $e->getMessage()
-                ]);
+                ->with('error', 'Gagal menambahkan nasabah: ' . $e->getMessage());
         }
     }
-    // Edit nasabah (Tampilan Form)
-    public function edit(Nasabah $nasabah)
+
+    public function edit($id)
     {
+        $nasabah = Nasabah::with(['user', 'rekening'])->findOrFail($id);
+
         return view('operator.nasabah.edit', compact('nasabah'));
     }
 
-    // Update data nasabah
-    public function update(Request $request, Nasabah $nasabah)
+    public function update(Request $request, $id)
     {
+        $nasabah = Nasabah::findOrFail($id);
+
         $request->validate([
             'nama' => 'required|string|max:255',
-            'username' => 'nullable|string|unique:users,username,' . $nasabah->username . ',username',
+            'kategori' => 'required|string|max:100',
             'alamat' => 'nullable|string',
-            'tanggal_daftar' => 'nullable|date',
-            'status' => 'required|in:aktif,nonaktif',
-            'reset_password' => 'nullable|boolean',
+            'tanggal_daftar' => 'required|date',
+            'status' => 'required|string',
+            'password' => 'nullable|string|min:6',
         ]);
 
         DB::beginTransaction();
 
         try {
-            // Update Data User
-            $userData = [
-                'name' => $request->nama,
-                'username' => $request->username,
-            ];
-
-            // Reset Password jika dicentang
-            if ($request->has('reset_password')) {
-                $userData['password'] = Hash::make('nasabah123');
-            }
-
-            $nasabah->user->update($userData);
-
-            // Update Data Nasabah
             $nasabah->update([
-                'username' => $request->username,
                 'nama' => $request->nama,
+                'kategori' => $request->kategori,
                 'alamat' => $request->alamat,
                 'tanggal_daftar' => $request->tanggal_daftar,
                 'status' => $request->status,
             ]);
 
+            $nasabah->user->update([
+                'name' => $request->nama,
+            ]);
+
+            if ($request->filled('password')) {
+                $nasabah->user->update([
+                    'password' => Hash::make($request->password),
+                ]);
+            }
+
             DB::commit();
 
-            return redirect()->route('operator.nasabah.index')
-                ->with('success', 'Data Nasabah berhasil diperbarui!');
-
-        } catch (\Exception $e) {
+            return redirect()
+                ->route('operator.nasabah.index')
+                ->with('success', 'Data nasabah berhasil diperbarui.');
+        } catch (\Throwable $e) {
             DB::rollBack();
 
-            return back()
+            return redirect()
+                ->back()
                 ->withInput()
-                ->withErrors([
-                    'error' => 'Gagal memperbarui data: ' . $e->getMessage()
-                ]);
+                ->with('error', 'Gagal memperbarui nasabah: ' . $e->getMessage());
         }
     }
 
-    // Hapus nasabah
-    public function destroy(Nasabah $nasabah)
+    public function destroy($id)
     {
-        $rekening = RekeningTabungan::where('id_nasabah', $nasabah->id_nasabah)->first();
+        $nasabah = Nasabah::findOrFail($id);
 
-        // Cek riwayat transaksi tabungan
-        if ($rekening) {
-            $adaTransaksi = DetailTabungan::where('no_rek', $rekening->no_rek)->exists();
+        if ($nasabah->rekening) {
+            $adaTransaksi = DetailTabungan::where(
+                'no_rek',
+                $nasabah->rekening->no_rek
+            )->exists();
 
             if ($adaTransaksi) {
                 return redirect()
-                    ->route('operator.nasabah.index')
+                    ->back()
                     ->with(
                         'error',
-                        'Nasabah tidak dapat dihapus karena sudah memiliki riwayat transaksi tabungan.'
+                        'Nasabah tidak dapat dihapus karena sudah memiliki transaksi tabungan.'
                     );
             }
-        }
-
-        // Cek riwayat peminjaman
-        $adaPeminjaman = \App\Models\Peminjaman::where(
-            'id_nasabah',
-            $nasabah->id_nasabah
-        )->exists();
-
-        if ($adaPeminjaman) {
-            return redirect()
-                ->route('operator.nasabah.index')
-                ->with(
-                    'error',
-                    'Nasabah tidak dapat dihapus karena sudah memiliki riwayat peminjaman.'
-                );
         }
 
         DB::beginTransaction();
 
         try {
-            // Hapus rekening
-            RekeningTabungan::where(
-                'id_nasabah',
-                $nasabah->id_nasabah
-            )->delete();
+            $username = $nasabah->username;
 
-            // Hapus user
-            User::where(
-                'username',
-                $nasabah->username
-            )->delete();
-
-            // Hapus nasabah
+            $nasabah->rekening()->delete();
             $nasabah->delete();
+
+            User::where('username', $username)->delete();
 
             DB::commit();
 
             return redirect()
                 ->route('operator.nasabah.index')
-                ->with(
-                    'success',
-                    'Data Nasabah berhasil dihapus!'
-                );
-
-        } catch (\Exception $e) {
+                ->with('success', 'Nasabah berhasil dihapus.');
+        } catch (\Throwable $e) {
             DB::rollBack();
 
-            return back()->with(
-                'error',
-                'Gagal menghapus nasabah: ' . $e->getMessage()
-            );
+            return redirect()
+                ->back()
+                ->with('error', 'Gagal menghapus nasabah: ' . $e->getMessage());
         }
     }
 }

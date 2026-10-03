@@ -46,6 +46,7 @@ class OperatorLaporanController extends Controller
                         'kredit' => 0,
                         'keterangan' => $keterangan,
                     ]);
+
                     $jurnalEntries->push([
                         'no_bukti' => $noBukti,
                         'tanggal' => $tanggal,
@@ -54,6 +55,29 @@ class OperatorLaporanController extends Controller
                         'kredit' => $jumlah,
                         'keterangan' => $keterangan,
                     ]);
+
+                    // kalau ada buku tabungan: kas masuk dan pendapatan lain-lain
+                    if (str_contains(strtolower($item->keterangan ?? ''), 'buku tabungan')) {
+                        $biayaBuku = 5000;
+
+                        $jurnalEntries->push([
+                            'no_bukti' => $noBukti,
+                            'tanggal' => $tanggal,
+                            'akun' => 'Kas',
+                            'debit' => $biayaBuku,
+                            'kredit' => 0,
+                            'keterangan' => 'Pembayaran Buku Tabungan',
+                        ]);
+
+                        $jurnalEntries->push([
+                            'no_bukti' => $noBukti,
+                            'tanggal' => $tanggal,
+                            'akun' => 'Pendapatan Lain-lain',
+                            'debit' => 0,
+                            'kredit' => $biayaBuku,
+                            'keterangan' => 'Pembayaran Buku Tabungan',
+                        ]);
+                    }
                 } else {
                     // kalau penarikan: tabungan nasabah (debit), kas (kredit)
                     $jurnalEntries->push([
@@ -64,6 +88,7 @@ class OperatorLaporanController extends Controller
                         'kredit' => 0,
                         'keterangan' => $keterangan,
                     ]);
+
                     $jurnalEntries->push([
                         'no_bukti' => $noBukti,
                         'tanggal' => $tanggal,
@@ -87,7 +112,7 @@ class OperatorLaporanController extends Controller
             foreach ($peminjamans as $pinjaman) {
                 $noBukti = 'PIN-' . $pinjaman->id;
                 $tanggal = $pinjaman->tanggal_ajuan;
-                
+
                 // hitung provisi 1% & kas yang keluar
                 $jumlahPinjaman = (int) $pinjaman->jumlah_pinjaman;
                 $provisi = (int) ($jumlahPinjaman * 0.01);
@@ -136,7 +161,7 @@ class OperatorLaporanController extends Controller
             foreach ($angsurans as $item) {
                 $noBukti = 'ANG-' . $item->id;
                 $tanggal = $item->tanggal_pembayaran;
-                
+
                 $pokok = (int) $item->jumlah_pokok;
                 $jasa = (int) $item->jumlah_jasa;
                 $totalBayar = $pokok + $jasa;
@@ -211,61 +236,175 @@ class OperatorLaporanController extends Controller
 
         $jurnalEntries = collect();
 
-        // logika sama persis kayak index
+        // transaksi tabungan
         if ($jenis === 'semua' || $jenis === 'tabungan') {
             $tabungans = DetailTabungan::query()
                 ->when($tanggalMulai, fn($q) => $q->whereDate('tanggal_transaksi', '>=', $tanggalMulai))
                 ->when($tanggalSelesai, fn($q) => $q->whereDate('tanggal_transaksi', '<=', $tanggalSelesai))
                 ->get();
+
             foreach ($tabungans as $item) {
                 $noBukti = 'TAB-' . $item->id;
                 $jumlah = (int) $item->jumlah;
                 $ket = (int) $item->id_jenis_transaksi === 1 ? 'Setoran Tabungan' : 'Penarikan Tabungan';
+
                 if ((int) $item->id_jenis_transaksi === 1) {
-                    $jurnalEntries->push(['no_bukti' => $noBukti, 'tanggal' => $item->tanggal_transaksi, 'akun' => 'Kas', 'debit' => $jumlah, 'kredit' => 0, 'keterangan' => $ket]);
-                    $jurnalEntries->push(['no_bukti' => $noBukti, 'tanggal' => $item->tanggal_transaksi, 'akun' => 'Tabungan Nasabah', 'debit' => 0, 'kredit' => $jumlah, 'keterangan' => $ket]);
+                    $jurnalEntries->push([
+                        'no_bukti' => $noBukti,
+                        'tanggal' => $item->tanggal_transaksi,
+                        'akun' => 'Kas',
+                        'debit' => $jumlah,
+                        'kredit' => 0,
+                        'keterangan' => $ket,
+                    ]);
+
+                    $jurnalEntries->push([
+                        'no_bukti' => $noBukti,
+                        'tanggal' => $item->tanggal_transaksi,
+                        'akun' => 'Tabungan Nasabah',
+                        'debit' => 0,
+                        'kredit' => $jumlah,
+                        'keterangan' => $ket,
+                    ]);
+
+                    // kalau ada buku tabungan: kas masuk dan pendapatan lain-lain
+                    if (str_contains(strtolower($item->keterangan ?? ''), 'buku tabungan')) {
+                        $biayaBuku = 5000;
+
+                        $jurnalEntries->push([
+                            'no_bukti' => $noBukti,
+                            'tanggal' => $item->tanggal_transaksi,
+                            'akun' => 'Kas',
+                            'debit' => $biayaBuku,
+                            'kredit' => 0,
+                            'keterangan' => 'Pembayaran Buku Tabungan',
+                        ]);
+
+                        $jurnalEntries->push([
+                            'no_bukti' => $noBukti,
+                            'tanggal' => $item->tanggal_transaksi,
+                            'akun' => 'Pendapatan Lain-lain',
+                            'debit' => 0,
+                            'kredit' => $biayaBuku,
+                            'keterangan' => 'Pembayaran Buku Tabungan',
+                        ]);
+                    }
                 } else {
-                    $jurnalEntries->push(['no_bukti' => $noBukti, 'tanggal' => $item->tanggal_transaksi, 'akun' => 'Tabungan Nasabah', 'debit' => $jumlah, 'kredit' => 0, 'keterangan' => $ket]);
-                    $jurnalEntries->push(['no_bukti' => $noBukti, 'tanggal' => $item->tanggal_transaksi, 'akun' => 'Kas', 'debit' => 0, 'kredit' => $jumlah, 'keterangan' => $ket]);
+                    $jurnalEntries->push([
+                        'no_bukti' => $noBukti,
+                        'tanggal' => $item->tanggal_transaksi,
+                        'akun' => 'Tabungan Nasabah',
+                        'debit' => $jumlah,
+                        'kredit' => 0,
+                        'keterangan' => $ket,
+                    ]);
+
+                    $jurnalEntries->push([
+                        'no_bukti' => $noBukti,
+                        'tanggal' => $item->tanggal_transaksi,
+                        'akun' => 'Kas',
+                        'debit' => 0,
+                        'kredit' => $jumlah,
+                        'keterangan' => $ket,
+                    ]);
                 }
             }
         }
 
+        // transaksi peminjaman
         if ($jenis === 'semua' || $jenis === 'peminjaman') {
             $peminjamans = Peminjaman::where('status_verifikasi', 'disetujui')
                 ->when($tanggalMulai, fn($q) => $q->whereDate('tanggal_ajuan', '>=', $tanggalMulai))
                 ->when($tanggalSelesai, fn($q) => $q->whereDate('tanggal_ajuan', '<=', $tanggalSelesai))
                 ->get();
+
             foreach ($peminjamans as $pinjaman) {
                 $noBukti = 'PIN-' . $pinjaman->id;
                 $jumlahPinjaman = (int) $pinjaman->jumlah_pinjaman;
                 $provisi = (int) ($jumlahPinjaman * 0.01);
                 $kasDiterima = $jumlahPinjaman - $provisi;
-                $jurnalEntries->push(['no_bukti' => $noBukti, 'tanggal' => $pinjaman->tanggal_ajuan, 'akun' => 'Piutang Pembiayaan', 'debit' => $jumlahPinjaman, 'kredit' => 0, 'keterangan' => 'Pencairan Pinjaman']);
-                $jurnalEntries->push(['no_bukti' => $noBukti, 'tanggal' => $pinjaman->tanggal_ajuan, 'akun' => 'Pendapatan Provisi', 'debit' => 0, 'kredit' => $provisi, 'keterangan' => 'Potongan Provisi']);
-                $jurnalEntries->push(['no_bukti' => $noBukti, 'tanggal' => $pinjaman->tanggal_ajuan, 'akun' => 'Kas', 'debit' => 0, 'kredit' => $kasDiterima, 'keterangan' => 'Pencairan Pinjaman']);
+
+                $jurnalEntries->push([
+                    'no_bukti' => $noBukti,
+                    'tanggal' => $pinjaman->tanggal_ajuan,
+                    'akun' => 'Piutang Pembiayaan',
+                    'debit' => $jumlahPinjaman,
+                    'kredit' => 0,
+                    'keterangan' => 'Pencairan Pinjaman',
+                ]);
+
+                $jurnalEntries->push([
+                    'no_bukti' => $noBukti,
+                    'tanggal' => $pinjaman->tanggal_ajuan,
+                    'akun' => 'Pendapatan Provisi',
+                    'debit' => 0,
+                    'kredit' => $provisi,
+                    'keterangan' => 'Potongan Provisi',
+                ]);
+
+                $jurnalEntries->push([
+                    'no_bukti' => $noBukti,
+                    'tanggal' => $pinjaman->tanggal_ajuan,
+                    'akun' => 'Kas',
+                    'debit' => 0,
+                    'kredit' => $kasDiterima,
+                    'keterangan' => 'Pencairan Pinjaman',
+                ]);
             }
         }
 
+        // transaksi angsuran
         if ($jenis === 'semua' || $jenis === 'peminjaman' || $jenis === 'jasa') {
             $angsurans = Angsuran::query()
                 ->when($tanggalMulai, fn($q) => $q->whereDate('tanggal_pembayaran', '>=', $tanggalMulai))
                 ->when($tanggalSelesai, fn($q) => $q->whereDate('tanggal_pembayaran', '<=', $tanggalSelesai))
                 ->get();
+
             foreach ($angsurans as $item) {
                 $noBukti = 'ANG-' . $item->id;
                 $pokok = (int) $item->jumlah_pokok;
                 $jasa = (int) $item->jumlah_jasa;
                 $totalBayar = $pokok + $jasa;
+
                 if ($totalBayar > 0) {
-                    $jurnalEntries->push(['no_bukti' => $noBukti, 'tanggal' => $item->tanggal_pembayaran, 'akun' => 'Kas', 'debit' => $totalBayar, 'kredit' => 0, 'keterangan' => 'Pembayaran Angsuran']);
-                    if ($pokok > 0) $jurnalEntries->push(['no_bukti' => $noBukti, 'tanggal' => $item->tanggal_pembayaran, 'akun' => 'Piutang Pembiayaan', 'debit' => 0, 'kredit' => $pokok, 'keterangan' => 'Pembayaran Pokok']);
-                    if ($jasa > 0) $jurnalEntries->push(['no_bukti' => $noBukti, 'tanggal' => $item->tanggal_pembayaran, 'akun' => 'Pendapatan Jasa', 'debit' => 0, 'kredit' => $jasa, 'keterangan' => 'Pembayaran Jasa']);
+                    $jurnalEntries->push([
+                        'no_bukti' => $noBukti,
+                        'tanggal' => $item->tanggal_pembayaran,
+                        'akun' => 'Kas',
+                        'debit' => $totalBayar,
+                        'kredit' => 0,
+                        'keterangan' => 'Pembayaran Angsuran',
+                    ]);
+
+                    if ($pokok > 0) {
+                        $jurnalEntries->push([
+                            'no_bukti' => $noBukti,
+                            'tanggal' => $item->tanggal_pembayaran,
+                            'akun' => 'Piutang Pembiayaan',
+                            'debit' => 0,
+                            'kredit' => $pokok,
+                            'keterangan' => 'Pembayaran Pokok',
+                        ]);
+                    }
+
+                    if ($jasa > 0) {
+                        $jurnalEntries->push([
+                            'no_bukti' => $noBukti,
+                            'tanggal' => $item->tanggal_pembayaran,
+                            'akun' => 'Pendapatan Jasa',
+                            'debit' => 0,
+                            'kredit' => $jasa,
+                            'keterangan' => 'Pembayaran Jasa',
+                        ]);
+                    }
                 }
             }
         }
 
-        $jurnalData = $jurnalEntries->groupBy('no_bukti')->sortByDesc(fn($group) => $group->first()['tanggal']);
+        $jurnalData = $jurnalEntries
+            ->groupBy('no_bukti')
+            ->sortByDesc(fn($group) => $group->first()['tanggal']);
+
         $totalDebit = $jurnalEntries->sum('debit');
         $totalKredit = $jurnalEntries->sum('kredit');
 
@@ -277,6 +416,12 @@ class OperatorLaporanController extends Controller
         ];
 
         // kirim view export-excel + header download
-        return response()->view('operator.laporan.export-excel', compact('jurnalData', 'totalDebit', 'totalKredit'))->withHeaders($headers);
+        return response()
+            ->view('operator.laporan.export-excel', compact(
+                'jurnalData',
+                'totalDebit',
+                'totalKredit'
+            ))
+            ->withHeaders($headers);
     }
 }

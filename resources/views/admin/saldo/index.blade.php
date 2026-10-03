@@ -78,10 +78,6 @@
                 <a href="{{ route('admin.laporan.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-money-bill-transfer w-5 text-center text-slate-400"></i> Laporan
                 </a>
-
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
-                    <i class="fas fa-cog w-5 text-center text-slate-400"></i> Pengaturan
-                </a>
             </nav>
 
             <div class="p-4 border-t border-slate-100">
