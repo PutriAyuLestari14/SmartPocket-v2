@@ -131,7 +131,7 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 lg:ml-64 p-4 sm:p-6 lg:p-10 w-full max-w-7xl mx-auto">
+        <main class="flex-1 lg:ml-64 p-4 sm:p-6 lg:p-10 min-w-0">
             
             <!-- Header Halaman -->
             <div class="mb-6 lg:mb-8 flex items-start justify-between gap-4">
@@ -148,9 +148,16 @@
                     </p>
                 </div>
 
-                <!-- Profile Desktop Header -->
+                <!-- Profil Desktop -->
                 <div class="hidden lg:flex items-center gap-3 pt-1 flex-shrink-0">
-                    <div class="w-px h-8 bg-slate-200 my-auto mx-1"></div>
+                    <a href="{{ route('nasabah.notifikasi.index') }}" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:text-primary hover:border-primary transition-all relative shadow-sm">
+                        <i class="far fa-bell text-base"></i>
+                        @php $pendingNotif = \App\Models\DetailTabungan::where('status', 'pending')->count(); @endphp
+                        @if($pendingNotif > 0)
+                            <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
+                        @endif
+                    </a>
+                    <div class="w-px h-8 bg-slate-200"></div>
                     <div class="text-right">
                         <p class="text-xs font-black text-slate-800 leading-tight">{{ auth()->user()->name }}</p>
                         <p class="text-[10px] font-bold text-slate-400 capitalize mt-0.5">
@@ -179,8 +186,8 @@
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/20 text-[9px] sm:text-[10px] font-bold text-accent tracking-wide uppercase mb-3 sm:mb-4">
                                     <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span> Maksimal Fasilitas
                                 </span>
-                                <p class="text-xs text-emerald-100 font-medium">Limit Pinjaman Tersisa</p>
-                                <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">Rp 5.000.000</h2>
+                                <p class="text-xs text-emerald-100 font-medium">Status Pinjaman</p>
+                                <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">Dapat Mengajukan</h2>
                             </div>
                             <div class="mt-6 sm:mt-8 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-emerald-100">
                                 <span class="flex items-center gap-1.5"><i class="fas fa-check-circle text-accent"></i> Akun Verifikasi</span>
@@ -234,7 +241,7 @@
                         <ul class="space-y-2 text-xs text-slate-600">
                             <li class="flex items-start gap-2">
                                 <i class="fas fa-check text-primary mt-0.5 text-[10px]"></i>
-                                <span>Nominal pengajuan minimal <strong class="text-primary">Rp 50.000</strong>.</span>
+                                <span>Nominal pinjaman ditentukan berdasarkan hasil verifikasi BMT</span>
                             </li>
                             <li class="flex items-start gap-2">
                                 <i class="fas fa-check text-primary mt-0.5 text-[10px]"></i>
@@ -294,7 +301,7 @@
                                     <input type="number" name="jumlah" id="jumlah" value="{{ old('jumlah') }}" min="50000" step="10000" placeholder="0" class="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-transparent text-base sm:text-lg font-black text-slate-900 placeholder-slate-300 focus:outline-none" required oninput="updateSimulasi()">
                                 </div>
                                 <div class="flex items-center justify-between mt-1.5 text-[10px] sm:text-[11px] text-slate-400">
-                                    <span>Min. Rp 50.000</span>
+                                    <span>Nominal pinjaman ditentukan berdasarkan hasil verifikasi BMT</span>
                                     <span>Kelipatan Rp 10.000</span>
                                 </div>
                             </div>
@@ -309,7 +316,7 @@
                                         <span class="text-slate-400 font-bold text-xs uppercase tracking-wider">Bulan</span>
                                     </div>
                                 </div>
-                                <p class="text-[10px] sm:text-[11px] text-slate-400 mt-1">Durasi pengembalian maksimal 24 Bulan (2 Tahun).</p>
+                                <p class="text-[10px] sm:text-[11px] text-slate-400 mt-1">Masukan durasi pengembalian</p>
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">

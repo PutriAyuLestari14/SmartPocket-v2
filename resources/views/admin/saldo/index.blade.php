@@ -82,9 +82,8 @@
                     <i class="fas fa-users w-5 text-center text-slate-400"></i> Data Nasabah
                 </a>
 
-                <!-- SATU-SATUNYA MENU UPDATE SALDO -->
                 <a href="{{ route('admin.update.saldo.index') }}" class="flex items-center gap-3 px-4 py-3 bg-mintLight text-primary rounded-xl text-sm font-bold transition-all shadow-sm border border-primary/20">
-                    <i class="fas fa-coins w-5 text-center text-primary"></i> Update Saldo (Bagi Hasil)
+                    <i class="fas fa-coins w-5 text-center text-primary"></i> Update Saldo 
                 </a>
 
                 <a href="{{ route('admin.laporan.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">

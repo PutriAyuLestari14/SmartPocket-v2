@@ -147,25 +147,6 @@
                             Perbarui informasi detail untuk nasabah terdaftar.
                         </p>
                     </div>
-
-                    <div class="hidden lg:flex items-center gap-3 pt-1 flex-shrink-0">
-                        <div class="text-right">
-                            <p class="text-xs font-bold text-slate-800 leading-tight">
-                                {{ auth()->user()->petugas->nama_lengkap ?? auth()->user()->name }}
-                            </p>
-                            <p class="text-[10px] font-semibold text-slate-400 mt-0.5">Operator</p>
-                        </div>
-                        <div class="w-10 h-10 rounded-xl overflow-hidden bg-forest text-white font-bold text-sm flex items-center justify-center border border-slate-200 shadow-sm flex-shrink-0">
-                            {{ strtoupper(substr(auth()->user()->petugas->nama_lengkap ?? auth()->user()->name, 0, 1)) }}
-                        </div>
-                        <a href="{{ route('operator.notifikasi.index') }}" class="w-10 h-10 bg-white border border-slate-200/80 rounded-xl flex items-center justify-center text-slate-600 hover:text-forest hover:border-mint transition-all relative shadow-sm ml-1">
-                            <i class="far fa-bell text-base"></i>
-                            @php $pendingNotif = \App\Models\DetailTabungan::where('status', 'pending')->count(); @endphp
-                            @if($pendingNotif > 0)
-                                <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-mint rounded-full ring-2 ring-white"></span>
-                            @endif
-                        </a>
-                    </div>
                 </header>
 
                 <!-- Main Card Container -->
@@ -287,6 +268,9 @@
                                             <textarea name="alamat" id="inputAlamat" rows="3" required
                                                 class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all resize-y">{{ old('alamat', $nasabah->alamat) }}</textarea>
                                         </div>
+
+                                        <input type="hidden" name="kategori" value="{{ $nasabah->kategori }}">
+                                        
                                     </div>
                                 </div>
 

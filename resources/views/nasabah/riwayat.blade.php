@@ -150,9 +150,16 @@
                     </p>
                 </div>
 
-                <!-- Profile Desktop -->
+                <!-- Profil Desktop -->
                 <div class="hidden lg:flex items-center gap-3 pt-1 flex-shrink-0">
-                    <div class="w-px h-8 bg-slate-200 my-auto mx-1"></div>
+                    <a href="{{ route('nasabah.notifikasi.index') }}" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:text-primary hover:border-primary transition-all relative shadow-sm">
+                        <i class="far fa-bell text-base"></i>
+                        @php $pendingNotif = \App\Models\DetailTabungan::where('status', 'pending')->count(); @endphp
+                        @if($pendingNotif > 0)
+                            <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
+                        @endif
+                    </a>
+                    <div class="w-px h-8 bg-slate-200"></div>
                     <div class="text-right">
                         <p class="text-xs font-black text-slate-800 leading-tight">{{ auth()->user()->name }}</p>
                         <p class="text-[10px] font-bold text-slate-400 capitalize mt-0.5">
@@ -225,8 +232,11 @@
                             <option value="">Semua Tipe</option>
                             <option value="setoran">Setor Tunai</option>
                             <option value="penarikan">Penarikan Saldo</option>
-                            <option value="peminjaman">Peminjaman Dana</option>
-                            <option value="angsuran">Pembayaran Cicilan</option>
+
+                            @if(!$isSiswa)
+                                <option value="peminjaman">Peminjaman Dana</option>
+                                <option value="angsuran">Pembayaran Cicilan</option>
+                            @endif
                         </select>
 
                         <select id="filterStatus"
@@ -250,6 +260,13 @@
                             $jenis = $trx->jenisTransaksi->id_jenis_transaksi ?? null;
                             $isSetoran = $isTabungan && $jenis == 1;
                             $isPenarikan = $isTabungan && $jenis == 2;
+
+                            $keterangan = strtolower($trx->keterangan ?? '');
+                            $isSaldoAwal = $isSetoran && str_contains($keterangan, 'saldo awal');
+
+                            $isBukuPotong = $isSaldoAwal
+                                && str_contains($keterangan, 'buku tabungan')
+                                && !str_contains($keterangan, 'terpisah');
                         @endphp
 
                         <div
@@ -257,45 +274,70 @@
                             data-tipe="{{ $isSetoran ? 'setoran' : ($isPenarikan ? 'penarikan' : ($isPeminjaman ? 'peminjaman' : 'angsuran')) }}"
                             data-status="{{ strtolower($trx->status ?? 'berhasil') }}">
 
-                            <!-- KIRI: ICON + DETAIL -->
+                            <!-- kiri: icon + detail -->
                             <div class="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
 
                                 @if($isSetoran)
                                     <div class="w-11 h-11 bg-mintLight text-primary rounded-xl flex items-center justify-center font-bold flex-shrink-0">
                                         <i class="fas fa-arrow-down text-base"></i>
                                     </div>
+
                                     <div class="min-w-0 flex-1">
-                                        <p class="text-sm font-bold text-primary leading-snug truncate">Setoran Tunai</p>
+                                        <p class="text-sm font-bold text-primary leading-snug truncate">
+                                            {{ $isSaldoAwal ? 'Setoran Awal' : 'Setoran Tunai' }}
+                                        </p>
+
                                         <p class="text-[11px] font-semibold text-slate-400 mt-0.5">
                                             {{ $trx->tanggal_transaksi->timezone('Asia/Jakarta')->format('d M Y • H:i') }} WIB
                                         </p>
+
+                                        @if($isBukuPotong)
+                                            <p class="text-[11px] font-bold text-rose-600 mt-1">
+                                                Biaya Buku Tabungan - Rp 5.000
+                                            </p>
+                                        @endif
                                     </div>
+
                                 @elseif($isPenarikan)
                                     <div class="w-11 h-11 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center font-bold flex-shrink-0">
                                         <i class="fas fa-arrow-up text-base"></i>
                                     </div>
+
                                     <div class="min-w-0 flex-1">
-                                        <p class="text-sm font-bold text-rose-700 leading-snug truncate">Penarikan Tunai</p>
+                                        <p class="text-sm font-bold text-rose-700 leading-snug truncate">
+                                            Penarikan Tunai
+                                        </p>
+
                                         <p class="text-[11px] font-semibold text-slate-400 mt-0.5">
                                             {{ $trx->tanggal_transaksi->timezone('Asia/Jakarta')->format('d M Y • H:i') }} WIB
                                         </p>
                                     </div>
+
                                 @elseif($isPeminjaman)
                                     <div class="w-11 h-11 bg-primary/10 text-primary rounded-xl flex items-center justify-center font-bold flex-shrink-0">
                                         <i class="fas fa-hand-holding-usd text-base"></i>
                                     </div>
+
                                     <div class="min-w-0 flex-1">
-                                        <p class="text-sm font-bold text-primary leading-snug truncate">Pengajuan Pinjaman</p>
+                                        <p class="text-sm font-bold text-primary leading-snug truncate">
+                                            Pengajuan Pinjaman
+                                        </p>
+
                                         <p class="text-[11px] font-semibold text-slate-400 mt-0.5">
                                             {{ \Carbon\Carbon::parse($trx->tanggal_transaksi)->timezone('Asia/Jakarta')->format('d M Y • H:i') }} WIB
                                         </p>
-                                    </div>                                
+                                    </div>
+
                                 @elseif($isAngsuran)
                                     <div class="w-11 h-11 bg-mintLight text-primary rounded-xl flex items-center justify-center font-bold flex-shrink-0">
                                         <i class="fas fa-check-circle text-base"></i>
                                     </div>
+
                                     <div class="min-w-0 flex-1">
-                                        <p class="text-sm font-bold text-primary leading-snug truncate">Pembayaran Cicilan</p>
+                                        <p class="text-sm font-bold text-primary leading-snug truncate">
+                                            Pembayaran Cicilan
+                                        </p>
+
                                         <p class="text-[11px] font-semibold text-slate-400 mt-0.5">
                                             {{ $trx->tanggal_transaksi->timezone('Asia/Jakarta')->format('d M Y • H:i') }} WIB
                                         </p>
@@ -303,12 +345,14 @@
                                 @endif
                             </div>
 
-                            <!-- KANAN: NOMINAL + STATUS -->
+                            <!-- kanan: nominal + status -->
                             <div class="text-right flex-shrink-0 flex sm:flex-col items-center sm:items-end justify-between sm:justify-center pl-[58px] sm:pl-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 sm:border-0 gap-2 sm:gap-0">
+
                                 @if($isPeminjaman)
                                     <p class="text-sm sm:text-base font-black text-primary sm:mb-1">
                                         Rp {{ number_format($trx->jumlah ?? 0, 0, ',', '.') }}
                                     </p>
+
                                     @if(in_array($trx->status, ['disetujui', 'berhasil']))
                                         <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black bg-mintLight text-primary border border-primary/20">
                                             Disetujui
@@ -323,6 +367,7 @@
                                     <p class="text-sm sm:text-base font-black text-rose-600 sm:mb-1">
                                         - Rp {{ number_format($trx->jumlah ?? 0, 0, ',', '.') }}
                                     </p>
+
                                     <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black bg-mintLight text-primary border border-primary/20">
                                         Berhasil
                                     </span>
@@ -331,6 +376,7 @@
                                     <p class="text-sm sm:text-base font-black text-primary sm:mb-1">
                                         + Rp {{ number_format($trx->jumlah ?? 0, 0, ',', '.') }}
                                     </p>
+
                                     @if($trx->status === 'berhasil')
                                         <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black bg-mintLight text-primary border border-primary/20">
                                             Berhasil
@@ -345,6 +391,7 @@
                                     <p class="text-sm sm:text-base font-black text-rose-600 sm:mb-1">
                                         - Rp {{ number_format($trx->jumlah ?? 0, 0, ',', '.') }}
                                     </p>
+
                                     @if($trx->status === 'berhasil')
                                         <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black bg-mintLight text-primary border border-primary/20">
                                             Berhasil

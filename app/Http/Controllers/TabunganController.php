@@ -166,6 +166,9 @@ class TabunganController extends Controller
         $user = auth()->user();
         $idNasabah = $user->nasabah->id_nasabah;
 
+        $kategori = strtolower(trim($user->nasabah->kategori));
+        $isSiswa = $kategori === 'siswa';
+
         // transaksi tabungan (setoran/penarikan)
         $transaksiTabungan = DetailTabungan::whereHas(
             'rekening.nasabah',
@@ -243,9 +246,15 @@ class TabunganController extends Controller
         });
 
         // gabung semua, urut paling baru
-        $semuaTransaksi = $transaksiTabungan
-            ->concat($transaksiPeminjaman)
-            ->concat($transaksiAngsuran)
+       if ($isSiswa) {
+            $semuaTransaksi = $transaksiTabungan;
+        } else {
+            $semuaTransaksi = $transaksiTabungan
+                ->concat($transaksiPeminjaman)
+                ->concat($transaksiAngsuran);
+        }
+
+        $semuaTransaksi = $semuaTransaksi
             ->sortByDesc(function ($trx) {
                 return $trx->tanggal_transaksi;
             })
@@ -295,7 +304,8 @@ class TabunganController extends Controller
         return view('nasabah.riwayat', compact(
             'transaksi',
             'totalPemasukan',
-            'totalPengeluaran'
+            'totalPengeluaran',
+            'isSiswa'
         ));
     }
 }

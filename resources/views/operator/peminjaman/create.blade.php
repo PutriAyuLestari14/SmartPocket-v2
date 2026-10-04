@@ -373,6 +373,17 @@
                                             <span class="text-xs text-emerald-100 font-medium flex-shrink-0">Tenor</span>
                                             <span id="summaryTenor" class="text-xs font-black text-white">0 Bulan</span>
                                         </div>
+
+                                        <div class="flex justify-between items-center pb-3 border-b border-white/10 gap-3">
+                                            <span class="text-xs text-emerald-100 font-medium flex-shrink-0">Provisi</span>
+                                            <span id="summaryProvisi" class="text-xs font-black text-white">Rp 0</span>
+                                        </div>
+
+                                        <div class="flex justify-between items-center pb-3 border-b border-white/10 gap-3">
+                                            <span class="text-xs text-emerald-100 font-medium flex-shrink-0">Jasa / Bulan</span>
+                                            <span id="summaryJasa" class="text-xs font-black text-white">Rp 0</span>
+                                        </div>
+
                                         <div class="flex justify-between items-center pt-2 bg-white/5 rounded-xl px-3 py-2 -mx-1 gap-3">
                                             <span class="text-xs text-emerald-100 font-bold flex-shrink-0">Angsuran / Bulan</span>
                                             <span id="summaryAngsuran" class="text-sm font-black text-accent">Rp 0</span>
@@ -516,10 +527,16 @@
         function updateSummary() {
             const nominal = Number(document.getElementById('nominal').value) || 0;
             const tenor = Number(document.getElementById('tenor').value) || 0;
-            const angsuran = tenor > 0 ? nominal / tenor : 0;
+
+            const provisi = nominal * 0.01;
+            const jasaPerBulan = nominal * 0.01;
+            const pokokPerBulan = tenor > 0 ? nominal / tenor : 0;
+            const angsuran = pokokPerBulan + jasaPerBulan;
 
             document.getElementById('summaryNominal').textContent = 'Rp ' + nominal.toLocaleString('id-ID');
             document.getElementById('summaryTenor').textContent = tenor + ' Bulan';
+            document.getElementById('summaryProvisi').textContent = 'Rp ' + Math.round(provisi).toLocaleString('id-ID');
+            document.getElementById('summaryJasa').textContent = 'Rp ' + Math.round(jasaPerBulan).toLocaleString('id-ID');
             document.getElementById('summaryAngsuran').textContent = 'Rp ' + Math.round(angsuran).toLocaleString('id-ID');
         }
 

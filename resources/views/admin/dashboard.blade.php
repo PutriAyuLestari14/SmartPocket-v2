@@ -123,10 +123,6 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <a href="#" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 relative active:scale-95 transition-transform shadow-sm">
-                        <i class="far fa-bell text-base"></i>
-                        <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white pulse-dot"></span>
-                    </a>
                     <button onclick="toggleSidebar()" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-700 active:scale-95 transition-transform shadow-sm">
                         <i class="fas fa-bars text-base"></i>
                     </button>
@@ -153,11 +149,6 @@
                     </div>
 
                     <div class="hidden lg:flex items-center gap-3 pt-1 flex-shrink-0">
-                        <button class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:text-primary hover:border-primary transition-all relative shadow-sm">
-                            <i class="far fa-bell text-base"></i>
-                            <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white pulse-dot"></span>
-                        </button>
-                        <div class="w-px h-8 bg-slate-200"></div>
                         <div class="text-right">
                             <p class="text-xs font-black text-slate-800 leading-tight">{{ auth()->user()->name ?? 'Admin' }}</p>
                             <p class="text-[10px] font-bold text-slate-400 mt-0.5">Administrator</p>

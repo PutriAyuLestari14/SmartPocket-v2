@@ -197,7 +197,7 @@
                                 <i class="fas fa-users text-white text-xl"></i>
                             </div>
                             <p class="text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1">Nasabah Aktif</p>
-                            <p class="text-1xl lg:text-2xl font-black text-slate-900">{{ $totalNasabah ?? 0 }}</p>
+                            <p class="text-1xl lg:text-2xl font-black text-slate-900">{{ $nasabahAktif ?? 0 }}</p>
                         </div>
                     </div>
 

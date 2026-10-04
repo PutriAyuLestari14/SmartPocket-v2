@@ -47,9 +47,37 @@ class OperatorPenarikanController extends Controller
                 return back()->with('error', 'Nasabah belum memiliki rekening tabungan')->withInput();
             }
 
-            // kalau saldo kurang dari jumlah penarikan, tolak
+            // tentukan saldo mengendap
+            $saldoMengendap = 10000;
+
+            // cek apakah saldo nasabah mencukupi untuk penarikan
             if ($rekening->saldo < $request->jumlah) {
-                return back()->with('error', 'Saldo nasabah tidak mencukupi. Saldo saat ini: Rp ' . number_format($rekening->saldo, 0, ',', '.'))->withInput();
+                DB::rollBack();
+
+                return back()
+                    ->with('error', 'Saldo nasabah tidak mencukupi. Saldo saat ini: Rp ' . number_format($rekening->saldo, 0, ',', '.'))
+                    ->withInput();
+            }
+
+            // hitung maksimal penarikan
+            $maksimalPenarikan = $rekening->saldo - $saldoMengendap;
+
+            // cek apakah saldo masih memungkinkan untuk ditarik
+            if ($maksimalPenarikan < 1000) {
+                DB::rollBack();
+
+                return back()
+                    ->with('error', 'Penarikan tidak dapat dilakukan. Saldo minimal yang harus mengendap adalah Rp 10.000.')
+                    ->withInput();
+            }
+
+            // cek apakah jumlah penarikan melebihi batas
+            if ($request->jumlah > $maksimalPenarikan) {
+                DB::rollBack();
+
+                return back()
+                    ->with('error', 'Maksimal penarikan adalah Rp ' . number_format($maksimalPenarikan, 0, ',', '.') . '. Saldo mengendap Rp 10.000 harus tetap tersisa.')
+                    ->withInput();
             }
 
             // potong saldo nasabah di sinilah gais 

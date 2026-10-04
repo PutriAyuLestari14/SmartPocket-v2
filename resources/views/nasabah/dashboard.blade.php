@@ -184,6 +184,14 @@
 
                 <!-- Profil Desktop -->
                 <div class="hidden lg:flex items-center gap-3 pt-1 flex-shrink-0">
+                    <a href="{{ route('nasabah.notifikasi.index') }}" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:text-primary hover:border-primary transition-all relative shadow-sm">
+                        <i class="far fa-bell text-base"></i>
+                        @php $pendingNotif = \App\Models\DetailTabungan::where('status', 'pending')->count(); @endphp
+                        @if($pendingNotif > 0)
+                            <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
+                        @endif
+                    </a>
+                    <div class="w-px h-8 bg-slate-200"></div>
                     <div class="text-right">
                         <p class="text-xs font-black text-slate-800 leading-tight">{{ auth()->user()->name }}</p>
                         <p class="text-[10px] font-bold text-slate-400 capitalize mt-0.5">
@@ -197,13 +205,6 @@
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         @endif
                     </div>
-                    <a href="{{ route('nasabah.notifikasi.index') }}" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:text-primary hover:border-primary transition-all relative shadow-sm ml-1">
-                        <i class="far fa-bell text-base"></i>
-                        @php $pendingNotif = \App\Models\DetailTabungan::where('status', 'pending')->count(); @endphp
-                        @if($pendingNotif > 0)
-                            <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
-                        @endif
-                    </a>
                 </div>
             </header>
 

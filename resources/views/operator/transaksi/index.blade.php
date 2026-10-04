@@ -33,14 +33,13 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
-        
-        /* Variasi Gradient yang TIDAK MONOTON */
+
         .gradient-primary { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
         .gradient-mint { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); }
         .gradient-soft { background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%); }
         .gradient-fresh { background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); }
         .gradient-vibrant { background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%); }
-        
+
         .hover-lift { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .hover-lift:hover { transform: translateY(-2px); }
     </style>
@@ -140,13 +139,12 @@
                             <i class="fas fa-chevron-right text-[9px]"></i>
                             <span class="text-primary font-bold">Transaksi</span>
                         </div>
-
                         <h2 class="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-tight">
                             Manajemen Transaksi
                         </h2>
                         <p class="text-sm text-slate-500 mt-2 flex items-center gap-2 font-medium">
                             <i class="fas fa-history text-primary"></i>
-                            Riwayat seluruh aktivitas setoran dan penarikan nasabah.
+                            Riwayat seluruh aktivitas setoran, penarikan, dan pendapatan lainnya.
                         </p>
                     </div>
 
@@ -183,13 +181,14 @@
                         </div>
 
                         <form method="GET" action="{{ route('operator.transaksi.index') }}" class="flex flex-col sm:flex-row gap-2">
-                            <select name="jenis" onchange="this.form.submit()"
-                                class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary focus:bg-white transition-all cursor-pointer">
+                            <select name="jenis" onchange="this.form.submit()" class="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                                 <option value="">Semua Jenis</option>
                                 <option value="setoran" {{ request('jenis') == 'setoran' ? 'selected' : '' }}>Setoran</option>
                                 <option value="penarikan" {{ request('jenis') == 'penarikan' ? 'selected' : '' }}>Penarikan</option>
+                                <option value="pendapatan_lain_lain" {{ request('jenis') == 'pendapatan_lain_lain' ? 'selected' : '' }}>Pendapatan Lain-lain</option>
                             </select>
-                            <input type="date" name="tanggal" value="{{ request('tanggal') }}" onchange="this.form.submit()" 
+
+                            <input type="date" name="tanggal" value="{{ request('tanggal') }}" onchange="this.form.submit()"
                                 class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary focus:bg-white transition-all cursor-pointer">
                         </form>
                     </div>
@@ -197,31 +196,33 @@
                     <!-- Desktop Table -->
                     <div class="hidden md:block overflow-x-auto">
                         <table class="w-full">
-                            <thead class="bg-slate-50/80">
+                            <thead class="bg-slate-50">
                                 <tr>
-                                    <th class="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider" style="min-width: 140px;">Waktu</th>
-                                    <th class="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider">Nasabah</th>
-                                    <th class="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider">Jenis</th>
-                                    <th class="px-6 py-4 text-right text-[10px] font-black text-slate-500 uppercase tracking-wider" style="min-width: 130px;">Tarik</th>
-                                    <th class="px-6 py-4 text-right text-[10px] font-black text-slate-500 uppercase tracking-wider" style="min-width: 130px;">Setor</th>
-                                    <th class="px-6 py-4 text-center text-[10px] font-black text-slate-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider" style="min-width: 140px;">Waktu</th>
+                                    <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Nasabah</th>
+                                    <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Jenis</th>
+                                    <th class="px-6 py-4 text-right text-[10px] font-semibold text-slate-500 uppercase tracking-wider" style="min-width: 130px;">Tarik</th>
+                                    <th class="px-6 py-4 text-right text-[10px] font-semibold text-slate-500 uppercase tracking-wider" style="min-width: 130px;">Setor</th>
+                                    <th class="px-6 py-4 text-right text-[10px] font-semibold text-slate-500 uppercase tracking-wider" style="min-width: 130px;">Pendapatan</th>
+                                    <th class="px-6 py-4 text-center text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
                                 @forelse($transaksi as $item)
                                     @php
-                                        $isSetoran = $item->id_jenis_transaksi == 1;
-                                        $isPenarikan = $item->id_jenis_transaksi == 2;
+                                        $isPendapatanLainLain = $item->is_pendapatan_lain_lain ?? false;
+                                        $isSetoran = !$isPendapatanLainLain && $item->id_jenis_transaksi == 1;
+                                        $isPenarikan = !$isPendapatanLainLain && $item->id_jenis_transaksi == 2;
                                         $amountFormatted = 'Rp ' . number_format($item->jumlah, 0, ',', '.');
 
-                                        $statusClass = 'bg-slate-100 text-slate-700 border-slate-200';
+                                        $statusClass = 'bg-slate-100 text-slate-700';
                                         $statusText = ucfirst($item->status);
                                         if ($item->status == 'berhasil') {
-                                            $statusClass = 'bg-mintLight text-primary border-primary/20';
+                                            $statusClass = 'bg-emerald-100 text-emerald-700';
                                         } elseif ($item->status == 'pending') {
-                                            $statusClass = 'bg-amber-50 text-amber-700 border-amber-200';
+                                            $statusClass = 'bg-amber-100 text-amber-700';
                                         } elseif (in_array($item->status, ['ditolak', 'gagal'])) {
-                                            $statusClass = 'bg-rose-50 text-rose-700 border-rose-200';
+                                            $statusClass = 'bg-red-100 text-red-700';
                                         }
                                     @endphp
 
@@ -234,6 +235,7 @@
                                                 {{ $item->tanggal_transaksi->format('d M Y') }}
                                             </p>
                                         </td>
+
                                         <td class="px-6 py-4 align-middle">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-mintLight to-emerald-100 flex items-center justify-center flex-shrink-0">
@@ -251,8 +253,13 @@
                                                 </div>
                                             </div>
                                         </td>
+
                                         <td class="px-6 py-4 align-middle">
-                                            @if($isSetoran)
+                                            @if($isPendapatanLainLain)
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-700 rounded-xl text-[10px] font-black border border-amber-200">
+                                                    <i class="fas fa-coins text-[8px]"></i> Pendapatan Lain-lain
+                                                </span>
+                                            @elseif($isSetoran)
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-mintLight text-primary rounded-xl text-[10px] font-black border border-primary/20">
                                                     <i class="fas fa-arrow-down text-[8px]"></i> Setoran
                                                 </span>
@@ -262,13 +269,15 @@
                                                 </span>
                                             @endif
                                         </td>
+
                                         <td class="px-6 py-4 text-right align-middle">
-                                            @if(!$isSetoran)
+                                            @if($isPenarikan)
                                                 <span class="text-sm font-black text-rose-600">{{ $amountFormatted }}</span>
                                             @else
                                                 <span class="text-slate-300 text-sm font-medium">—</span>
                                             @endif
                                         </td>
+
                                         <td class="px-6 py-4 text-right align-middle">
                                             @if($isSetoran)
                                                 <span class="text-sm font-black text-primary">{{ $amountFormatted }}</span>
@@ -276,6 +285,15 @@
                                                 <span class="text-slate-300 text-sm font-medium">—</span>
                                             @endif
                                         </td>
+
+                                        <td class="px-6 py-4 text-right align-middle">
+                                            @if($isPendapatanLainLain)
+                                                <span class="text-sm font-black text-amber-600">{{ $amountFormatted }}</span>
+                                            @else
+                                                <span class="text-slate-300 text-sm font-medium">—</span>
+                                            @endif
+                                        </td>
+
                                         <td class="px-6 py-4 text-center align-middle">
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 {{ $statusClass }} rounded-xl text-[10px] font-black border">
                                                 @if($item->status == 'berhasil')
@@ -291,12 +309,12 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-6 py-16 text-center">
+                                        <td colspan="7" class="px-6 py-16 text-center">
                                             <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
                                                 <i class="fas fa-inbox text-slate-400 text-2xl"></i>
                                             </div>
                                             <p class="text-sm font-bold text-slate-900">Belum ada data transaksi</p>
-                                            <p class="text-xs text-slate-500 mt-1">Data akan muncul setelah ada aktivitas setoran atau penarikan.</p>
+                                            <p class="text-xs text-slate-500 mt-1">Data akan muncul setelah ada aktivitas setoran, penarikan, atau pendapatan lainnya.</p>
                                         </td>
                                     </tr>
                                 @endforelse
@@ -308,8 +326,9 @@
                     <div class="md:hidden divide-y divide-slate-100">
                         @forelse($transaksi as $item)
                             @php
-                                $isSetoran = $item->id_jenis_transaksi == 1;
-                                $isPenarikan = $item->id_jenis_transaksi == 2;
+                                $isPendapatanLainLain = $item->is_pendapatan_lain_lain ?? false;
+                                $isSetoran = !$isPendapatanLainLain && $item->id_jenis_transaksi == 1;
+                                $isPenarikan = !$isPendapatanLainLain && $item->id_jenis_transaksi == 2;
                                 $amountFormatted = 'Rp ' . number_format($item->jumlah, 0, ',', '.');
 
                                 $statusClass = 'bg-slate-100 text-slate-700 border-slate-200';
@@ -340,6 +359,7 @@
                                             </p>
                                         </div>
                                     </div>
+
                                     <span class="inline-flex items-center gap-1.5 px-2 py-1 {{ $statusClass }} rounded-lg text-[9px] font-black border flex-shrink-0">
                                         @if($item->status == 'berhasil')
                                             <i class="fas fa-check-circle text-[7px]"></i>
@@ -354,7 +374,11 @@
 
                                 <div class="flex justify-between items-end gap-3">
                                     <div>
-                                        @if($isSetoran)
+                                        @if($isPendapatanLainLain)
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 rounded-lg text-[10px] font-black border border-amber-200">
+                                                <i class="fas fa-coins text-[8px]"></i> Pendapatan Lain-lain
+                                            </span>
+                                        @elseif($isSetoran)
                                             <span class="inline-flex items-center gap-1 px-2 py-1 bg-mintLight text-primary rounded-lg text-[10px] font-black border border-primary/20">
                                                 <i class="fas fa-arrow-down text-[8px]"></i> Setoran
                                             </span>
@@ -363,13 +387,15 @@
                                                 <i class="fas fa-arrow-up text-[8px]"></i> Penarikan
                                             </span>
                                         @endif
+
                                         <p class="text-[10px] text-slate-400 mt-1.5 font-bold">
                                             {{ $item->tanggal_transaksi->copy()->timezone('Asia/Jakarta')->format('H:i') }} WIB
                                             · {{ $item->tanggal_transaksi->format('d M Y') }}
                                         </p>
                                     </div>
-                                    <p class="text-sm font-black {{ $isSetoran ? 'text-primary' : 'text-rose-600' }} whitespace-nowrap">
-                                        {{ $isSetoran ? '+ ' : '- ' }}{{ $amountFormatted }}
+
+                                    <p class="text-sm font-black {{ $isPendapatanLainLain ? 'text-amber-600' : ($isSetoran ? 'text-primary' : 'text-rose-600') }} whitespace-nowrap">
+                                        {{ $isPenarikan ? '- ' : '+ ' }}{{ $amountFormatted }}
                                     </p>
                                 </div>
                             </div>
@@ -379,7 +405,7 @@
                                     <i class="fas fa-inbox text-slate-400 text-2xl"></i>
                                 </div>
                                 <p class="text-sm font-bold text-slate-900">Belum ada data transaksi</p>
-                                <p class="text-xs text-slate-500 mt-1">Data akan muncul setelah ada aktivitas setoran atau penarikan.</p>
+                                <p class="text-xs text-slate-500 mt-1">Data akan muncul setelah ada aktivitas setoran, penarikan, atau pendapatan lainnya.</p>
                             </div>
                         @endforelse
                     </div>
@@ -395,7 +421,9 @@
                         </div>
                     </div>
                     @endif
+
                 </div>
+
             </div>
         </main>
     </div>

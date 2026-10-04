@@ -39,12 +39,31 @@ class NasabahController extends Controller
         $nasabahAktif = Nasabah::where('status', 'aktif')->count();
         $nasabahNonaktif = Nasabah::where('status', '!=', 'aktif')->count();
 
+        $nasabahBaru = Nasabah::whereMonth('tanggal_daftar', now()->month)
+            ->whereYear('tanggal_daftar', now()->year)
+            ->count();
+
+        $totalSaldoTabungan = RekeningTabungan::sum('saldo');
+
+        $jumlahBuku = DetailTabungan::where('status', 'berhasil')
+            ->whereHas('jenisTransaksi', function ($q) {
+                $q->whereRaw('LOWER(TRIM(setoran)) = ?', ['setoran']);
+            })
+            ->whereRaw('LOWER(keterangan) LIKE ?', ['%buku tabungan%'])
+            ->count();
+
+        $pendapatanBuku = $jumlahBuku * 5000;
+
+        $totalSaldo = $totalSaldoTabungan + $pendapatanBuku;
+
         // kirim data ke halaman
         return view('operator.nasabah.index', compact(
             'nasabahs',
             'totalNasabah',
             'nasabahAktif',
-            'nasabahNonaktif'
+            'nasabahNonaktif',
+            'nasabahBaru',
+            'totalSaldo'
         ));
     }
 
@@ -81,7 +100,7 @@ class NasabahController extends Controller
 
             if ($request->buku_tabungan === 'terpisah') {
                 $totalDibayarNasabah = $saldoAwal + $biayaBuku;
-                $keteranganSetoran = 'Saldo Awal + Buku Tabungan';
+                $keteranganSetoran = 'Saldo Awal - Buku Tabungan Terpisah';
             }
 
             if ($request->buku_tabungan === 'potong') {
@@ -95,7 +114,7 @@ class NasabahController extends Controller
                 }
 
                 $saldoMasukRekening = $saldoAwal - $biayaBuku;
-                $keteranganSetoran = 'Saldo Awal + Buku Tabungan';
+                $keteranganSetoran = 'Saldo Awal - Buku Tabungan Potong dari Saldo';
             }
 
             $prefix = strtoupper(trim($request->prefix));
@@ -110,7 +129,6 @@ class NasabahController extends Controller
                     $lastRekening->no_rek,
                     strlen($prefix)
                 );
-
                 $nextNumber = $lastNumber + 1;
             } else {
                 $nextNumber = 1;
@@ -176,6 +194,7 @@ class NasabahController extends Controller
                     ', saldo masuk rekening Rp ' .
                     number_format($saldoMasukRekening, 0, ',', '.') . '.'
                 );
+
         } catch (\Throwable $e) {
             DB::rollBack();
 

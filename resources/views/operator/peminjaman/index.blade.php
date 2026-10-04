@@ -138,7 +138,7 @@
                 </div>
             </header>
 
-            <div class="p-4 lg:p-8 space-y-5 lg:space-y-6">
+            <div class="p-4 lg:p-8 space-y-8 lg:space-y-10">
 
                 <!-- Header -->
                 <header class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
@@ -158,32 +158,16 @@
                         </p>
                     </div>
 
-                    <div class="hidden lg:flex items-center gap-3 pt-1 flex-shrink-0">
-                        <div class="text-right">
-                            <p class="text-xs font-black text-slate-800 leading-tight">
-                                {{ auth()->user()->petugas->nama_lengkap ?? auth()->user()->name }}
-                            </p>
-                            <p class="text-[10px] font-bold text-slate-400 mt-0.5">Operator Shift Pagi</p>
-                        </div>
-                        <div class="w-10 h-10 rounded-xl overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
-                            {{ strtoupper(substr(auth()->user()->petugas->nama_lengkap ?? auth()->user()->name, 0, 1)) }}
-                        </div>
-                        <a href="{{ route('operator.notifikasi.index') }}" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:text-primary hover:border-primary transition-all relative shadow-sm ml-1">
-                            <i class="far fa-bell text-base"></i>
-                            @php $pendingNotif = \App\Models\DetailTabungan::where('status', 'pending')->count(); @endphp
-                            @if($pendingNotif > 0)
-                                <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
-                            @endif
+                    <div class="hidden lg:flex items-center pt-1 flex-shrink-0">
+                        <a href="{{ route('operator.peminjaman.create') }}" class="px-5 py-3 bg-primary hover:bg-primaryDark text-white rounded-xl text-sm font-black transition-colors flex items-center justify-center gap-2 shadow-lg shadow-primary/30">
+                            <i class="fas fa-plus text-xs"></i> Input Peminjaman
                         </a>
                     </div>
                 </header>
 
-                <!-- Action Buttons (mobile + desktop) -->
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <button class="px-4 py-2.5 border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 bg-white shadow-sm">
-                        <i class="fas fa-download text-xs"></i> Export Data
-                    </button>
-                    <a href="{{ route('operator.peminjaman.create') }}" class="px-4 py-2.5 bg-primary hover:bg-primaryDark text-white rounded-xl text-sm font-black transition-colors flex items-center justify-center gap-2 shadow-md shadow-primary/30">
+                <!-- Action Buttons (mobile only) -->
+                <div class="lg:hidden">
+                    <a href="{{ route('operator.peminjaman.create') }}" class="w-full px-4 py-3 bg-primary hover:bg-primaryDark text-white rounded-xl text-sm font-black transition-colors flex items-center justify-center gap-2 shadow-md shadow-primary/30">
                         <i class="fas fa-plus text-xs"></i> Input Peminjaman
                     </a>
                 </div>

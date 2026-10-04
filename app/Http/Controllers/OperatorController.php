@@ -13,8 +13,21 @@ class OperatorController extends Controller
         // hitung total semua nasabah yang terdaftar di sistem
         $totalNasabah = Nasabah::count();
 
-        // (total kas bmt) di jumlahkan
-        $totalSaldo = RekeningTabungan::sum('saldo');
+        // hitung total saldo tabungan
+        $totalSaldoTabungan = RekeningTabungan::sum('saldo');
+
+        // hitung pendapatan buku tabungan
+        $jumlahBuku = DetailTabungan::where('status', 'berhasil')
+            ->whereHas('jenisTransaksi', function ($q) {
+                $q->whereRaw('LOWER(TRIM(setoran)) = ?', ['setoran']);
+            })
+            ->whereRaw('LOWER(keterangan) LIKE ?', ['%buku tabungan%'])
+            ->count();
+
+        $pendapatanBuku = $jumlahBuku * 5000;
+
+        // hitung saldo kas bmt
+        $totalSaldo = $totalSaldoTabungan + $pendapatanBuku;
 
         // hitung berapa banyak transaksi yang terjadi tepat hari ini
         $transaksiHariIni = DetailTabungan::whereDate(
