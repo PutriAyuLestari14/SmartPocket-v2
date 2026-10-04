@@ -25,6 +25,9 @@ use App\Http\Controllers\OperatorPenarikanController;
 use App\Http\Controllers\OperatorPembayaranController;
 use App\Http\Controllers\OperatorNotifikasiController; 
 
+// ⬇️ TAMBAHKAN IMPORT INI DI ATAS ⬇️
+use App\Http\Controllers\AdminUpdateSaldoController; 
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -32,14 +35,26 @@ Route::get('/', function () {
     // ADMIN
     Route::middleware(['auth'])->group(function () {
         Route::middleware(['role:admin'])->prefix('admin')->group(function () {
+        
         Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
         Route::get('/nasabah', [AdminNasabahController::class, 'index'])->name('admin.nasabah.index');
         Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('admin.laporan.index');
+        
+        // --- ROUTE SALDO MANUAL (Existing) ---
         Route::get('/saldo', [AdminSaldoController::class, 'index'])->name('admin.saldo.index');
         Route::post('/saldo/proses', [AdminSaldoController::class, 'proses'])->name('admin.saldo.proses');
-
         Route::get('/nasabah/mutasi/{idNasabah}', [AdminSaldoController::class, 'mutasiNasabah'])
             ->name('admin.nasabah.mutasi');
+
+        // --- ROUTE BAGI HASIL OTOMATIS (New) ---
+        // Halaman Preview/Simulasi Bagi Hasil
+        Route::get('/update-saldo/bagi-hasil', [AdminUpdateSaldoController::class, 'index'])
+            ->name('admin.update.saldo.index');
+            
+        // Proses Eksekusi Bagi Hasil
+        Route::post('/update-saldo/bagi-hasil/proses', [AdminUpdateSaldoController::class, 'store'])
+            ->name('admin.update.saldo.store');
+
     });
 
     // OPERATOR
