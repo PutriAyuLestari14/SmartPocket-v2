@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\Nasabah;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,13 +23,31 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        $role = $request->user()->role;
+        $user = $request->user();
 
-        if ($role === 'admin') {
+        // ============================================================
+        // ⬇️ CEK STATUS NASABAH — kalau 'nonaktif', langsung logout ⬇️
+        // ============================================================
+        if ($user->role === 'nasabah') {
+            $nasabah = Nasabah::where('username', $user->username)->first();
+
+            if ($nasabah && strtolower($nasabah->status) === 'nonaktif') {
+                Auth::guard('web')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'username' => 'Akun Anda telah dinonaktifkan. Silakan hubungi operator.',
+                ])->onlyInput('username');
+            }
+        }
+
+        // Redirect sesuai role
+        if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
 
-        if ($role === 'operator') {
+        if ($user->role === 'operator') {
             return redirect()->route('operator.dashboard');
         }
 

@@ -43,7 +43,7 @@ class LoginRequest extends FormRequest
         $login = $this->string('username')->toString();
         $password = $this->string('password')->toString();
 
-        // Coba login nasabah menggunakan nomor rekening
+        // 1. Coba login nasabah menggunakan nomor rekening
         $nasabah = Nasabah::where('no_rek', $login)->first();
 
         if ($nasabah && $nasabah->user) {
@@ -57,7 +57,7 @@ class LoginRequest extends FormRequest
             }
         }
 
-        // Coba login admin/operator menggunakan username
+        // 2. Coba login admin/operator menggunakan username
         $user = User::where('username', $login)
             ->whereIn('role', ['admin', 'operator'])
             ->first();
@@ -69,10 +69,12 @@ class LoginRequest extends FormRequest
             return;
         }
 
+        // 3. Jika semua gagal, lempar error bahasa Indonesia
         RateLimiter::hit($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'username' => trans('auth.failed'),
+            // ⬇️ PERUBAHAN DI SINI (Bahasa Indonesia) ⬇️
+            'username' => 'Username/Nomor Rekening dan Password yang Anda masukkan salah. Silakan coba lagi.',
         ]);
     }
 
@@ -92,10 +94,8 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'username' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
+            // ⬇️ PERUBAHAN DI SINI JUGA (Bahasa Indonesia) ⬇️
+            'username' => 'Terlalu banyak percobaan login. Akun Anda terkunci sementara. Silakan coba lagi dalam ' . ceil($seconds / 60) . ' menit.',
         ]);
     }
 

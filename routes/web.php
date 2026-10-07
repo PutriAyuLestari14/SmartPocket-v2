@@ -108,8 +108,11 @@ Route::get('/', function () {
 
     });
 
+    // ============================================================
     // NASABAH 
-    Route::middleware(['role:nasabah'])->group(function () {
+    // ⬇️ DITAMBAHKAN MIDDLEWARE 'check.nasabah' DI SINI ⬇️
+    // ============================================================
+    Route::middleware(['role:nasabah', 'check.nasabah'])->group(function () {
         Route::get('/nasabah/dashboard', [TabunganController::class, 'index'])->name('nasabah.dashboard');
         
         //riwayat

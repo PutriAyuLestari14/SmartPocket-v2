@@ -184,6 +184,50 @@
                 color: #6b7280;
             }
 
+            /* ==================================================== */
+            /* ⬇️ STYLE BARU UNTUK ALERT ERROR ⬇️                    */
+            /* ==================================================== */
+            .alert-error {
+                background: #fef2f2;
+                border: 1.5px solid #fecaca;
+                color: #991b1b;
+                padding: 12px 14px;
+                border-radius: 10px;
+                margin-bottom: 18px;
+                font-size: 12.5px;
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+                animation: shakeError 0.4s ease-in-out;
+            }
+
+            .alert-error i {
+                color: #dc2626;
+                font-size: 15px;
+                margin-top: 1px;
+                flex-shrink: 0;
+            }
+
+            .alert-error .alert-content strong {
+                display: block;
+                font-weight: 700;
+                margin-bottom: 3px;
+                font-size: 13px;
+            }
+
+            .alert-error .alert-content p {
+                margin: 0;
+                line-height: 1.5;
+            }
+
+            @keyframes shakeError {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-4px); }
+                75% { transform: translateX(4px); }
+            }
+
+            /* ==================================================== */
+
             .input-group {
                 margin-bottom: 16px;
             }
@@ -333,12 +377,28 @@
                         <p>Silakan masuk ke akun Anda</p>
                     </div>
 
+                    {{-- ============================================================ --}}
+                    {{-- ⬇️ ALERT ERROR: Akun dinonaktifkan / salah password ⬇️        --}}
+                    {{-- ============================================================ --}}
+                    @if ($errors->any())
+                        <div class="alert-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <div class="alert-content">
+                                <strong>Gagal Login</strong>
+                                @foreach ($errors->all() as $error)
+                                    <p>{{ $error }}</p>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                    {{-- ============================================================ --}}
+
                     <form action="{{ route('login') }}" method="POST">
                         @csrf
 
                         <div class="input-group">
                             <label for="username">No Rekening</label>
-                            <input type="text" id="username" name="username" placeholder="cth: siswa123" required autofocus>
+                            <input type="text" id="username" name="username" placeholder="cth: siswa123" value="{{ old('username') }}" required autofocus>
                         </div>
 
                         <div class="input-group">

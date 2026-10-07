@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role' => RoleMiddleware::class,
+            'check.nasabah' => \App\Http\Middleware\CheckNasabahStatus::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
