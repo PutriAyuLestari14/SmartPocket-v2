@@ -142,28 +142,40 @@
                         </p>
                     </div>
 
-                    {{-- PILIH BULAN --}}
-                    <form
-                        action="{{ route('admin.laporan.index') }}"
-                        method="GET"
-                        class="flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-1.5 shadow-sm flex-shrink-0"
-                    >
-                        <label
-                            for="periode"
-                            class="text-xs font-bold text-slate-500 px-2 uppercase tracking-wider"
+                    {{-- FILTER & EXPORT ACTIONS --}}
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-shrink-0 w-full sm:w-auto">
+                        
+                        {{-- PILIH BULAN --}}
+                        <form
+                            action="{{ route('admin.laporan.index') }}"
+                            method="GET"
+                            class="flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-1.5 shadow-sm w-full sm:w-auto"
                         >
-                            <i class="fas fa-calendar text-forest"></i> Periode
-                        </label>
+                            <label
+                                for="periode"
+                                class="text-xs font-bold text-slate-500 px-2 uppercase tracking-wider whitespace-nowrap"
+                            >
+                                <i class="fas fa-calendar text-forest"></i> Periode
+                            </label>
 
-                        <input
-                            type="month"
-                            name="periode"
-                            id="periode"
-                            value="{{ $periode }}"
-                            class="border-0 rounded-lg px-3 py-2 bg-slate-50 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-mint/30 focus:bg-white transition-all"
-                            onchange="this.form.submit()"
-                        >
-                    </form>
+                            <input
+                                type="month"
+                                name="periode"
+                                id="periode"
+                                value="{{ $periode }}"
+                                class="border-0 rounded-lg px-3 py-2 bg-slate-50 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-mint/30 focus:bg-white transition-all w-full sm:w-auto"
+                                onchange="this.form.submit()"
+                            >
+                        </form>
+
+                        {{-- TOMBOL EXPORT EXCEL --}}
+                        <a href="{{ route('admin.laporan.export-neraca', ['periode' => $periode]) }}" 
+                           class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white border-2 border-forest text-forest hover:bg-forest hover:text-white text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 group shadow-sm hover:shadow-md whitespace-nowrap">
+                            <i class="fas fa-file-excel text-lg group-hover:scale-110 transition-transform"></i> 
+                            <span>Export Excel</span>
+                        </a>
+
+                    </div>
 
                 </header>
 
@@ -186,9 +198,11 @@
                 {{-- TABLE --}}
                 <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
 
-                    <div class="p-4 lg:p-5 border-b border-slate-100 flex items-center gap-2">
-                        <div class="w-1 h-5 bg-gradient-to-b from-mint to-forest rounded-full"></div>
-                        <h3 class="text-sm font-extrabold text-slate-900">Neraca Saldo</h3>
+                    <div class="p-4 lg:p-5 border-b border-slate-100 flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1 h-5 bg-gradient-to-b from-mint to-forest rounded-full"></div>
+                            <h3 class="text-sm font-extrabold text-slate-900">Neraca Saldo</h3>
+                        </div>
                     </div>
 
                     <div class="overflow-x-auto table-scroll">
@@ -270,140 +284,86 @@
 
                                         {{-- NERACA AWAL DEBIT --}}
                                         <td class="px-3 lg:px-4 py-4 text-center border-l border-slate-100">
-
                                             @if ($item['awal_debit'] > 0)
-
                                                 <div class="text-xs lg:text-sm font-extrabold text-slate-800 whitespace-nowrap">
                                                     Rp {{ number_format($item['awal_debit'], 0, ',', '.') }}
                                                 </div>
-
                                                 <div class="text-[9px] lg:text-[10px] text-slate-400 mt-1 font-semibold">
                                                     saldo awal
                                                 </div>
-
                                             @else
-
-                                                <span class="text-slate-300 text-sm">
-                                                    —
-                                                </span>
-
+                                                <span class="text-slate-300 text-sm">—</span>
                                             @endif
-
                                         </td>
 
                                         {{-- NERACA AWAL KREDIT --}}
                                         <td class="px-3 lg:px-4 py-4 text-center border-r border-slate-100">
-
                                             @if ($item['awal_kredit'] > 0)
-
                                                 <div class="text-xs lg:text-sm font-extrabold text-slate-800 whitespace-nowrap">
                                                     Rp {{ number_format($item['awal_kredit'], 0, ',', '.') }}
                                                 </div>
-
                                                 <div class="text-[9px] lg:text-[10px] text-slate-400 mt-1 font-semibold">
                                                     saldo awal
                                                 </div>
-
                                             @else
-
-                                                <span class="text-slate-300 text-sm">
-                                                    —
-                                                </span>
-
+                                                <span class="text-slate-300 text-sm">—</span>
                                             @endif
-
                                         </td>
 
                                         {{-- MUTASI DEBIT --}}
                                         <td class="px-3 lg:px-4 py-4 text-center">
-
                                             @if ($item['mutasi_debit'] > 0)
-
                                                 <div class="text-xs lg:text-sm font-extrabold text-slate-800 whitespace-nowrap">
                                                     Rp {{ number_format($item['mutasi_debit'], 0, ',', '.') }}
                                                 </div>
-
                                                 <div class="text-[9px] lg:text-[10px] text-slate-400 mt-1 font-semibold">
                                                     mutasi bulan
                                                 </div>
-
                                             @else
-
-                                                <span class="text-slate-300 text-sm">
-                                                    —
-                                                </span>
-
+                                                <span class="text-slate-300 text-sm">—</span>
                                             @endif
-
                                         </td>
 
                                         {{-- MUTASI KREDIT --}}
                                         <td class="px-3 lg:px-4 py-4 text-center border-r border-slate-100">
-
                                             @if ($item['mutasi_kredit'] > 0)
-
                                                 <div class="text-xs lg:text-sm font-extrabold text-slate-800 whitespace-nowrap">
                                                     Rp {{ number_format($item['mutasi_kredit'], 0, ',', '.') }}
                                                 </div>
-
                                                 <div class="text-[9px] lg:text-[10px] text-slate-400 mt-1 font-semibold">
                                                     mutasi bulan
                                                 </div>
-
                                             @else
-
-                                                <span class="text-slate-300 text-sm">
-                                                    —
-                                                </span>
-
+                                                <span class="text-slate-300 text-sm">—</span>
                                             @endif
-
                                         </td>
 
                                         {{-- SALDO AKHIR DEBIT --}}
                                         <td class="px-3 lg:px-4 py-4 text-center">
-
                                             @if ($item['akhir_debit'] > 0)
-
                                                 <div class="text-xs lg:text-sm font-extrabold text-forest whitespace-nowrap">
                                                     Rp {{ number_format($item['akhir_debit'], 0, ',', '.') }}
                                                 </div>
-
                                                 <div class="text-[9px] lg:text-[10px] text-slate-400 mt-1 font-semibold">
                                                     saldo akhir
                                                 </div>
-
                                             @else
-
-                                                <span class="text-slate-300 text-sm">
-                                                    —
-                                                </span>
-
+                                                <span class="text-slate-300 text-sm">—</span>
                                             @endif
-
                                         </td>
 
                                         {{-- SALDO AKHIR KREDIT --}}
                                         <td class="px-3 lg:px-4 py-4 text-center">
-
                                             @if ($item['akhir_kredit'] > 0)
-
                                                 <div class="text-xs lg:text-sm font-extrabold text-forest whitespace-nowrap">
                                                     Rp {{ number_format($item['akhir_kredit'], 0, ',', '.') }}
                                                 </div>
-
                                                 <div class="text-[9px] lg:text-[10px] text-slate-400 mt-1 font-semibold">
                                                     saldo akhir
                                                 </div>
-
                                             @else
-
-                                                <span class="text-slate-300 text-sm">
-                                                    —
-                                                </span>
-
+                                                <span class="text-slate-300 text-sm">—</span>
                                             @endif
-
                                         </td>
 
                                     </tr>

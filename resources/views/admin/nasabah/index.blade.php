@@ -22,10 +22,13 @@
                 extend: {
                     colors: {
                         bgMain: '#FAFAFA',
-                        forest: '#1A4D2E',
-                        forestDark: '#123720',
-                        mint: '#4E9F3D',
-                        mintLight: '#E8F5E9',
+                        primary: '#15803d',
+                        primaryDark: '#166534',
+                        primaryLight: '#16a34a',
+                        secondary: '#22c55e',
+                        accent: '#4ade80',
+                        mint: '#15803d',
+                        mintLight: '#dcfce7',
                     },
 
                     fontFamily: {
@@ -124,11 +127,11 @@
             <div class="p-6 border-b border-slate-100">
 
                 <div class="flex items-center justify-between">
-
+    
                     <div class="flex items-center gap-3">
 
                         <div
-                            class="w-10 h-10 bg-forest rounded-xl flex items-center justify-center shadow-md shadow-forest/20">
+                            class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-md shadow-primary/20">
 
                             <i class="fas fa-wallet text-white text-lg"></i>
 
@@ -136,11 +139,11 @@
 
                         <div>
 
-                            <h1 class="text-base font-extrabold text-forest tracking-tight">
+                            <h1 class="text-base font-extrabold text-primary tracking-tight">
                                 Smart Pocket
                             </h1>
 
-                            <p class="text-[10px] text-mint font-bold tracking-wider">
+                            <p class="text-[10px] text-primaryLight font-bold tracking-wider">
                                 ADMIN PANEL
                             </p>
 
@@ -150,7 +153,7 @@
 
 
                     <button onclick="toggleSidebar()"
-                        class="lg:hidden text-slate-400 hover:text-forest p-1">
+                        class="lg:hidden text-slate-400 hover:text-primary p-1">
 
                         <i class="fas fa-times text-lg"></i>
 
@@ -164,7 +167,7 @@
             <nav class="p-4 space-y-1.5 flex-1 overflow-y-auto">
 
                 <a href="{{ route('admin.dashboard') }}"
-                    class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                    class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
 
                     <i class="fas fa-chart-line w-5 text-center text-slate-400"></i>
 
@@ -174,7 +177,7 @@
 
 
                 <a href="{{ route('admin.nasabah.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 bg-mintLight text-forest rounded-xl text-sm font-bold transition-all shadow-sm border border-mint/20">
+                    class="flex items-center gap-3 px-4 py-3 bg-mintLight text-primary rounded-xl text-sm font-bold transition-all shadow-sm border border-mint/20">
 
                     <i class="fas fa-users w-5 text-center text-mint"></i>
 
@@ -184,7 +187,7 @@
 
 
                 <a href="{{ route('admin.saldo.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                    class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
 
                     <i class="fas fa-wallet w-5 text-center text-slate-400"></i>
 
@@ -194,7 +197,7 @@
 
 
                 <a href="{{ route('admin.laporan.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                    class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
 
                     <i class="fas fa-money-bill-transfer w-5 text-center text-slate-400"></i>
 
@@ -240,7 +243,7 @@
                 <div class="flex items-center gap-3">
 
                     <div
-                        class="w-10 h-10 bg-forest rounded-xl flex items-center justify-center shadow-md shadow-forest/20 flex-shrink-0">
+                        class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-md shadow-primary/20 flex-shrink-0">
 
                         <i class="fas fa-wallet text-white text-lg"></i>
 
@@ -248,11 +251,11 @@
 
                     <div>
 
-                        <h1 class="text-base font-extrabold text-forest tracking-tight leading-none">
+                        <h1 class="text-base font-extrabold text-primary tracking-tight leading-none">
                             Smart Pocket
                         </h1>
 
-                        <p class="text-[10px] text-mint font-bold tracking-wider mt-1">
+                        <p class="text-[10px] text-primaryLight font-bold tracking-wider mt-1">
                             Admin Panel
                         </p>
 
