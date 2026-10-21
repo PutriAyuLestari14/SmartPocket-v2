@@ -1,31 +1,26 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Laporan Keuangan - SmartPocket</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap"
-        rel="stylesheet"
-    >
-
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         bgMain: '#FAFAFA',
-                        forest: '#1A4D2E',
-                        forestDark: '#123720',
-                        mint: '#4E9F3D',
-                        mintLight: '#E8F5E9',
+                        primary: '#15803d',      
+                        primaryDark: '#166534',
+                        primaryLight: '#16a34a',
+                        secondary: '#22c55e',
+                        accent: '#4ade80',
+                        mint: '#15803d',          
+                        mintLight: '#dcfce7',     
                     },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
@@ -40,8 +35,11 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
-        .gradient-forest { background: linear-gradient(135deg, #1A4D2E 0%, #123720 100%); }
-        .gradient-mint { background: linear-gradient(135deg, #4E9F3D 0%, #1A4D2E 100%); }
+        
+        .gradient-primary { background: linear-gradient(135deg, #15803d 0%, #166534 100%); box-shadow: 0 12px 28px -6px rgba(21, 128, 61, 0.25); }
+        .gradient-soft { background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%); }
+        .gradient-vibrant { background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%); }
+        
         .table-scroll { -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
     </style>
 </head>
@@ -49,45 +47,45 @@
 <body class="bg-bgMain text-slate-800 antialiased">
 
     <!-- Mobile Sidebar Backdrop -->
-    <div id="sidebarBackdrop" class="fixed inset-0 bg-forestDark/50 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity" onclick="toggleSidebar()"></div>
+    <div id="sidebarBackdrop" class="fixed inset-0 bg-primaryDark/50 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity" onclick="toggleSidebar()"></div>
 
     <div class="flex min-h-screen">
 
         {{-- SIDEBAR --}}
-        <aside id="sidebar" class="w-64 bg-white border-r border-slate-200/80 flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-sm">
+        <aside id="sidebar" class="w-64 bg-white border-r border-slate-200/80 flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl shadow-slate-200/50">
 
             <div class="p-6 border-b border-slate-100">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-forest rounded-xl flex items-center justify-center shadow-md shadow-forest/20">
-                            <i class="fas fa-wallet text-white text-lg"></i>
+                        <div class="w-10 h-10 gradient-vibrant rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/30">
+                            <i class="fas fa-wallet text-lg"></i>
                         </div>
                         <div>
-                            <h1 class="text-base font-extrabold text-forest tracking-tight">SmartPocket</h1>
-                            <p class="text-[10px] text-mint font-bold tracking-wider">ADMIN PANEL</p>
+                            <h1 class="text-base font-black text-primary tracking-tight leading-none">SmartPocket</h1>
+                            <p class="text-[10px] text-primaryDark font-bold tracking-wider mt-1 uppercase">ADMIN PANEL</p>
                         </div>
                     </div>
-                    <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-forest p-1">
+                    <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-primary p-1">
                         <i class="fas fa-times text-lg"></i>
                     </button>
                 </div>
             </div>
 
             <nav class="p-4 space-y-1.5 flex-1 overflow-y-auto">
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-chart-line w-5 text-center text-slate-400"></i> Dashboard
                 </a>
 
-                <a href="{{ route('admin.nasabah.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                <a href="{{ route('admin.nasabah.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-users w-5 text-center text-slate-400"></i> Data Nasabah
                 </a>
 
-                <a href="{{ route('admin.saldo.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                <a href="{{ route('admin.saldo.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-wallet w-5 text-center text-slate-400"></i> Update Saldo
                 </a>
 
-                <a href="{{ route('admin.laporan.index') }}" class="flex items-center gap-3 px-4 py-3 bg-mintLight text-forest rounded-xl text-sm font-bold transition-all shadow-sm border border-mint/20">
-                    <i class="fas fa-money-bill-transfer w-5 text-center text-mint"></i> Laporan
+                <a href="{{ route('admin.laporan.index') }}" class="flex items-center gap-3 px-4 py-3 bg-mintLight text-primary rounded-xl text-sm font-bold transition-all shadow-sm border border-primary/20">
+                    <i class="fas fa-money-bill-transfer w-5 text-center text-primary"></i> Laporan
                 </a>
             </nav>
 
@@ -106,14 +104,14 @@
         <main class="flex-1 lg:ml-64 min-w-0">
 
             {{-- Mobile Top Bar --}}
-            <header class="lg:hidden bg-white border-b border-slate-200/80 sticky top-0 z-30 px-4 py-3 flex items-center justify-between">
+            <header class="lg:hidden bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 px-4 py-3 flex items-center justify-between shadow-sm">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-forest rounded-xl flex items-center justify-center text-white shadow-md shadow-forest/20 flex-shrink-0">
+                    <div class="w-10 h-10 gradient-soft rounded-xl flex items-center justify-center text-white shadow-md shadow-primary/30 flex-shrink-0">
                         <i class="fas fa-wallet text-lg"></i>
                     </div>
                     <div>
-                        <h1 class="text-base font-extrabold text-forest tracking-tight leading-none">Smart Pocket</h1>
-                        <p class="text-[10px] text-mint font-bold tracking-wider mt-1">Admin Panel</p>
+                        <h1 class="text-base font-black text-primary tracking-tight leading-none">Smart Pocket</h1>
+                        <p class="text-[10px] text-primaryDark font-bold tracking-wider mt-1 uppercase">Admin Panel</p>
                     </div>
                 </div>
                 <button onclick="toggleSidebar()" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-700 active:scale-95 transition-transform">
@@ -130,7 +128,7 @@
                         <div class="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-1 flex-wrap">
                             <span>Admin</span>
                             <i class="fas fa-chevron-right text-[9px]"></i>
-                            <span class="text-forest font-bold">Laporan Keuangan</span>
+                            <span class="text-primary font-bold">Laporan Keuangan</span>
                         </div>
 
                         <h2 class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-tight">
@@ -155,7 +153,7 @@
                                 for="periode"
                                 class="text-xs font-bold text-slate-500 px-2 uppercase tracking-wider whitespace-nowrap"
                             >
-                                <i class="fas fa-calendar text-forest"></i> Periode
+                                <i class="fas fa-calendar text-primary"></i> Periode
                             </label>
 
                             <input
@@ -163,14 +161,14 @@
                                 name="periode"
                                 id="periode"
                                 value="{{ $periode }}"
-                                class="border-0 rounded-lg px-3 py-2 bg-slate-50 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-mint/30 focus:bg-white transition-all w-full sm:w-auto"
+                                class="border-0 rounded-lg px-3 py-2 bg-slate-50 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/30 focus:bg-white transition-all w-full sm:w-auto"
                                 onchange="this.form.submit()"
                             >
                         </form>
 
                         {{-- TOMBOL EXPORT EXCEL --}}
                         <a href="{{ route('admin.laporan.export-neraca', ['periode' => $periode]) }}" 
-                           class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white border-2 border-forest text-forest hover:bg-forest hover:text-white text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 group shadow-sm hover:shadow-md whitespace-nowrap">
+                           class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 group shadow-sm hover:shadow-md whitespace-nowrap">
                             <i class="fas fa-file-excel text-lg group-hover:scale-110 transition-transform"></i> 
                             <span>Export Excel</span>
                         </a>
@@ -180,7 +178,7 @@
                 </header>
 
                 {{-- PERIODE INFO --}}
-                <div class="gradient-forest rounded-2xl p-5 text-white shadow-lg shadow-forest/20 relative overflow-hidden">
+                <div class="gradient-primary rounded-2xl p-5 text-white shadow-xl shadow-primary/20 relative overflow-hidden">
                     <div class="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                     <div class="relative z-10 flex items-center gap-3">
                         <div class="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center flex-shrink-0">
@@ -200,7 +198,7 @@
 
                     <div class="p-4 lg:p-5 border-b border-slate-100 flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
-                            <div class="w-1 h-5 bg-gradient-to-b from-mint to-forest rounded-full"></div>
+                            <div class="w-1 h-5 bg-gradient-to-b from-mint to-primary rounded-full"></div>
                             <h3 class="text-sm font-extrabold text-slate-900">Neraca Saldo</h3>
                         </div>
                     </div>
@@ -273,7 +271,7 @@
                                     <tr class="border-t border-slate-200 hover:bg-mintLight/20 transition-colors">
 
                                         {{-- KODE --}}
-                                        <td class="px-3 lg:px-4 py-4 text-xs lg:text-sm font-extrabold text-forest">
+                                        <td class="px-3 lg:px-4 py-4 text-xs lg:text-sm font-extrabold text-primary">
                                             {{ $item['kode'] }}
                                         </td>
 
@@ -341,7 +339,7 @@
                                         {{-- SALDO AKHIR DEBIT --}}
                                         <td class="px-3 lg:px-4 py-4 text-center">
                                             @if ($item['akhir_debit'] > 0)
-                                                <div class="text-xs lg:text-sm font-extrabold text-forest whitespace-nowrap">
+                                                <div class="text-xs lg:text-sm font-extrabold text-primary whitespace-nowrap">
                                                     Rp {{ number_format($item['akhir_debit'], 0, ',', '.') }}
                                                 </div>
                                                 <div class="text-[9px] lg:text-[10px] text-slate-400 mt-1 font-semibold">
@@ -355,7 +353,7 @@
                                         {{-- SALDO AKHIR KREDIT --}}
                                         <td class="px-3 lg:px-4 py-4 text-center">
                                             @if ($item['akhir_kredit'] > 0)
-                                                <div class="text-xs lg:text-sm font-extrabold text-forest whitespace-nowrap">
+                                                <div class="text-xs lg:text-sm font-extrabold text-primary whitespace-nowrap">
                                                     Rp {{ number_format($item['akhir_kredit'], 0, ',', '.') }}
                                                 </div>
                                                 <div class="text-[9px] lg:text-[10px] text-slate-400 mt-1 font-semibold">
@@ -371,7 +369,7 @@
                                 @endforeach
 
                                 {{-- TOTAL --}}
-                                <tr class="gradient-forest text-white">
+                                <tr class="gradient-primary text-white">
 
                                     <td colspan="2" class="px-3 lg:px-4 py-4 font-black text-xs lg:text-sm uppercase tracking-wider">
                                         Total
@@ -412,11 +410,11 @@
                 </div>
 
                 {{-- KETERANGAN --}}
-                <div class="bg-mintLight/50 border border-mint/20 rounded-2xl p-4 lg:p-5 flex items-start gap-3">
-                    <div class="w-8 h-8 bg-mint rounded-xl flex items-center justify-center flex-shrink-0">
+                <div class="bg-mintLight/50 border border-primary/20 rounded-2xl p-4 lg:p-5 flex items-start gap-3">
+                    <div class="w-8 h-8 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-info text-white text-xs"></i>
                     </div>
-                    <p class="text-[11px] lg:text-xs text-forest/80 leading-relaxed font-semibold">
+                    <p class="text-[11px] lg:text-xs text-primary/80 leading-relaxed font-semibold">
                         <strong>Catatan:</strong>
                         Neraca awal merupakan posisi akun sebelum periode yang dipilih.
                         Mutasi merupakan transaksi yang terjadi selama periode tersebut.

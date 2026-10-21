@@ -51,6 +51,18 @@
 </head>
 <body class="bg-bgMain text-slate-800 antialiased selection:bg-mintLight selection:text-primary">
 
+    @php
+        // CEK APAKAH FILE GAMBAR BENERAN ADA DI FOLDER STORAGE
+        $photoPath = auth()->user()->nasabah->photo ?? null;
+        $photoUrl = null;
+        if ($photoPath) {
+            // Kalau filenya ada, kita bikin URL-nya
+            if (file_exists(storage_path('app/public/' . $photoPath))) {
+                $photoUrl = asset('storage/' . $photoPath);
+            }
+        }
+    @endphp
+
     <!-- Mobile Sidebar Backdrop -->
     <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-primaryDark/50 backdrop-blur-sm z-30 hidden lg:hidden transition-opacity"></div>
 
@@ -180,8 +192,8 @@
                         </p>
                     </div>
                     <div class="w-10 h-10 rounded-xl overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
-                        @if(auth()->user()->nasabah && auth()->user()->nasabah->photo)
-                            <img src="{{ asset('storage/' . auth()->user()->nasabah->photo) }}" alt="Profile" class="w-full h-full object-cover">
+                        @if($photoUrl)
+                            <img src="{{ $photoUrl }}" alt="Profile" class="w-full h-full object-cover">
                         @else
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         @endif
@@ -211,8 +223,8 @@
 
                             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8 p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
                                 <div class="relative group">
-                                    @if(auth()->user()->nasabah && auth()->user()->nasabah->photo)
-                                        <img src="{{ asset('storage/' . auth()->user()->nasabah->photo) }}" alt="Foto Profile" class="w-20 h-20 rounded-2xl object-cover border-2 border-white shadow-md">
+                                    @if($photoUrl)
+                                        <img src="{{ $photoUrl }}" alt="Foto Profile" class="w-20 h-20 rounded-2xl object-cover border-2 border-white shadow-md">
                                     @else
                                         <div class="w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center border-2 border-white shadow-md text-slate-400">
                                             <i class="fas fa-user text-2xl"></i>
@@ -437,7 +449,7 @@
                 <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex gap-2 mb-2">
                     <i class="fas fa-exclamation-triangle text-amber-600 text-xs mt-0.5"></i>
                     <p class="text-[11px] text-amber-800 leading-relaxed font-semibold">
-                        Setelah diubah, kamu akan diminta login ulang dengan sandi baru.
+                        Sandi Anda akan langsung diubah secara permanen. Demi keamanan, silakan login ulang setelahnya.
                     </p>
                 </div>
             </div>

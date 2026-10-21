@@ -87,7 +87,7 @@
                 </a>
 
                 <a href="{{ route('admin.laporan.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
-                    <i class="fas fa-file-invoice-dollar w-5 text-center text-slate-400"></i> Laporan Keuangan
+                    <i class="fas fa-money-bill-transfer w-5 text-center text-slate-400"></i> Laporan
                 </a>
             </nav>
 

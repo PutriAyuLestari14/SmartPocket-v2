@@ -15,10 +15,10 @@
                 extend: {
                     colors: {
                         bgMain: '#FAFAFA',
-                        forest: '#1A4D2E',
-                        forestDark: '#123720',
-                        mint: '#4E9F3D',
-                        mintLight: '#E8F5E9',
+                        forest: '#15803d',
+                        forestDark: '#166534',
+                        mint: '#15803d',
+                        mintLight: '#dcfce7',
                     },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
@@ -34,9 +34,10 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
 
-        .gradient-forest { background: linear-gradient(135deg, #1A4D2E 0%, #123720 100%); }
-        .gradient-mint { background: linear-gradient(135deg, #4E9F3D 0%, #1A4D2E 100%); }
-        .gradient-mint-soft { background: linear-gradient(135deg, #E8F5E9 0%, #ffffff 100%); }
+        .bg-forest { background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%); }
+        .gradient-forest { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
+        .gradient-mint { background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%); }
+        .gradient-mint-soft { background: linear-gradient(135deg, #dcfce7 0%, #ffffff 100%); }
 
         .hover-lift { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .hover-lift:hover { transform: translateY(-2px); }
@@ -49,33 +50,19 @@
         .modal-in { animation: modalIn 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
         .backdrop-in { animation: backdropIn 0.2s ease-out; }
 
-        .book-option {
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .book-option { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
         .book-option.selected {
-            border-color: #4E9F3D;
-            background: linear-gradient(135deg, #E8F5E9 0%, #ffffff 100%);
+            border-color: #15803d;
+            background: linear-gradient(135deg, #dcfce7 0%, #ffffff 100%);
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px -10px rgba(78, 159, 61, 0.35);
+            box-shadow: 0 10px 25px -10px rgba(21, 128, 61, 0.35);
         }
-        .book-option.selected .book-radio {
-            border-color: #4E9F3D;
-            background: #4E9F3D;
-        }
+        .book-option.selected .book-radio { border-color: #15803d; background: #15803d; }
         .book-option.selected .book-radio::after {
-            content: '';
-            display: block;
-            width: 7px;
-            height: 7px;
-            background: white;
-            border-radius: 50%;
-            margin: 3px auto;
+            content: ''; display: block; width: 7px; height: 7px;
+            background: white; border-radius: 50%; margin: 3px auto;
         }
-        .book-option.selected .book-icon {
-            background: #4E9F3D;
-            color: white;
-            transform: scale(1.1);
-        }
+        .book-option.selected .book-icon { background: #15803d; color: white; transform: scale(1.1); }
     </style>
 </head>
 
@@ -203,30 +190,7 @@
                             Masukkan data detail untuk mendaftarkan nasabah baru ke dalam sistem Mini Bank SMKN 11.
                         </p>
                     </div>
-
-                    <div class="hidden lg:flex items-center gap-3 pt-1 flex-shrink-0">
-                        <div class="text-right">
-                            <p class="text-xs font-bold text-slate-800 leading-tight">
-                                {{ auth()->user()->petugas->nama_lengkap ?? auth()->user()->name }}
-                            </p>
-                            <p class="text-[10px] font-semibold text-slate-400 mt-0.5">Operator</p>
-                        </div>
-
-                        <div class="w-10 h-10 rounded-xl overflow-hidden bg-forest text-white font-bold text-sm flex items-center justify-center border border-slate-200 shadow-sm flex-shrink-0">
-                            {{ strtoupper(substr(auth()->user()->petugas->nama_lengkap ?? auth()->user()->name, 0, 1)) }}
-                        </div>
-
-                        <a href="{{ route('operator.notifikasi.index') }}"
-                           class="w-10 h-10 bg-white border border-slate-200/80 rounded-xl flex items-center justify-center text-slate-600 hover:text-forest hover:border-mint transition-all relative shadow-sm ml-1">
-                            <i class="far fa-bell text-base"></i>
-                            @php
-                                $pendingNotif = \App\Models\DetailTabungan::where('status', 'pending')->count();
-                            @endphp
-                            @if($pendingNotif > 0)
-                                <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-mint rounded-full ring-2 ring-white"></span>
-                            @endif
-                        </a>
-                    </div>
+                    <!-- BAGIAN PROFIL, AVATAR, NOTIF DI SINI SUDAH DIHAPUS -->
                 </header>
 
                 <!-- Error Message -->
