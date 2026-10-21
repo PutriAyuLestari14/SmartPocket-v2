@@ -39,8 +39,8 @@ Route::get('/', function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
         Route::get('/nasabah', [AdminNasabahController::class, 'index'])->name('admin.nasabah.index');
         Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('admin.laporan.index');
-        Route::get('/admin/laporan/export-neraca', [App\Http\Controllers\AdminLaporanController::class, 'exportNeraca'])->name('admin.laporan.export-neraca');
-        
+        // ✅ BENAR
+Route::get('/admin/laporan/export-neraca', [AdminLaporanController::class, 'exportNeraca'])->name('admin.laporan.export-neraca');
         // --- ROUTE SALDO MANUAL (Existing) ---
         Route::get('/saldo', [AdminSaldoController::class, 'index'])->name('admin.saldo.index');
         Route::post('/saldo/proses', [AdminSaldoController::class, 'proses'])->name('admin.saldo.proses');
