@@ -272,30 +272,47 @@
                         <div class="p-5 lg:p-6">
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
 
+                                {{-- ============ NISN / NIP ============ --}}
                                 <div>
                                     <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">
                                         NISN / NIP <span class="text-red-500">*</span>
                                     </label>
                                     <input type="text" name="username" id="inputUsername" value="{{ old('username') }}"
                                            placeholder="Masukkan Nomor Induk"
-                                           class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all"
+                                           class="w-full px-4 py-3 bg-slate-50 border-2 {{ $errors->has('username') ? 'border-red-400 bg-red-50' : 'border-slate-200' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all"
                                            required>
-                                    <p class="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1">
-                                        <i class="fas fa-info-circle text-mint"></i>
-                                        Digunakan sebagai username login
-                                    </p>
+                                    @error('username')
+                                        <p class="text-[11px] text-red-600 font-bold mt-1.5 flex items-start gap-1">
+                                            <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+                                            <span>{{ $message }}</span>
+                                        </p>
+                                    @enderror
+                                    @if(!$errors->has('username'))
+                                        <p class="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1">
+                                            <i class="fas fa-info-circle text-mint"></i>
+                                            Digunakan sebagai username login
+                                        </p>
+                                    @endif
                                 </div>
 
+                                {{-- ============ NAMA LENGKAP ============ --}}
                                 <div>
                                     <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">
                                         Nama Lengkap <span class="text-red-500">*</span>
                                     </label>
                                     <input type="text" name="nama" id="inputNama" value="{{ old('nama') }}"
                                            placeholder="Nama sesuai KTP/Kartu Pelajar"
-                                           class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all"
+                                           class="w-full px-4 py-3 bg-slate-50 border-2 {{ $errors->has('nama') ? 'border-red-400 bg-red-50' : 'border-slate-200' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all"
                                            required>
+                                    @error('nama')
+                                        <p class="text-[11px] text-red-600 font-bold mt-1.5 flex items-start gap-1">
+                                            <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+                                            <span>{{ $message }}</span>
+                                        </p>
+                                    @enderror
                                 </div>
 
+                                {{-- ============ PREFIX NO REKENING ============ --}}
                                 <div>
                                     <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">
                                         No. Rekening <span class="text-red-500">*</span>
@@ -303,25 +320,40 @@
                                     <input type="text" name="prefix" id="inputPrefix" value="{{ old('prefix') }}"
                                            placeholder="Sesuai angkatan siswa"
                                            maxlength="4"
-                                           class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all"
+                                           class="w-full px-4 py-3 bg-slate-50 border-2 {{ $errors->has('prefix') ? 'border-red-400 bg-red-50' : 'border-slate-200' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all"
                                            required>
-                                    <p class="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1">
-                                        <i class="fas fa-info-circle text-mint"></i>
-                                        Siswa: 2 digit angkatan. Guru: GT.
-                                    </p>
+                                    @error('prefix')
+                                        <p class="text-[11px] text-red-600 font-bold mt-1.5 flex items-start gap-1">
+                                            <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+                                            <span>{{ $message }}</span>
+                                        </p>
+                                    @enderror
+                                    @if(!$errors->has('prefix'))
+                                        <p class="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1">
+                                            <i class="fas fa-info-circle text-mint"></i>
+                                            Siswa: 2 digit angkatan. Guru: GT.
+                                        </p>
+                                    @endif
                                 </div>
 
+                                {{-- ============ JENIS NASABAH ============ --}}
                                 <div>
                                     <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">
                                         Jenis Nasabah <span class="text-red-500">*</span>
                                     </label>
                                     <select name="kategori" id="inputKategori"
-                                            class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all cursor-pointer"
+                                            class="w-full px-4 py-3 bg-slate-50 border-2 {{ $errors->has('kategori') ? 'border-red-400 bg-red-50' : 'border-slate-200' }} rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all cursor-pointer"
                                             required>
                                         <option value="">Pilih Jenis Nasabah</option>
                                         <option value="siswa" {{ old('kategori') == 'siswa' ? 'selected' : '' }}>Siswa</option>
                                         <option value="guru" {{ old('kategori') == 'guru' ? 'selected' : '' }}>Guru</option>
                                     </select>
+                                    @error('kategori')
+                                        <p class="text-[11px] text-red-600 font-bold mt-1.5 flex items-start gap-1">
+                                            <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+                                            <span>{{ $message }}</span>
+                                        </p>
+                                    @enderror
                                 </div>
 
                             </div>
@@ -345,28 +377,45 @@
                         <div class="p-5 lg:p-6">
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
 
+                                {{-- ============ ALAMAT ============ --}}
                                 <div class="lg:col-span-2">
                                     <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">
                                         Alamat <span class="text-red-500">*</span>
                                     </label>
                                     <textarea name="alamat" id="inputAlamat" rows="3" placeholder="Masukkan alamat lengkap"
-                                              class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all resize-none"
+                                              class="w-full px-4 py-3 bg-slate-50 border-2 {{ $errors->has('alamat') ? 'border-red-400 bg-red-50' : 'border-slate-200' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all resize-none"
                                               required>{{ old('alamat') }}</textarea>
+                                    @error('alamat')
+                                        <p class="text-[11px] text-red-600 font-bold mt-1.5 flex items-start gap-1">
+                                            <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+                                            <span>{{ $message }}</span>
+                                        </p>
+                                    @enderror
                                 </div>
 
+                                {{-- ============ SALDO AWAL ============ --}}
                                 <div>
                                     <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">
                                         Saldo Awal (Rp)
                                     </label>
                                     <input type="number" name="saldo" id="inputSaldo" value="{{ old('saldo', 0) }}"
                                            placeholder="Rp 0" min="0" oninput="updatePembayaran()"
-                                           class="w-full px-4 py-3 bg-gradient-to-br from-mintLight to-white border-2 border-mint/30 rounded-xl text-base font-black text-forest focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint transition-all text-right">
-                                    <p class="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1">
-                                        <i class="fas fa-info-circle text-mint"></i>
-                                        Masukan setoran awal
-                                    </p>
+                                           class="w-full px-4 py-3 bg-gradient-to-br from-mintLight to-white border-2 {{ $errors->has('saldo') ? 'border-red-400' : 'border-mint/30' }} rounded-xl text-base font-black text-forest focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint transition-all text-right">
+                                    @error('saldo')
+                                        <p class="text-[11px] text-red-600 font-bold mt-1.5 flex items-start gap-1">
+                                            <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+                                            <span>{{ $message }}</span>
+                                        </p>
+                                    @enderror
+                                    @if(!$errors->has('saldo'))
+                                        <p class="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1">
+                                            <i class="fas fa-info-circle text-mint"></i>
+                                            Masukan setoran awal
+                                        </p>
+                                    @endif
                                 </div>
 
+                                {{-- ============ PASSWORD DEFAULT (INFO) ============ --}}
                                 <div>
                                     <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">
                                         Password Akun
@@ -477,25 +526,39 @@
 
                                 </div>
 
+                                {{-- ============ TANGGAL DAFTAR ============ --}}
                                 <div>
                                     <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">
                                         Tanggal Daftar <span class="text-red-500">*</span>
                                     </label>
                                     <input type="date" name="tanggal_daftar" id="inputTanggal" value="{{ old('tanggal_daftar', date('Y-m-d')) }}"
-                                           class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all"
+                                           class="w-full px-4 py-3 bg-slate-50 border-2 {{ $errors->has('tanggal_daftar') ? 'border-red-400 bg-red-50' : 'border-slate-200' }} rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all"
                                            required>
+                                    @error('tanggal_daftar')
+                                        <p class="text-[11px] text-red-600 font-bold mt-1.5 flex items-start gap-1">
+                                            <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+                                            <span>{{ $message }}</span>
+                                        </p>
+                                    @enderror
                                 </div>
 
+                                {{-- ============ STATUS ============ --}}
                                 <div>
                                     <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">
                                         Status <span class="text-red-500">*</span>
                                     </label>
                                     <select name="status" id="inputStatus"
-                                            class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all cursor-pointer"
+                                            class="w-full px-4 py-3 bg-slate-50 border-2 {{ $errors->has('status') ? 'border-red-400 bg-red-50' : 'border-slate-200' }} rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all cursor-pointer"
                                             required>
                                         <option value="aktif" {{ old('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
                                         <option value="nonaktif" {{ old('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
                                     </select>
+                                    @error('status')
+                                        <p class="text-[11px] text-red-600 font-bold mt-1.5 flex items-start gap-1">
+                                            <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+                                            <span>{{ $message }}</span>
+                                        </p>
+                                    @enderror
                                 </div>
 
                             </div>

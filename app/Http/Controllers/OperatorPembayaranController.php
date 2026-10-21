@@ -21,14 +21,17 @@ class OperatorPembayaranController extends Controller
         $peminjamanAktif = collect();
         $pinjamanTerpilih = null;
 
+        // ambil semua nasabah buat dropdown search
+        $nasabahs = Nasabah::with(['user', 'rekening'])
+            ->where('status', 'aktif')
+            ->orderBy('nama', 'asc')
+            ->get();
+
         // kalau ada id_pinjaman di url (dari tombol bayar di tabel)
         if ($request->has('id_pinjaman') && $request->id_pinjaman) {
-            // cari pinjaman yang dimaksud
             $pinjamanTerpilih = Peminjaman::with('nasabah')->find($request->id_pinjaman);
             if ($pinjamanTerpilih) {
-                // kalau ketemu, ambil nasabahnya ceelah
                 $nasabah = $pinjamanTerpilih->nasabah;
-                // bikin collection isinya cuma 1 pinjaman ini
                 $peminjamanAktif = collect([$pinjamanTerpilih]);
             }
         } 
@@ -36,12 +39,12 @@ class OperatorPembayaranController extends Controller
         elseif ($request->has('cari') && !empty($request->cari)) {
             $keyword = $request->cari;
         
-            // cari nasabah berdasarkan nama atau username
-            $nasabah = Nasabah::where('nama', 'LIKE', "%{$keyword}%")
-                            ->orWhere('username', 'LIKE', "%{$keyword}%")
-                            ->first();
+            $nasabah = Nasabah::where(function ($query) use ($keyword) {
+                $query->where('nama', 'LIKE', "%{$keyword}%")
+                    ->orWhere('username', 'LIKE', "%{$keyword}%")
+                    ->orWhere('no_rek', 'LIKE', "%{$keyword}%");
+            })->first();
 
-            // kalau ketemu, ambil pinjaman aktifnya
             if ($nasabah) {
                 $peminjamanAktif = Peminjaman::where('id_nasabah', $nasabah->id_nasabah)
                     ->where('sisa_pinjaman', '>', 0)
@@ -53,14 +56,11 @@ class OperatorPembayaranController extends Controller
 
         // tambah data tambahan buat tiap pinjaman aktif
         $peminjamanAktif->each(function ($pinjaman) {
-            // hitung cicilan ke berapa selanjutnya = sudah bayar + 1
             $sudahBayar = Angsuran::where('id_pinjaman', $pinjaman->id_pinjaman)
-                                  ->where('jumlah_pokok', '>', 0)
-                                  ->count();
+                                ->where('jumlah_pokok', '>', 0)
+                                ->count();
             $pinjaman->next_cicilan_ke = $sudahBayar + 1;
 
-            // ambil daftar bulan yang udah dibayar jasa (format Y-m)
-            // biar bisa cek apa bulan ini udah bayar jasa
             $pinjaman->jasa_bulan = Angsuran::where('id_pinjaman', $pinjaman->id_pinjaman)
                 ->where('jumlah_jasa', '>', 0)
                 ->get()
@@ -72,8 +72,8 @@ class OperatorPembayaranController extends Controller
                 ->toArray();
         });
 
-        // kirim ke view
-        return view('operator.pembayaran.create', compact('nasabah', 'peminjamanAktif', 'pinjamanTerpilih'));
+        // kirim ke view (tambah 'nasabahs')
+        return view('operator.pembayaran.create', compact('nasabah', 'peminjamanAktif', 'pinjamanTerpilih', 'nasabahs'));
     }
 
     // proses simpan pembayaran cicilan

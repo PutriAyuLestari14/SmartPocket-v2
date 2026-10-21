@@ -385,9 +385,11 @@
                             <i class="fas fa-exclamation-circle"></i>
                             <div class="alert-content">
                                 <strong>Gagal Login</strong>
-                                @foreach ($errors->all() as $error)
-                                    <p>{{ $error }}</p>
-                                @endforeach
+                                <ul style="margin: 6px 0 0 0; padding-left: 18px;">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
                             </div>
                         </div>
                     @endif

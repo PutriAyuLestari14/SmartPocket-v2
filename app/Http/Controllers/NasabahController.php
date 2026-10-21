@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Nasabah;
 use App\Models\RekeningTabungan;
 use App\Models\DetailTabungan;
+use App\Models\NomorRekeningCounter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -85,6 +86,31 @@ class NasabahController extends Controller
             'status' => 'required|string',
             'password' => 'nullable|string|min:6',
             'buku_tabungan' => 'required|in:tidak,terpisah,potong',
+        ], [
+            'username.required' => 'NISN / NIP wajib diisi.',
+            'username.unique'   => 'NISN / NIP ini sudah terdaftar. Gunakan nomor lain.',
+            'username.max'      => 'NISN / NIP maksimal 255 karakter.',
+
+            'nama.required' => 'Nama lengkap wajib diisi.',
+            'nama.max'      => 'Nama lengkap maksimal 255 karakter.',
+
+            'kategori.required' => 'Jenis nasabah wajib dipilih.',
+
+            'prefix.required' => 'No. Rekening (prefix) wajib diisi.',
+            'prefix.max'      => 'No. Rekening (prefix) maksimal 10 karakter.',
+
+            'saldo.numeric' => 'Saldo awal harus berupa angka.',
+            'saldo.min'     => 'Saldo awal tidak boleh negatif.',
+
+            'tanggal_daftar.required' => 'Tanggal daftar wajib diisi.',
+            'tanggal_daftar.date'     => 'Tanggal daftar tidak valid.',
+
+            'status.required' => 'Status wajib dipilih.',
+
+            'password.min' => 'Password minimal 6 karakter.',
+
+            'buku_tabungan.required' => 'Pilihan buku tabungan wajib dipilih.',
+            'buku_tabungan.in'       => 'Pilihan buku tabungan tidak valid.',
         ]);
 
         DB::beginTransaction();
@@ -118,21 +144,19 @@ class NasabahController extends Controller
             }
 
             $prefix = strtoupper(trim($request->prefix));
-
-            // buat nomor rekening berikutnya
-            $lastRekening = RekeningTabungan::where('no_rek', 'like', $prefix . '%')
-                ->orderBy('no_rek', 'desc')
+            $counter = NomorRekeningCounter::where('prefix', $prefix)
+                ->lockForUpdate()
                 ->first();
 
-            if ($lastRekening) {
-                $lastNumber = (int) substr(
-                    $lastRekening->no_rek,
-                    strlen($prefix)
-                );
-                $nextNumber = $lastNumber + 1;
-            } else {
-                $nextNumber = 1;
+            if (!$counter) {
+                $counter = NomorRekeningCounter::create([
+                    'prefix' => $prefix,
+                    'nomor_terakhir' => 0,
+                ]);
             }
+
+            $nextNumber = $counter->nomor_terakhir + 1;
+            $counter->update(['nomor_terakhir' => $nextNumber]);
 
             $noRek = $prefix . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
 
