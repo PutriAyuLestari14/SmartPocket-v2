@@ -127,7 +127,7 @@ class NasabahController extends Controller
 
             if ($request->buku_tabungan === 'terpisah') {
                 $totalDibayarNasabah = $saldoAwal + $biayaBuku;
-                $keteranganSetoran = 'Saldo Awal - Buku Tabungan Terpisah';
+                $keteranganSetoran = 'Saldo Awal';
             }
 
             if ($request->buku_tabungan === 'potong') {
@@ -141,7 +141,7 @@ class NasabahController extends Controller
                 }
 
                 $saldoMasukRekening = $saldoAwal - $biayaBuku;
-                $keteranganSetoran = 'Saldo Awal - Buku Tabungan Potong dari Saldo';
+                $keteranganSetoran = 'Saldo Awal (Potong Biaya Buku)';
             }
 
             $prefix = strtoupper(trim($request->prefix));
@@ -161,7 +161,7 @@ class NasabahController extends Controller
 
             $noRek = $prefix . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
 
-            // buat akun user nasabah
+            // 1. buat akun user nasabah
             $user = User::create([
                 'username' => $request->username,
                 'name' => $request->nama,
@@ -169,7 +169,7 @@ class NasabahController extends Controller
                 'role' => 'nasabah',
             ]);
 
-            // buat data nasabah
+            // 2. buat data nasabah
             $nasabah = Nasabah::create([
                 'username' => $user->username,
                 'no_rek' => $noRek,
@@ -180,14 +180,14 @@ class NasabahController extends Controller
                 'status' => $request->status,
             ]);
 
-            // buat rekening tabungan
+            // 3. buat rekening tabungan
             RekeningTabungan::create([
                 'no_rek' => $noRek,
                 'id_nasabah' => $nasabah->id_nasabah,
                 'saldo' => $saldoMasukRekening,
             ]);
 
-            // catat saldo awal yang benar-benar masuk ke tabungan
+            // 4. catat saldo awal yang benar-benar masuk ke tabungan
             if ($saldoMasukRekening > 0) {
                 $jenisSetoran = DB::table('jenis_transaksi')
                     ->where('setoran', 'setoran')
@@ -214,6 +214,31 @@ class NasabahController extends Controller
                         ' telah berhasil dicatat ke rekening tabungan kamu.',
                         'setoran'
                     );
+                }
+            }
+
+            // ==========================================================
+            // 5. PERBAIKAN AKUNTANSI: Catat Transaksi Biaya Buku Tabungan
+            // ==========================================================
+            // Ini memastikan Rp 5.000 tercatat sebagai mutasi Kas (Debit) 
+            // dan Pendapatan Lain-lain (Kredit) di laporan Neraca.
+            if ($request->buku_tabungan === 'terpisah' || $request->buku_tabungan === 'potong') {
+                $jenisSetoran = DB::table('jenis_transaksi')
+                    ->where('setoran', 'setoran')
+                    ->first();
+
+                if ($jenisSetoran) {
+                    $petugas = auth()->user()->petugas;
+
+                    DetailTabungan::create([
+                        'no_rek' => $noRek,
+                        'id_petugas' => $petugas->id_petugas,
+                        'id_jenis_transaksi' => $jenisSetoran->id_jenis_transaksi,
+                        'jumlah' => $biayaBuku, // Rp 5.000
+                        'tanggal_transaksi' => now('Asia/Jakarta'),
+                        'status' => 'berhasil',
+                        'keterangan' => 'Biaya Buku Tabungan', // KUNCI: Agar terbaca di AdminLaporanController
+                    ]);
                 }
             }
 
