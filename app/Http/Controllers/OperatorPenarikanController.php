@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Nasabah;
 use App\Models\RekeningTabungan;
 use App\Models\DetailTabungan;
+use App\Http\Controllers\NotifikasiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -95,9 +96,17 @@ class OperatorPenarikanController extends Controller
             ]);
 
             // simpan permanen
-            DB::commit();
+           DB::commit();
 
-            // balikin ke form dengan pesan sukses
+            // Kirim notifikasi kepada nasabah setelah penarikan berhasil
+            NotifikasiController::kirim(
+                $rekening->id_nasabah,
+                'Penarikan Tabungan Berhasil',
+                'Penarikan sebesar Rp ' . number_format($request->jumlah, 0, ',', '.') .
+                ' telah diproses oleh operator. Saldo tabungan kamu telah berkurang.',
+                'penarikan'
+            );
+
             return redirect()->route('operator.penarikan.create')
                 ->with('success', 'Penarikan berhasil! Saldo a.n ' . $rekening->nasabah->nama . ' berkurang sebesar Rp ' . number_format($request->jumlah, 0, ',', '.'));
 

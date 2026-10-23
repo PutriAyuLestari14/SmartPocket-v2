@@ -7,6 +7,7 @@ use App\Models\Nasabah;
 use App\Models\RekeningTabungan;
 use App\Models\DetailTabungan;
 use App\Models\NomorRekeningCounter;
+use App\Http\Controllers\NotifikasiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -204,6 +205,15 @@ class NasabahController extends Controller
                         'status' => 'berhasil',
                         'keterangan' => $keteranganSetoran,
                     ]);
+
+                    NotifikasiController::kirim(
+                        $nasabah->id_nasabah,
+                        'Setoran Awal Berhasil',
+                        'Setoran awal sebesar Rp ' .
+                        number_format($saldoMasukRekening, 0, ',', '.') .
+                        ' telah berhasil dicatat ke rekening tabungan kamu.',
+                        'setoran'
+                    );
                 }
             }
 

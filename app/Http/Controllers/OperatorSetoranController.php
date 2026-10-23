@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Nasabah;
 use App\Models\RekeningTabungan;
 use App\Models\DetailTabungan;
+use App\Http\Controllers\NotifikasiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -70,6 +71,17 @@ class OperatorSetoranController extends Controller
                 'tanggal_transaksi' => now()->timezone('Asia/Jakarta'),
                 'keterangan' => $request->keterangan,
             ]);
+
+            // kirim notifikasi setoran ke nasabah
+            NotifikasiController::kirim(
+                $rekening->id_nasabah,
+                'Setoran Tabungan Berhasil',
+                'Setoran sebesar Rp ' .
+                number_format($request->jumlah, 0, ',', '.') .
+                ' berhasil ditambahkan ke rekening tabungan kamu. Keterangan: ' .
+                $request->keterangan,
+                'setoran'
+            );
 
             // simpan permanen
             DB::commit();

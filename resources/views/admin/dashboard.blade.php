@@ -418,7 +418,11 @@
         };
 
         const dataHarian = {
-            labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+            labels: [
+                @for ($i = 6; $i >= 0; $i--)
+                    '{{ \Carbon\Carbon::today()->subDays($i)->locale("id")->translatedFormat("D") }}',
+                @endfor
+            ],
             datasets: [{
                 label: 'Transaksi',
                 data: @json($grafikHarian ?? []),

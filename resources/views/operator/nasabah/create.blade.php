@@ -190,7 +190,6 @@
                             Masukkan data detail untuk mendaftarkan nasabah baru ke dalam sistem Mini Bank SMKN 11.
                         </p>
                     </div>
-                    <!-- BAGIAN PROFIL, AVATAR, NOTIF DI SINI SUDAH DIHAPUS -->
                 </header>
 
                 <!-- Error Message -->
@@ -410,26 +409,15 @@
                                         </div>
                                     </div>
 
-                                    <input type="hidden" name="buku_tabungan" id="inputBuku" value="tidak">
+                                    <input type="hidden" name="buku_tabungan" id="inputBuku" value="terpisah">
 
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 
-                                        <button type="button" onclick="selectBuku('tidak', this)"
-                                                class="book-option selected text-left border-2 border-mint rounded-xl p-3"
-                                                data-value="tidak">
-                                            <div class="flex items-center gap-2.5">
-                                                <div class="book-radio w-4 h-4 rounded-full border-2 border-mint bg-mint flex-shrink-0"></div>
-                                                <div class="flex-1 min-w-0">
-                                                    <p class="text-xs font-extrabold text-slate-800">Tidak</p>
-                                                    <p class="text-[10px] text-slate-500 mt-0.5 leading-snug">Hanya saldo awal.</p>
-                                                </div>
-                                            </div>
-                                        </button>
                                         <button type="button" onclick="selectBuku('terpisah', this)"
-                                                class="book-option text-left border-2 border-slate-200 rounded-xl p-3 bg-white"
+                                                class="book-option selected text-left border-2 border-mint rounded-xl p-3"
                                                 data-value="terpisah">
                                             <div class="flex items-center gap-2.5">
-                                                <div class="book-radio w-4 h-4 rounded-full border-2 border-slate-300 bg-white flex-shrink-0"></div>
+                                                <div class="book-radio w-4 h-4 rounded-full border-2 border-mint bg-mint flex-shrink-0"></div>
                                                 <div class="flex-1 min-w-0">
                                                     <p class="text-xs font-extrabold text-slate-800">Terpisah</p>
                                                     <p class="text-[10px] text-slate-500 mt-0.5 leading-snug">+Rp5.000 di luar saldo.</p>
@@ -470,13 +458,13 @@
 
                                             <div class="flex justify-between items-center">
                                                 <span class="text-xs text-slate-500 font-semibold">Buku tabungan</span>
-                                                <span id="summaryBuku" class="text-sm font-bold text-slate-800">Tidak</span>
+                                                <span id="summaryBuku" class="text-sm font-bold text-slate-800">Terpisah</span>
                                             </div>
 
                                             <div class="border-t border-dashed border-slate-200 pt-3 mt-1 flex justify-between items-center">
                                                 <div>
                                                     <p class="text-xs font-extrabold text-slate-800">Total dibayar nasabah</p>
-                                                    <p id="summaryKeterangan" class="text-[10px] text-slate-400 mt-0.5">Hanya saldo awal</p>
+                                                    <p id="summaryKeterangan" class="text-[10px] text-slate-400 mt-0.5">Buku dibayar di luar saldo awal</p>
                                                 </div>
                                                 <span id="summaryTotal" class="text-xl font-black text-mint">Rp 0</span>
                                             </div>
@@ -613,7 +601,7 @@
 
                         <div class="flex justify-between items-center">
                             <span class="text-[11px] text-slate-500">Buku Tabungan</span>
-                            <span id="modalBuku" class="text-xs font-bold text-slate-800">Tidak</span>
+                            <span id="modalBuku" class="text-xs font-bold text-slate-800">Terpisah</span>
                         </div>
 
                         <div class="border-t border-slate-200 pt-2 mt-2 flex justify-between items-center">
@@ -706,8 +694,8 @@
 
             let totalBayar = saldo;
             let saldoMasuk = saldo;
-            let bukuText = 'Tidak';
-            let keterangan = 'Hanya saldo awal';
+            let bukuText = 'Terpisah';
+            let keterangan = 'Buku dibayar di luar saldo awal';
 
             if (buku === 'terpisah') {
                 totalBayar = saldo + BIAYA_BUKU;
@@ -756,7 +744,7 @@
 
             let totalBayar = saldo;
             let saldoMasuk = saldo;
-            let bukuText = 'Tidak';
+            let bukuText = 'Terpisah';
 
             if (buku === 'terpisah') {
                 totalBayar = saldo + BIAYA_BUKU;
