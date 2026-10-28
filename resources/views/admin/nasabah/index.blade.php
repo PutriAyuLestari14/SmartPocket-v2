@@ -156,7 +156,7 @@
                         </div>
                         <div class="relative sm:w-72">
                             <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                            <input type="text" id="searchNasabah" placeholder="Cari nama, username, atau no. rek..."
+                            <input type="text" id="searchNasabah" placeholder="Cari nama atau no. rek..."
                                 class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary focus:bg-white transition-all"
                                 autocomplete="off">
                         </div>
@@ -228,7 +228,7 @@
                                                     <form
                                                         action="{{ route('admin.nasabah.destroy', $n->id_nasabah) }}"
                                                         method="POST"
-                                                        onsubmit="return confirm('Yakin ingin menutup rekening {{ addslashes($n->nama ?? '-') }}? Riwayat transaksi akan tetap disimpan.');">
+                                                        onsubmit="return confirm('⚠️ PERINGATAN!\n\nApakah Anda yakin ingin menghapus nasabah ini?\n\nNama: {{ $n->nama }}\nNo. Rek: {{ $n->rekening->no_rek ?? '-' }}\n\nData yang dihapus tidak dapat dikembalikan!')">
                                                         @csrf
                                                         @method('DELETE')
 
@@ -647,5 +647,18 @@
             });
         });
     </script>
+
+    <!-- POPUP NOTIFIKASI DARI LARAVEL -->
+    @if (session('error'))
+        <script>
+            alert(@json(session('error')));
+        </script>
+    @endif
+
+    @if (session('success'))
+        <script>
+            alert(@json(session('success')));
+        </script>
+    @endif
 </body>
 </html>

@@ -27,7 +27,7 @@ class OperatorController extends Controller
         $pendapatanBuku = $jumlahBuku * 5000;
 
         // hitung saldo kas bmt
-        $totalSaldo = $totalSaldoTabungan + $pendapatanBuku;
+        $totalSaldo = $totalSaldoTabungan;
 
         // hitung berapa banyak transaksi yang terjadi tepat hari ini
         $transaksiHariIni = DetailTabungan::whereDate(
