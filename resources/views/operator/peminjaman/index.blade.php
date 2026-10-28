@@ -150,11 +150,11 @@
                         </div>
 
                         <h2 class="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-tight">
-                            Peminjaman Staf & Guru
+                            Riwayat Peminjaman
                         </h2>
                         <p class="text-sm text-slate-500 mt-2 flex items-center gap-2 font-medium">
                             <i class="fas fa-hand-holding-usd text-primary"></i>
-                            Kelola data pengajuan dan angsuran pinjaman khusus pegawai.
+                            Kelola data pengajuan dan angsuran pinjaman (Aktif & Lunas).
                         </p>
                     </div>
 
@@ -218,7 +218,7 @@
                     <div class="p-4 lg:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div class="flex items-center gap-2">
                             <div class="w-1 h-5 bg-gradient-to-b from-primary to-primaryDark rounded-full"></div>
-                            <h3 class="text-sm lg:text-base font-black text-slate-900">Daftar Peminjaman Aktif</h3>
+                            <h3 class="text-sm lg:text-base font-black text-slate-900">Daftar Peminjaman (Aktif & Lunas)</h3>
                         </div>
                         <div class="relative sm:w-72">
                             <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -236,7 +236,7 @@
                                     <th class="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider">Peminjam</th>
                                     <th class="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider">Nominal Pinjaman</th>
                                     <th class="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider">Tenor</th>
-                                    <th class="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider">Sisa Cicilan</th>
+                                    <th class="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider">Status</th>
                                     <th class="px-6 py-4 text-center text-[10px] font-black text-slate-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
@@ -271,9 +271,9 @@
                                             {{ $peminjaman->tenor }} Bulan
                                         </td>
                                         <td class="px-6 py-4">
-                                            @if($sisaBulan <= 0)
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-mintLight text-primary rounded-xl text-[10px] font-black border border-primary/20">
-                                                    <i class="fas fa-check text-[8px]"></i> Lunas
+                                            @if($peminjaman->is_lunas)
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-xl text-[10px] font-black border border-emerald-300">
+                                                    <i class="fas fa-check-circle text-[8px]"></i> LUNAS
                                                 </span>
                                             @else
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-black border border-blue-200">
@@ -288,11 +288,13 @@
                                                     title="Lihat Mutasi Peminjaman">
                                                     <i class="fas fa-eye text-xs"></i>
                                                 </button>
-                                                <a href="{{ route('operator.pembayaran.create', ['id_pinjaman' => $peminjaman->id_pinjaman]) }}"
-                                                    class="w-8 h-8 bg-blue-50 hover:bg-blue-500 hover:text-white text-blue-600 rounded-lg flex items-center justify-center transition-colors"
-                                                    title="Bayar Cicilan">
-                                                    <i class="fas fa-money-bill-wave text-xs"></i>
-                                                </a>
+                                                @if(!$peminjaman->is_lunas)
+                                                    <a href="{{ route('operator.pembayaran.create', ['id_pinjaman' => $peminjaman->id_pinjaman]) }}"
+                                                        class="w-8 h-8 bg-blue-50 hover:bg-blue-500 hover:text-white text-blue-600 rounded-lg flex items-center justify-center transition-colors"
+                                                        title="Bayar Cicilan">
+                                                        <i class="fas fa-money-bill-wave text-xs"></i>
+                                                    </a>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -303,7 +305,7 @@
                                                 <i class="fas fa-inbox text-slate-400 text-2xl"></i>
                                             </div>
                                             <p class="text-sm font-bold text-slate-900">Belum ada pinjaman yang disetujui</p>
-                                            <p class="text-xs text-slate-500 mt-1">Data pinjaman aktif akan muncul di sini</p>
+                                            <p class="text-xs text-slate-500 mt-1">Data pinjaman akan muncul di sini</p>
                                         </td>
                                     </tr>
                                 @endforelse
@@ -336,8 +338,12 @@
                                         <p class="text-xs font-black text-slate-900 truncate">Rp {{ number_format($peminjaman->jumlah_pinjaman, 0, ',', '.') }}</p>
                                     </div>
                                     <div class="bg-blue-50 rounded-xl px-3 py-2">
-                                        <p class="text-[9px] font-bold text-blue-600 uppercase tracking-wider mb-0.5">Sisa Cicilan</p>
-                                        <p class="text-xs font-black text-blue-700">{{ $sisaBulan }} Bulan</p>
+                                        <p class="text-[9px] font-bold text-blue-600 uppercase tracking-wider mb-0.5">Status</p>
+                                        @if($peminjaman->is_lunas)
+                                            <p class="text-xs font-black text-emerald-700">LUNAS</p>
+                                        @else
+                                            <p class="text-xs font-black text-blue-700">{{ $sisaBulan }} Bulan</p>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -346,10 +352,12 @@
                                         class="flex-1 py-2 bg-emerald-50 hover:bg-primary hover:text-white text-primary rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold transition-colors">
                                         <i class="fas fa-eye text-[10px]"></i> Mutasi
                                     </button>
-                                    <a href="{{ route('operator.pembayaran.create', ['id_pinjaman' => $peminjaman->id_pinjaman]) }}"
-                                        class="flex-1 py-2 bg-blue-50 hover:bg-blue-500 hover:text-white text-blue-600 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold transition-colors">
-                                        <i class="fas fa-money-bill-wave text-[10px]"></i> Bayar
-                                    </a>
+                                    @if(!$peminjaman->is_lunas)
+                                        <a href="{{ route('operator.pembayaran.create', ['id_pinjaman' => $peminjaman->id_pinjaman]) }}"
+                                            class="flex-1 py-2 bg-blue-50 hover:bg-blue-500 hover:text-white text-blue-600 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold transition-colors">
+                                            <i class="fas fa-money-bill-wave text-[10px]"></i> Bayar
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
                         @empty
@@ -358,7 +366,7 @@
                                     <i class="fas fa-inbox text-slate-400 text-2xl"></i>
                                 </div>
                                 <p class="text-sm font-bold text-slate-900">Belum ada pinjaman yang disetujui</p>
-                                <p class="text-xs text-slate-500 mt-1">Data pinjaman aktif akan muncul di sini</p>
+                                <p class="text-xs text-slate-500 mt-1">Data pinjaman akan muncul di sini</p>
                             </div>
                         @endforelse
                     </div>
@@ -377,7 +385,7 @@
         </main>
     </div>
 
-    <!-- ═══ MODAL MUTASI PEMINJAMAN ═══ -->
+    <!-- ══ MODAL MUTASI PEMINJAMAN ══ -->
     <div id="mutasiModal" class="fixed inset-0 z-50 hidden">
         <div class="absolute inset-0 bg-primaryDark/60 backdrop-blur-sm backdrop-in" onclick="closeMutasiModal()"></div>
 

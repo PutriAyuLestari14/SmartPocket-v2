@@ -30,7 +30,18 @@ class Peminjaman extends Model
     protected $casts = [
         'tanggal_ajuan' => 'date',
         'tanggal_jatuh_tempo' => 'date',
+        'tanggal_lunas' => 'date',
     ];
+
+    public function scopeAktif($query)
+    {
+        return $query->where('status', 'aktif');
+    }
+
+    public function scopeLunas($query)
+    {
+        return $query->where('status', 'lunas');
+    }
 
     public function nasabah()
     {
