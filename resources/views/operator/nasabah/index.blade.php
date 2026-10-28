@@ -304,14 +304,6 @@
                                             <a href="{{ route('operator.nasabah.edit', $n->id_nasabah) }}" class="w-8 h-8 bg-emerald-50 hover:bg-primary hover:text-white text-primary rounded-lg flex items-center justify-center transition-colors" title="Edit">
                                                 <i class="fas fa-edit text-xs"></i>
                                             </a>
-                                            <form action="{{ route('operator.nasabah.destroy', $n->id_nasabah) }}" method="POST"
-                                                onsubmit="return confirm('⚠️ PERINGATAN!\n\nApakah Anda yakin ingin menghapus nasabah ini?\n\nNama: {{ $n->nama }}\nNo. Rek: {{ $n->rekening->no_rek ?? '-' }}\n\nData yang dihapus tidak dapat dikembalikan!')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="w-8 h-8 bg-red-50 hover:bg-red-500 hover:text-white rounded-lg flex items-center justify-center text-red-600 transition-colors" title="Hapus">
-                                                    <i class="fas fa-trash text-xs"></i>
-                                                </button>
-                                            </form>
                                         </div>
                                     </td>
                                 </tr>
@@ -370,14 +362,6 @@
                                     <a href="{{ route('operator.nasabah.edit', $n->id_nasabah) }}" class="flex-1 py-2 bg-emerald-50 hover:bg-primary hover:text-white text-primary rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold transition-colors">
                                         <i class="fas fa-edit text-[10px]"></i> Edit
                                     </a>
-                                    <form action="{{ route('operator.nasabah.destroy', $n->id_nasabah) }}" method="POST" class="flex-1"
-                                        onsubmit="return confirm('⚠️ PERINGATAN!\n\nApakah Anda yakin ingin menghapus nasabah ini?\n\nNama: {{ $n->nama }}\nNo. Rek: {{ $n->rekening->no_rek ?? '-' }}\n\nData yang dihapus tidak dapat dikembalikan!')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="w-full py-2 bg-red-50 hover:bg-red-500 hover:text-white rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold text-red-600 transition-colors">
-                                            <i class="fas fa-trash text-[10px]"></i> Hapus
-                                        </button>
-                                    </form>
                                 </div>
                             </div>
                         @empty

@@ -312,8 +312,6 @@ class AdminNasabahController extends Controller
             );
         }
     }
-
-
     
     public function destroy($idNasabah)
     {
@@ -324,25 +322,37 @@ class AdminNasabahController extends Controller
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $rekening = \App\Models\RekeningTabungan::where(
+            $rekening = RekeningTabungan::where(
                 'id_nasabah',
                 $nasabah->id_nasabah
             )->lockForUpdate()->first();
 
+            // Jangan hapus jika saldo masih ada.
             if ($rekening && (float) $rekening->saldo > 0) {
                 DB::rollBack();
 
                 return back()->with(
                     'error',
-                    'Rekening belum bisa ditutup karena saldo masih Rp ' .
-                    number_format($rekening->saldo, 0, ',', '.') .
-                    '. Selesaikan saldo terlebih dahulu.'
+                    'Nasabah tidak bisa dihapus karena saldo masih Rp ' .
+                    number_format($rekening->saldo, 0, ',', '.') . '.'
                 );
             }
 
-            // Nonaktifkan nasabah, JANGAN hapus riwayat transaksi.
-            $nasabah->status = 'nonaktif';
-            $nasabah->save();
+            $username = $nasabah->username;
+
+            // Hapus rekening, tetapi riwayat transaksi dipertahankan.
+            if ($rekening) {
+                $rekening->delete();
+            }
+
+            // Hapus data nasabah.
+            $nasabah->delete();
+
+            // Hapus akun login nasabah saja.
+            DB::table('users')
+                ->where('username', $username)
+                ->where('role', 'nasabah')
+                ->delete();
 
             DB::commit();
 
@@ -350,17 +360,20 @@ class AdminNasabahController extends Controller
                 ->route('admin.nasabah.index')
                 ->with(
                     'success',
-                    'Rekening berhasil ditutup. Riwayat transaksi tetap tersimpan.'
+                    'Nasabah berhasil dihapus. Riwayat transaksi lama tetap tersimpan.'
                 );
 
         } catch (\Throwable $e) {
             DB::rollBack();
 
+            report($e);
+
             return back()->with(
                 'error',
-                'Gagal menutup rekening: ' . $e->getMessage()
+                'Gagal menghapus nasabah. Periksa log Laravel.'
             );
         }
     }
+
 
 }

@@ -108,12 +108,19 @@ class AdminLaporanController extends Controller
 
             $keteranganAsli = strtolower(trim($transaksi->keterangan ?? ''));
 
-            // PERBAIKAN: biaya buku tidak dihitung sebagai setoran tabungan.
+            // Pencatatan biaya buku pada saldo awal
             if (
                 str_contains($keteranganAsli, 'biaya buku tabungan')
                 || str_contains($keteranganAsli, 'pembayaran buku tabungan')
             ) {
-                $akun['1-1100']['awal_debit'] += $jumlah;
+                if ($transaksi->id_jenis_transaksi == 2) {
+                    // Biaya dipotong langsung dari saldo tabungan
+                    $akun['2-2100']['awal_debit'] += $jumlah;
+                } else {
+                    // Biaya dibayar sebagai uang masuk ke Kas
+                    $akun['1-1100']['awal_debit'] += $jumlah;
+                }
+
                 $akun['4-1300']['awal_kredit'] += $jumlah;
 
                 continue;
@@ -200,12 +207,19 @@ class AdminLaporanController extends Controller
 
             $keteranganAsli = strtolower(trim($transaksi->keterangan ?? ''));
 
-            // PERBAIKAN: biaya buku hanya masuk Kas dan Pendapatan Lain-lain.
+            // Pencatatan biaya buku tabungan
             if (
                 str_contains($keteranganAsli, 'biaya buku tabungan')
                 || str_contains($keteranganAsli, 'pembayaran buku tabungan')
             ) {
-                $akun['1-1100']['mutasi_debit'] += $jumlah;
+                if ($transaksi->id_jenis_transaksi == 2) {
+                    // Biaya dipotong langsung dari saldo tabungan
+                    $akun['2-2100']['mutasi_debit'] += $jumlah;
+                } else {
+                    // Biaya dibayar sebagai uang masuk ke Kas
+                    $akun['1-1100']['mutasi_debit'] += $jumlah;
+                }
+
                 $akun['4-1300']['mutasi_kredit'] += $jumlah;
 
                 continue;
@@ -351,12 +365,19 @@ class AdminLaporanController extends Controller
 
             $keteranganAsli = strtolower(trim($transaksi->keterangan ?? ''));
 
-            // PERBAIKAN: biaya buku tidak dihitung sebagai setoran tabungan.
+            // Pencatatan biaya buku pada saldo awal
             if (
                 str_contains($keteranganAsli, 'biaya buku tabungan')
                 || str_contains($keteranganAsli, 'pembayaran buku tabungan')
             ) {
-                $akun['1-1100']['awal_debit'] += $jumlah;
+                if ($transaksi->id_jenis_transaksi == 2) {
+                    // Biaya dipotong langsung dari saldo tabungan
+                    $akun['2-2100']['awal_debit'] += $jumlah;
+                } else {
+                    // Biaya dibayar sebagai uang masuk ke Kas
+                    $akun['1-1100']['awal_debit'] += $jumlah;
+                }
+
                 $akun['4-1300']['awal_kredit'] += $jumlah;
 
                 continue;
@@ -420,12 +441,19 @@ class AdminLaporanController extends Controller
 
             $keteranganAsli = strtolower(trim($transaksi->keterangan ?? ''));
 
-            // PERBAIKAN: biaya buku hanya masuk Kas dan Pendapatan Lain-lain.
+            // Pencatatan biaya buku tabungan
             if (
                 str_contains($keteranganAsli, 'biaya buku tabungan')
                 || str_contains($keteranganAsli, 'pembayaran buku tabungan')
             ) {
-                $akun['1-1100']['mutasi_debit'] += $jumlah;
+                if ($transaksi->id_jenis_transaksi == 2) {
+                    // Biaya dipotong langsung dari saldo tabungan
+                    $akun['2-2100']['mutasi_debit'] += $jumlah;
+                } else {
+                    // Biaya dibayar sebagai uang masuk ke Kas
+                    $akun['1-1100']['mutasi_debit'] += $jumlah;
+                }
+
                 $akun['4-1300']['mutasi_kredit'] += $jumlah;
 
                 continue;
@@ -499,10 +527,16 @@ class AdminLaporanController extends Controller
         ];
 
         return response()->view('admin.laporan.export-neraca', compact(
-            'periode', 'tanggalMulai', 'tanggalSelesai', 'akun',
-            'totalAwalDebit', 'totalAwalKredit',
-            'totalMutasiDebit', 'totalMutasiKredit',
-            'totalAkhirDebit', 'totalAkhirKredit'
+            'periode',
+            'tanggalMulai',
+            'tanggalSelesai',
+            'akun',
+            'totalAwalDebit',
+            'totalAwalKredit',
+            'totalMutasiDebit',
+            'totalMutasiKredit',
+            'totalAkhirDebit',
+            'totalAkhirKredit'
         ))->withHeaders($headers);
     }
 }
