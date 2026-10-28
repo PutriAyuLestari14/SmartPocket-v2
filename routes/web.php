@@ -40,7 +40,7 @@ Route::get('/', function () {
         Route::get('/nasabah', [AdminNasabahController::class, 'index'])->name('admin.nasabah.index');
         Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('admin.laporan.index');
         // ✅ BENAR
-Route::get('/admin/laporan/export-neraca', [AdminLaporanController::class, 'exportNeraca'])->name('admin.laporan.export-neraca');
+        Route::get('/admin/laporan/export-neraca', [AdminLaporanController::class, 'exportNeraca'])->name('admin.laporan.export-neraca');
         // --- ROUTE SALDO MANUAL (Existing) ---
         Route::get('/saldo', [AdminSaldoController::class, 'index'])->name('admin.saldo.index');
         Route::post('/saldo/proses', [AdminSaldoController::class, 'proses'])->name('admin.saldo.proses');
@@ -55,6 +55,14 @@ Route::get('/admin/laporan/export-neraca', [AdminLaporanController::class, 'expo
         // Proses Eksekusi Bagi Hasil
         Route::post('/update-saldo/bagi-hasil/proses', [AdminUpdateSaldoController::class, 'store'])
             ->name('admin.update.saldo.store');
+
+        Route::post('/nasabah/{idNasabah}/pindahkan-saldo', [
+            AdminNasabahController::class,
+            'pindahkanSaldo'
+        ])->name('admin.nasabah.pindahkanSaldo');
+
+        Route::delete('/nasabah/{idNasabah}', [AdminNasabahController::class, 'destroy'])
+            ->name('admin.nasabah.destroy');
 
     });
 

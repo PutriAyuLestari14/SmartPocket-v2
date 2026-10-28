@@ -13,12 +13,11 @@
                 extend: {
                     colors: {
                         bgMain: '#FAFAFA',
-                        // Warna hijau yang SAMA dengan landing page
-                        primary: '#15803d',        // Emerald 700
-                        primaryDark: '#166534',    // Emerald 800
-                        primaryLight: '#16a34a',   // Emerald 600
-                        secondary: '#22c55e',      // Emerald 500
-                        accent: '#4ade80',         // Emerald 400
+                        primary: '#15803d',
+                        primaryDark: '#166534',
+                        primaryLight: '#16a34a',
+                        secondary: '#22c55e',
+                        accent: '#4ade80',
                         mint: '#15803d',
                         mintLight: '#dcfce7',
                     },
@@ -123,7 +122,10 @@
                 <div class="flex items-center gap-2">
                     <a href="{{ route('operator.notifikasi.index') }}" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 relative active:scale-95 transition-transform shadow-sm">
                         <i class="far fa-bell text-base"></i>
-                        <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
+                        <!-- BADGE NOTIFIKASI MOBILE -->
+                        <span class="absolute -top-1.5 -left-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white ring-2 ring-white animate-pulse">
+                            3
+                        </span>
                     </a>
                     <button onclick="toggleSidebar()" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-700 active:scale-95 transition-transform shadow-sm">
                         <i class="fas fa-bars text-base"></i>
@@ -162,7 +164,10 @@
                             <i class="far fa-bell text-base"></i>
                             @php $pendingNotif = \App\Models\DetailTabungan::where('status', 'pending')->count(); @endphp
                             @if($pendingNotif > 0)
-                                <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
+                                <!-- BADGE NOTIFIKASI DESKTOP (ANGKA MERAH DI KIRI ATAS) -->
+                                <span class="absolute -top-1.5 -left-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white ring-2 ring-white animate-pulse">
+                                    {{ $pendingNotif > 99 ? '99+' : $pendingNotif }}
+                                </span>
                             @endif
                         </a>
                         <div class="w-px h-8 bg-slate-200"></div>
@@ -172,9 +177,11 @@
                             </p>
                             <p class="text-[10px] font-bold text-slate-400 mt-0.5">Operator</p>
                         </div>
-                        <div class="w-10 h-10 rounded-xl overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
+                        
+                        <div class="w-11 h-11 rounded-full overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
                             {{ strtoupper(substr(auth()->user()->petugas->nama_lengkap ?? auth()->user()->name, 0, 1)) }}
                         </div>
+
                     </div>
                 </header>
 

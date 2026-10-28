@@ -34,7 +34,8 @@
         ::-webkit-scrollbar-track { background: #FAFAFA; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
 
-        .gradient-primary { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
+        /* Warna diselaraskan dengan halaman Nasabah */
+        .gradient-primary { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); }
         .gradient-forest { background: linear-gradient(135deg, #1A4D2E 0%, #123720 100%); }
 
         @keyframes softPulse {
@@ -93,8 +94,9 @@
             @if($penarikanPending->count() > 0)
                 <div class="mb-3">
                     <div class="flex items-center gap-2 mb-3">
-                        <div class="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-arrow-up text-amber-600 text-xs"></i>
+                        <!-- Disamakan warnanya dengan tema hijau -->
+                        <div class="w-8 h-8 bg-mintLight rounded-lg flex items-center justify-center">
+                            <i class="fas fa-arrow-up text-primary text-xs"></i>
                         </div>
                         <div>
                             <h3 class="text-sm font-extrabold text-slate-900">Penarikan</h3>
@@ -104,7 +106,7 @@
 
                     <div class="space-y-3.5">
                         @foreach($penarikanPending as $trx)
-                            <div class="bg-white rounded-2xl border border-primary/30 ring-1 ring-primary/10 transition-all duration-200 p-5 shadow-sm hover:shadow-md relative overflow-hidden flex items-start justify-between gap-4">
+                            <div class="bg-white rounded-2xl border transition-all duration-200 p-5 shadow-sm hover:shadow-md relative overflow-hidden flex items-start justify-between gap-4 border-primary/30 ring-1 ring-primary/10">
                                 <!-- GARIS HIJAU DISAMPING -->
                                 <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-primary"></div>
 
@@ -136,7 +138,7 @@
                                 </div>
 
                                 <!-- TOMBOL AKSI -->
-                                <a href="{{ route('operator.verifikasi.index') }}" class="shrink-0 inline-flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primaryDark text-white text-xs font-bold rounded-xl shadow-md shadow-primary/20 transition-all" title="Proses Verifikasi">
+                                <a href="{{ route('operator.verifikasi.index') }}" class="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primaryDark text-white text-xs font-bold rounded-xl shadow-md shadow-primary/20 transition-all" title="Proses Verifikasi">
                                     <i class="fas fa-check text-xs"></i>
                                     <span class="hidden sm:inline">Proses</span>
                                 </a>
@@ -152,8 +154,9 @@
             @if($peminjamanPending->count() > 0)
                 <div class="mb-3">
                     <div class="flex items-center gap-2 mb-3">
-                        <div class="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-hand-holding-dollar text-emerald-600 text-xs"></i>
+                        <!-- Disamakan warnanya dengan tema hijau -->
+                        <div class="w-8 h-8 bg-mintLight rounded-lg flex items-center justify-center">
+                            <i class="fas fa-hand-holding-dollar text-primary text-xs"></i>
                         </div>
                         <div>
                             <h3 class="text-sm font-extrabold text-slate-900">Pengajuan Pinjaman</h3>
@@ -163,7 +166,7 @@
 
                     <div class="space-y-3.5">
                         @foreach($peminjamanPending as $pinjaman)
-                            <div class="bg-white rounded-2xl border border-primary/30 ring-1 ring-primary/10 transition-all duration-200 p-5 shadow-sm hover:shadow-md relative overflow-hidden flex items-start justify-between gap-4">
+                            <div class="bg-white rounded-2xl border transition-all duration-200 p-5 shadow-sm hover:shadow-md relative overflow-hidden flex items-start justify-between gap-4 border-primary/30 ring-1 ring-primary/10">
                                 <!-- GARIS HIJAU DISAMPING -->
                                 <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-primary"></div>
 
@@ -204,7 +207,7 @@
                                 </div>
 
                                 <!-- TOMBOL AKSI -->
-                                <a href="{{ route('operator.peminjaman.index') }}" class="shrink-0 inline-flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primaryDark text-white text-xs font-bold rounded-xl shadow-md shadow-primary/20 transition-all" title="Proses Pengajuan">
+                                <a href="{{ route('operator.peminjaman.index') }}" class="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primaryDark text-white text-xs font-bold rounded-xl shadow-md shadow-primary/20 transition-all" title="Proses Pengajuan">
                                     <i class="fas fa-check text-xs"></i>
                                     <span class="hidden sm:inline">Proses</span>
                                 </a>

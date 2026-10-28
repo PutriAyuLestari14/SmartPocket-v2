@@ -2,6 +2,14 @@
     $saldoMengendap = 10000;
     $saldoTersedia = $rekening->saldo ?? 0;
     $maksimalPenarikan = max(0, $saldoTersedia - $saldoMengendap);
+    
+    $photoPath = auth()->user()->nasabah->photo ?? null;
+    $photoUrl = null;
+    if ($photoPath) {
+        if (file_exists(storage_path('app/public/' . $photoPath))) {
+            $photoUrl = asset('storage/' . $photoPath);
+        }
+    }
 @endphp
 
 <!DOCTYPE html>
@@ -10,7 +18,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajukan Penarikan - Smart Pocket</title>
-    <!-- SweetAlert2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -43,8 +50,8 @@
         ::-webkit-scrollbar-track { background: #FAFAFA; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
 
-        /* Variasi Gradient yang TIDAK MONOTON */
-        .gradient-primary { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
+        /* HANYA BAGIAN INI YANG DIUBAH: Warna dijadikan lebih cerah/fresh (sama seperti dashboard) */
+        .gradient-primary { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); }
         .gradient-soft { background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%); }
         .gradient-vibrant { background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%); }
 
@@ -54,10 +61,8 @@
 </head>
 <body class="bg-bgMain text-slate-800 antialiased selection:bg-mintLight selection:text-primary">
 
-    <!-- Mobile Sidebar Backdrop -->
     <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-primaryDark/50 backdrop-blur-sm z-30 hidden lg:hidden transition-opacity"></div>
 
-    <!-- MOBILE TOPBAR HEADER -->
     <header class="lg:hidden bg-white border-b border-slate-200/80 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
         <div class="flex items-center gap-3">
             <div class="w-9 h-9 gradient-soft rounded-xl flex items-center justify-center text-white shadow-sm shadow-primary/30">
@@ -88,10 +93,8 @@
 
     <div class="flex flex-col lg:flex-row min-h-screen">
         
-        <!-- SIDEBAR DESKTOP & MOBILE -->
         <aside id="sidebar" class="w-64 bg-white border-r border-slate-200/80 flex flex-col fixed inset-y-0 left-0 z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl shadow-slate-200/50">
             
-            <!-- Brand Header Sidebar -->
             <div class="p-5 border-b border-slate-100 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 gradient-vibrant rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/30">
@@ -107,7 +110,6 @@
                 </button>
             </div>
             
-            <!-- Navigation Links -->
             <nav class="p-4 space-y-1.5 flex-1 overflow-y-auto">
                 <p class="px-3 py-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Menu Utama</p>
 
@@ -135,7 +137,6 @@
                 </a>
             </nav>
 
-            <!-- Logout Button -->
             <div class="p-4 border-t border-slate-100">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
@@ -146,10 +147,8 @@
             </div>
         </aside>
 
-        <!-- MAIN CONTENT AREA -->
         <main class="flex-1 lg:ml-64 p-4 sm:p-6 lg:p-8 min-w-0">
             
-            <!-- HEADER PRESISI DESAIN -->
             <header class="mb-6 lg:mb-8 flex items-start justify-between gap-4">
                 <div>
                     <nav class="flex items-center gap-1.5 text-xs sm:text-sm text-slate-400 font-medium mb-2">
@@ -166,7 +165,6 @@
                     </p>
                 </div>
 
-                <!-- Profil Desktop -->
                 <div class="hidden lg:flex items-center gap-3 pt-1 flex-shrink-0">
                     <a href="{{ route('nasabah.notifikasi.index') }}" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:text-primary hover:border-primary transition-all relative shadow-sm">
                         <i class="far fa-bell text-base"></i>
@@ -182,9 +180,9 @@
                             {{ auth()->user()->nasabah->kategori ?? 'Siswa' }}
                         </p>
                     </div>
-                    <div class="w-10 h-10 rounded-xl overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
-                        @if(auth()->user()->nasabah && auth()->user()->nasabah->photo)
-                            <img src="{{ asset('storage/' . auth()->user()->nasabah->photo) }}" alt="Profile" class="w-full h-full object-cover">
+                    <div class="w-11 h-11 rounded-full overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
+                        @if($photoUrl)
+                            <img src="{{ $photoUrl }}" alt="Profile" class="w-full h-full object-cover">
                         @else
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         @endif
@@ -192,12 +190,9 @@
                 </div>
             </header>
 
-            <!-- LAYOUT 2 KOLOM -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
                 
-                <!-- KOLOM KIRI: Informasi & Saldo -->
                 <div class="space-y-6">
-                    <!-- Kartu Saldo Tabungan -->
                     <div class="gradient-primary rounded-2xl p-6 text-white relative overflow-hidden flex flex-col justify-between min-h-[190px] group">
                         <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
                         <div class="flex justify-between items-start relative z-10">
@@ -238,7 +233,6 @@
                         </div>
                     </div>
 
-                    <!-- Kartu Aturan Penarikan -->
                     <div class="bg-white rounded-2xl border border-slate-200/60 shadow-xl shadow-slate-200/50 p-5">
                         <h3 class="text-xs font-black text-primary uppercase tracking-wider mb-4 flex items-center gap-2">
                             <i class="fas fa-info-circle text-primary text-sm"></i> Ketentuan Penarikan
@@ -260,14 +254,12 @@
                     </div>
                 </div>
 
-                <!-- KOLOM KANAN: Form Pengajuan -->
                 <div class="lg:col-span-2">
                     <div class="bg-white rounded-2xl border border-slate-200/60 shadow-xl shadow-slate-200/50 p-5 sm:p-6 lg:p-8">
                         
                         <form action="{{ route('nasabah.penarikan.store') }}" method="POST" id="formPenarikan">
                             @csrf
 
-                            <!-- Input Jumlah -->
                             <div class="mb-6">
                                 <label for="jumlah" class="block text-xs font-black uppercase tracking-wider text-primary mb-2">
                                     Jumlah Penarikan <span class="text-rose-500">*</span>
@@ -314,7 +306,6 @@
                                 </p>
                             </div>
 
-                            <!-- Input Tanggal Penarikan -->
                             <div class="mb-6">
                                 <label for="tanggal_transaksi" class="block text-xs font-black uppercase tracking-wider text-primary mb-2">
                                     Tanggal Penarikan <span class="text-rose-500">*</span>
@@ -338,7 +329,6 @@
                                 </p>
                             </div>
 
-                            <!-- Input Keterangan -->
                             <div class="mb-8">
                                 <label for="keterangan" class="block text-xs font-black uppercase tracking-wider text-primary mb-2">
                                     Keterangan / Keperluan <span class="text-rose-500">*</span>
@@ -357,7 +347,6 @@
                                 </div>
                             </div>
 
-                            <!-- Tombol Aksi -->
                             <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-6 border-t border-slate-100">
                                 <a href="{{ route('nasabah.dashboard') }}" class="w-full sm:w-auto px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-bold hover:bg-slate-50 transition-all text-xs text-center">
                                     Batal
@@ -376,7 +365,6 @@
         </main>
     </div>
 
-    <!-- Script UX & Logic Interaktif -->
     <script>
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -385,7 +373,6 @@
             backdrop.classList.toggle('hidden');
         }
 
-        // Pop-up Notifikasi Sukses
         @if(session('success'))
             Swal.fire({
                 icon: 'success',
@@ -406,7 +393,6 @@
             });
         @endif
 
-        // Pop-up Notifikasi Gagal
         @if(session('error'))
             Swal.fire({
                 icon: 'error',
@@ -421,7 +407,6 @@
             });
         @endif
 
-        // Loading State Tombol Submit
         const form = document.getElementById('formPenarikan');
         const btnSubmit = document.getElementById('btnSubmit');
         const btnText = document.getElementById('btnText');
@@ -436,7 +421,6 @@
             });
         }
 
-        // Counter Karakter Textarea
         const textarea = document.getElementById('keterangan');
         const charCount = document.getElementById('charCount');
         if (textarea && charCount) {
@@ -451,7 +435,6 @@
             });
         }
 
-        // Validasi Input Angka
         const saldoMengendap = {{ $saldoMengendap }};
         const saldoTersedia = {{ $saldoTersedia }};
         const maksimalPenarikan = {{ $maksimalPenarikan }};

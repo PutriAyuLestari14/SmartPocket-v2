@@ -81,7 +81,7 @@
                 </a>
 
                 <a href="{{ route('admin.saldo.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
-                    <i class="fas fa-wallet w-5 text-center text-slate-400"></i> Update Saldo
+                    <i class="fas fa-wallet w-5 text-center text-slate-400"></i> Bagi Hasil
                 </a>
 
                 <a href="{{ route('admin.laporan.index') }}" class="flex items-center gap-3 px-4 py-3 bg-mintLight text-primary rounded-xl text-sm font-bold transition-all shadow-sm border border-primary/20">

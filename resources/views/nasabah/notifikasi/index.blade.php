@@ -32,7 +32,8 @@
         ::-webkit-scrollbar-track { background: #FAFAFA; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
         
-        .gradient-primary { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
+        /* HANYA BAGIAN INI YANG DIUBAH: Warna dijadikan lebih cerah/fresh */
+        .gradient-primary { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); }
     </style>
 </head>
 <body class="bg-bgMain text-slate-800 antialiased min-h-screen selection:bg-mintLight selection:text-primary">

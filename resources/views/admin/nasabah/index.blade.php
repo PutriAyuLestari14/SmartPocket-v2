@@ -202,14 +202,46 @@
                                             </span>
                                         </td>
                                         <!-- AKSI -->
-                                        <td class="px-5 py-3.5">
-                                            <div class="flex justify-center">
-                                                <button onclick="openMutasiNasabah({{ $n->id_nasabah }}, '{{ addslashes($n->nama ?? '-') }}', '{{ addslashes($n->rekening->no_rek ?? '-') }}')"
+                                        <td class="px-5 py-3.5">                                            
+                                            <div class="flex justify-center items-center gap-2">
+                                                <button
+                                                    onclick="openMutasiNasabah({{ $n->id_nasabah }}, '{{ addslashes($n->nama ?? '-') }}', '{{ addslashes($n->rekening->no_rek ?? '-') }}')"
                                                     class="w-8 h-8 bg-emerald-50 hover:bg-primary hover:text-white text-primary rounded-lg flex items-center justify-center transition-colors"
                                                     title="Lihat Mutasi Nasabah">
                                                     <i class="fas fa-eye text-xs"></i>
                                                 </button>
+                                                <form
+                                                    action="{{ route('admin.nasabah.pindahkanSaldo', $n->id_nasabah) }}"
+                                                    method="POST"
+                                                    onsubmit="return confirm('Yakin memindahkan saldo mengendap ke Pendapatan Usaha?')">
+                                                    @csrf
+
+                                                    <button
+                                                        type="submit"
+                                                        class="w-8 h-8 bg-amber-50 hover:bg-amber-500 hover:text-white text-amber-600 rounded-lg flex items-center justify-center transition-colors"
+                                                        title="Pindahkan Saldo">
+                                                        <i class="fas fa-wallet text-xs"></i>
+                                                    </button>
+                                                </form>
+
+                                                @if($n->status === 'aktif')
+                                                    <form
+                                                        action="{{ route('admin.nasabah.destroy', $n->id_nasabah) }}"
+                                                        method="POST"
+                                                        onsubmit="return confirm('Yakin ingin menutup rekening {{ addslashes($n->nama ?? '-') }}? Riwayat transaksi akan tetap disimpan.');">
+                                                        @csrf
+                                                        @method('DELETE')
+
+                                                        <button
+                                                            type="submit"
+                                                            class="w-8 h-8 bg-red-50 hover:bg-red-600 hover:text-white text-red-600 rounded-lg flex items-center justify-center transition-colors"
+                                                            title="Tutup Rekening">
+                                                            <i class="fas fa-trash text-xs"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
                                             </div>
+
                                         </td>
                                     </tr>
                                 @empty

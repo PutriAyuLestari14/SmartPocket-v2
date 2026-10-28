@@ -173,9 +173,15 @@
                             </p>
                             <p class="text-[10px] font-bold text-slate-400 mt-0.5">Operator</p>
                         </div>
-                        <div class="w-10 h-10 rounded-xl overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
+                        
+                        <!-- ========================================== -->
+                        <!-- HANYA BAGIAN INI YANG DIUBAH (ROUNDED-FULL) -->
+                        <!-- ========================================== -->
+                        <div class="w-11 h-11 rounded-full overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
                             {{ strtoupper(substr(auth()->user()->petugas->nama_lengkap ?? auth()->user()->name, 0, 1)) }}
                         </div>
+                        <!-- ========================================== -->
+
                     </div>
                 </header>
 

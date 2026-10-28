@@ -36,7 +36,8 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
         
-        .gradient-primary { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
+        /* HANYA BAGIAN INI YANG DIUBAH: Warna dijadikan lebih cerah/fresh */
+        .gradient-primary { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); }
         .gradient-mint { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); }
         .gradient-soft { background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%); }
         .gradient-fresh { background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); }
@@ -156,9 +157,15 @@
                             </p>
                             <p class="text-[10px] font-bold text-slate-400 mt-0.5">Operator</p>
                         </div>
-                        <div class="w-10 h-10 rounded-xl overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
+                        
+                        <!-- ========================================== -->
+                        <!-- HANYA BAGIAN INI YANG DIUBAH (ROUNDED-FULL) -->
+                        <!-- ========================================== -->
+                        <div class="w-11 h-11 rounded-full overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
                             {{ strtoupper(substr(auth()->user()->petugas->nama_lengkap ?? auth()->user()->name, 0, 1)) }}
                         </div>
+                        <!-- ========================================== -->
+
                     </div>
                 </header>
 
@@ -168,7 +175,8 @@
                         <p class="text-xs text-slate-500 font-black uppercase tracking-wider mb-1">Total Transaksi</p>
                         <p class="text-2xl font-black text-slate-900">{{ $jurnalData->count() }} <span class="text-sm font-bold text-slate-400">Bukti</span></p>
                     </div>
-                    <div class="bg-gradient-to-br from-primary to-primaryDark rounded-2xl p-5 shadow-lg shadow-primary/20 hover-lift text-white">
+                    <!-- DI SINI DIUBAH: from-primaryLight to-primary -->
+                    <div class="bg-gradient-to-br from-primaryLight to-primary rounded-2xl p-5 shadow-lg shadow-primary/20 hover-lift text-white">
                         <p class="text-xs text-emerald-100 font-black uppercase tracking-wider mb-1">Total Debit</p>
                         <p class="text-2xl font-black">Rp {{ number_format($totalDebit, 0, ',', '.') }}</p>
                     </div>
@@ -214,7 +222,7 @@
                     </form>
                 </div>
 
-                <!-- TABEL JURNAL UMUM (4 KOLOM - LEBIH BERSIH) -->
+                                <!-- TABEL JURNAL UMUM -->
                 <div class="bg-white rounded-2xl border border-slate-200/60 shadow-lg overflow-hidden">
                     <div class="p-5 border-b border-slate-100 flex items-center gap-3">
                         <div class="w-10 h-10 bg-infoYellowLight rounded-xl flex items-center justify-center">
@@ -227,82 +235,84 @@
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
+                        <table class="w-full text-sm">  
+                                <colgroup>
+                                    <col style="width: 13%">
+                                    <col style="width: 15%">
+                                    <col style="width: 30%">
+                                    <col style="width: 21%">
+                                    <col style="width: 21%">
+                                </colgroup>                          
                             <thead class="bg-slate-50/80 border-b border-slate-200">
                                 <tr>
-                                    <th class="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider w-32">Tanggal</th>
+                                    <th class="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider">Tanggal</th>
+                                    <th class="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider">No. Rekening</th>
                                     <th class="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider">Nama Akun (CoA) & Keterangan</th>
-                                    <th class="px-6 py-4 text-right text-[10px] font-black text-slate-500 uppercase tracking-wider w-40">Debit (Rp)</th>
-                                    <th class="px-6 py-4 text-right text-[10px] font-black text-slate-500 uppercase tracking-wider w-40">Kredit (Rp)</th>
+                                    <th class="px-6 py-4 text-right text-[10px] font-black text-slate-500 uppercase tracking-wider">Debit (Rp)</th>
+                                    <th class="px-6 py-4 text-right text-[10px] font-black text-slate-500 uppercase tracking-wider">Kredit (Rp)</th>
                                 </tr>
                             </thead>
+
                             <tbody class="divide-y divide-slate-100">
                                 @forelse ($jurnalData as $noBukti => $entries)
                                     @php
                                         $firstEntry = $entries->first();
-                                        $totalDebitTransaksi = $entries->sum('debit');
-                                        $totalKreditTransaksi = $entries->sum('kredit');
                                     @endphp
 
                                     @foreach ($entries as $index => $entry)
                                         <tr class="hover:bg-mintLight/10 transition-colors group">
-                                            
-                                            <!-- Tanggal (Hanya muncul di baris pertama per grup) -->
+
+                                            {{-- Tanggal: hanya sekali per transaksi --}}
                                             <td class="px-6 py-3 align-top whitespace-nowrap font-bold text-slate-700">
                                                 @if($index === 0)
                                                     {{ \Carbon\Carbon::parse($firstEntry['tanggal'])->format('d/m/Y') }}
                                                 @endif
                                             </td>
 
-                                            <!-- Nama Akun & Keterangan -->
+                                            {{-- No. Rekening: hanya sekali per transaksi --}}
+                                            <td class="px-6 py-3 align-top whitespace-nowrap font-semibold text-slate-600">
+                                                @if($index === 0)
+                                                    {{ $firstEntry['no_rekening'] ?? '-' }}
+                                                @endif
+                                            </td>
+
+                                            {{-- Nama Akun dan Keterangan: digabung --}}
                                             <td class="px-6 py-3 align-top">
-                                                @if($entry['kredit'] > 0)
-                                                    <!-- Akun Kredit: Indentasi & Italic -->
+                                                @if(($entry['kredit'] ?? 0) > 0)
                                                     <div class="account-credit text-slate-600 font-semibold">
                                                         {{ $entry['akun'] }}
                                                     </div>
                                                 @else
-                                                    <!-- Akun Debit: Bold & Rata Kiri -->
                                                     <div class="text-slate-900 font-bold">
                                                         {{ $entry['akun'] }}
                                                     </div>
                                                 @endif
-                                                
-                                                <!-- Keterangan Transaksi (Hanya muncul di baris pertama) -->
-                                                @if($index === 0 && isset($firstEntry['keterangan']) && $firstEntry['keterangan'])
-                                                    <p class="text-[10px] text-slate-400 mt-1 italic max-w-[250px] leading-tight">
-                                                        "{{ Str::limit($firstEntry['keterangan'], 50) }}"
+
+                                                @if($index === 0 && !empty($firstEntry['keterangan']))
+                                                    <p class="text-[10px] text-slate-400 mt-1 italic max-w-[300px] leading-tight whitespace-normal break-words">
+                                                        "{{ $firstEntry['keterangan'] }}"
                                                     </p>
                                                 @endif
                                             </td>
 
-                                            <!-- Kolom Debit -->
+                                            {{-- Debit --}}
                                             <td class="px-6 py-3 text-right align-top font-mono font-semibold text-slate-700">
-                                                @if($entry['debit'] > 0)
+                                                @if(($entry['debit'] ?? 0) > 0)
                                                     {{ number_format($entry['debit'], 0, ',', '.') }}
                                                 @endif
                                             </td>
 
-                                            <!-- Kolom Kredit -->
+                                            {{-- Kredit --}}
                                             <td class="px-6 py-3 text-right align-top font-mono font-semibold text-slate-700">
-                                                @if($entry['kredit'] > 0)
+                                                @if(($entry['kredit'] ?? 0) > 0)
                                                     {{ number_format($entry['kredit'], 0, ',', '.') }}
                                                 @endif
                                             </td>
                                         </tr>
                                     @endforeach
-
-                                    <!-- Garis Pemisah & Subtotal per Transaksi -->
-                                    <tr class="bg-slate-50/50">
-                                        <td colspan="4" class="px-6 py-1 border-b border-slate-200">
-                                            <div class="flex justify-end gap-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                                                <span>Subtotal: Dr {{ number_format($totalDebitTransaksi, 0, ',', '.') }} = Cr {{ number_format($totalKreditTransaksi, 0, ',', '.') }}</span>
-                                            </div>
-                                        </td>
-                                    </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-6 py-16 text-center">
+                                        <td colspan="5" class="px-6 py-16 text-center">
                                             <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
                                                 <i class="fas fa-book-open text-slate-300 text-2xl"></i>
                                             </div>
@@ -312,16 +322,19 @@
                                 @endforelse
                             </tbody>
 
-                            <!-- Footer Total Keseluruhan -->
+                            {{-- Total keseluruhan --}}                            
                             <tfoot class="bg-primary text-white border-t-2 border-primaryDark">
                                 <tr>
-                                    <td colspan="2" class="px-6 py-4 font-black text-sm tracking-wide text-right">
+                                    <td colspan="3"
+                                        class="px-4 py-4 font-black text-sm tracking-wide text-right">
                                         TOTAL KESELURUHAN
                                     </td>
-                                    <td class="px-6 py-4 text-right font-black text-accent font-mono text-base">
+
+                                    <td class="px-4 py-4 text-right font-black text-accent font-mono text-sm whitespace-nowrap">
                                         Rp {{ number_format($totalDebit, 0, ',', '.') }}
                                     </td>
-                                    <td class="px-6 py-4 text-right font-black text-yellow-300 font-mono text-base">
+
+                                    <td class="px-4 py-4 text-right font-black text-yellow-300 font-mono text-sm whitespace-nowrap">
                                         Rp {{ number_format($totalKredit, 0, ',', '.') }}
                                     </td>
                                 </tr>

@@ -35,8 +35,8 @@
         ::-webkit-scrollbar-track { background: #FAFAFA; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
         
-        /* Variasi Gradient yang TIDAK MONOTON */
-        .gradient-primary { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
+        /* HANYA BAGIAN INI YANG DIUBAH: Warna dibuat lebih cerah & fresh */
+        .gradient-primary { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); }
         .gradient-soft { background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%); }
         .gradient-vibrant { background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%); }
 
@@ -164,13 +164,15 @@
                             {{ auth()->user()->nasabah->kategori ?? 'Siswa' }}
                         </p>
                     </div>
-                    <div class="w-10 h-10 rounded-xl overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
+                    
+                    <div class="w-11 h-11 rounded-full overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
                         @if(auth()->user()->nasabah && auth()->user()->nasabah->photo)
                             <img src="{{ asset('storage/' . auth()->user()->nasabah->photo) }}" alt="Profile" class="w-full h-full object-cover">
                         @else
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         @endif
                     </div>
+
                 </div>
             </div>
 

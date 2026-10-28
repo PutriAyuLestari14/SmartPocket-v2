@@ -26,6 +26,16 @@ class TransaksiController extends Controller
 
         // transaksi tabungan biasa
         $transaksiTabungan = $detailTabungan->filter(function ($item) {
+            $keterangan = strtolower(trim($item->keterangan ?? ''));
+
+            // Biaya buku ditampilkan sebagai Pendapatan Lain-lain saja.
+            if (
+                str_contains($keterangan, 'biaya buku tabungan') ||
+                str_contains($keterangan, 'pembayaran buku tabungan')
+            ) {
+                return false;
+            }
+
             return in_array((int) $item->id_jenis_transaksi, [1, 2]);
         });
 

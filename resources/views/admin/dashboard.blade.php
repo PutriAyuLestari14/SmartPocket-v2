@@ -88,8 +88,8 @@
                     <i class="fas fa-users w-5 text-center text-slate-400"></i> Kelola Nasabah
                 </a>
 
-                <a href="{{ route('admin.saldo.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
-                    <i class="fas fa-wallet w-5 text-center text-slate-400"></i> Update Saldo
+                <a href="{{ route('admin.update.saldo.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
+                    <i class="fas fa-wallet w-5 text-center text-slate-400"></i> Bagi Hasil
                 </a>
 
                 <a href="{{ route('admin.laporan.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
@@ -153,9 +153,15 @@
                             <p class="text-xs font-black text-slate-800 leading-tight">{{ auth()->user()->name ?? 'Admin' }}</p>
                             <p class="text-[10px] font-bold text-slate-400 mt-0.5">Administrator</p>
                         </div>
-                        <div class="w-10 h-10 rounded-xl overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
+                        
+                        <!-- ========================================== -->
+                        <!-- HANYA BAGIAN INI YANG DIUBAH (ROUNDED-FULL) -->
+                        <!-- ========================================== -->
+                        <div class="w-11 h-11 rounded-full overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
                             {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
                         </div>
+                        <!-- ========================================== -->
+
                     </div>
                 </header>
 

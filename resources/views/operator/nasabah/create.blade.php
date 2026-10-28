@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tambah Nasabah Baru - Smart Pocket</title>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -788,6 +789,35 @@
         }
 
         updatePembayaran();
+
+        /* === POP-UP SWEETALERT UNTUK SUCCESS & ERROR === */
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil! 🎉',
+                text: '{{ session('success') }}',
+                confirmButtonColor: '#15803d',
+                confirmButtonText: 'Tutup',
+                customClass: {
+                    popup: 'rounded-2xl p-4 sm:p-6',
+                    confirmButton: 'rounded-xl px-5 py-2.5 font-bold text-xs'
+                }
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: '{{ session('error') }}',
+                confirmButtonColor: '#e11d48',
+                confirmButtonText: 'Coba Lagi',
+                customClass: {
+                    popup: 'rounded-2xl p-4 sm:p-6',
+                    confirmButton: 'rounded-xl px-5 py-2.5 font-bold text-xs'
+                }
+            });
+        @endif
     </script>
 
 </body>

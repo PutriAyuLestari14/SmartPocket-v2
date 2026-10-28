@@ -13,10 +13,13 @@
                 extend: {
                     colors: {
                         bgMain: '#FAFAFA',
-                        forest: '#1A4D2E',
-                        forestDark: '#123720',
-                        mint: '#4E9F3D',
-                        mintLight: '#E8F5E9',
+                        primary: '#15803d',
+                        primaryDark: '#166534',
+                        primaryLight: '#16a34a',
+                        secondary: '#22c55e',
+                        accent: '#4ade80',
+                        mint: '#15803d',
+                        mintLight: '#dcfce7',
                     },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
@@ -30,9 +33,8 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
-        .gradient-forest { background: linear-gradient(135deg, #1A4D2E 0%, #123720 100%); }
-        .gradient-mint { background: linear-gradient(135deg, #4E9F3D 0%, #1A4D2E 100%); }
-        .gradient-blue { background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); }
+        .gradient-primary { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
+        .gradient-soft { background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%); }
         .hover-lift { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .hover-lift:hover { transform: translateY(-2px); }
         @keyframes modalIn {
@@ -47,7 +49,7 @@
 <body class="bg-bgMain text-slate-800 antialiased">
 
     <!-- Mobile Sidebar Backdrop -->
-    <div id="sidebarBackdrop" class="fixed inset-0 bg-forestDark/50 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity" onclick="toggleSidebar()"></div>
+    <div id="sidebarBackdrop" class="fixed inset-0 bg-primaryDark/50 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity" onclick="toggleSidebar()"></div>
 
     <div class="flex min-h-screen">
 
@@ -55,12 +57,12 @@
         <aside id="sidebar" class="w-64 bg-white border-r border-slate-200/80 flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-sm">
             <div class="p-6 border-b border-slate-100">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-forest rounded-xl flex items-center justify-center shadow-md shadow-forest/20">
+                    <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-md shadow-primary/20">
                         <i class="fas fa-wallet text-white text-lg"></i>
                     </div>
                     <div>
-                        <h1 class="text-base font-extrabold text-forest tracking-tight">Smart Pocket</h1>
-                        <p class="text-[10px] text-mint font-bold tracking-wider">BMT SMKN 11 BANDUNG</p>
+                        <h1 class="text-base font-extrabold text-primary tracking-tight">Smart Pocket</h1>
+                        <p class="text-[10px] text-primary font-bold tracking-wider">BMT SMKN 11 BANDUNG</p>
                     </div>
                 </div>
             </div>
@@ -68,27 +70,27 @@
             <nav class="p-4 space-y-1.5 flex-1 overflow-y-auto">
                 <p class="px-3 py-2 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Menu Utama</p>
 
-                <a href="{{ route('operator.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                <a href="{{ route('operator.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-home w-5 text-center text-slate-400"></i> Dashboard
                 </a>
 
-                <a href="{{ route('operator.nasabah.index') }}" class="flex items-center gap-3 px-4 py-3 bg-mintLight text-forest rounded-xl text-sm font-bold transition-all shadow-sm border border-mint/20">
-                    <i class="fas fa-users w-5 text-center text-mint"></i> Data Nasabah
+                <a href="{{ route('operator.nasabah.index') }}" class="flex items-center gap-3 px-4 py-3 bg-mintLight text-primary rounded-xl text-sm font-bold transition-all shadow-sm border border-primary/20">
+                    <i class="fas fa-users w-5 text-center text-primary"></i> Data Nasabah
                 </a>
 
-                <a href="{{ route('operator.transaksi.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                <a href="{{ route('operator.transaksi.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-exchange-alt w-5 text-center text-slate-400"></i> Transaksi
                 </a>
 
-                <a href="{{ route('operator.peminjaman.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                <a href="{{ route('operator.peminjaman.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-hand-holding-usd w-5 text-center text-slate-400"></i> Peminjaman
                 </a>
 
-                <a href="{{ route('operator.verifikasi.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                <a href="{{ route('operator.verifikasi.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-check-circle w-5 text-center text-slate-400"></i> Verifikasi
                 </a>
 
-                <a href="{{ route('operator.laporan.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-forest rounded-xl text-sm font-semibold transition-all">
+                <a href="{{ route('operator.laporan.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
                     <i class="fas fa-chart-bar w-5 text-center text-slate-400"></i> Laporan
                 </a>
             </nav>
@@ -109,19 +111,19 @@
             <!-- Mobile Top Bar -->
             <header class="lg:hidden bg-white border-b border-slate-200/80 sticky top-0 z-30 px-4 py-3 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-forest rounded-xl flex items-center justify-center text-white shadow-md shadow-forest/20">
+                    <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-md shadow-primary/20">
                         <i class="fas fa-wallet text-base"></i>
                     </div>
                     <div>
-                        <h1 class="text-base font-extrabold text-forest tracking-tight leading-none">Smart Pocket</h1>
-                        <p class="text-[10px] text-mint font-bold tracking-wider mt-1">BMT SMKN 11</p>
+                        <h1 class="text-base font-extrabold text-primary tracking-tight leading-none">Smart Pocket</h1>
+                        <p class="text-[10px] text-primary font-bold tracking-wider mt-1">BMT SMKN 11</p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2">
                     <a href="{{ route('operator.notifikasi.index') }}" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 relative active:scale-95 transition-transform">
                         <i class="far fa-bell text-base"></i>
-                        <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-mint rounded-full ring-2 ring-white"></span>
+                        <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-primary rounded-full ring-2 ring-white"></span>
                     </a>
                     <button onclick="toggleSidebar()" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-700 active:scale-95 transition-transform">
                         <i class="fas fa-bars text-base"></i>
@@ -135,9 +137,9 @@
                 <header class="flex items-start justify-between gap-4">
                     <div class="min-w-0">
                         <div class="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-1 flex-wrap">
-                            <a href="{{ route('operator.nasabah.index') }}" class="hover:text-forest transition-colors">Data Nasabah</a>
+                            <a href="{{ route('operator.nasabah.index') }}" class="hover:text-primary transition-colors">Data Nasabah</a>
                             <i class="fas fa-chevron-right text-[9px]"></i>
-                            <span class="text-forest font-bold">Edit Nasabah</span>
+                            <span class="text-primary font-bold">Edit Nasabah</span>
                         </div>
 
                         <h2 class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-tight">
@@ -156,21 +158,21 @@
                     <div class="space-y-4">
 
                         <!-- Saldo Card -->
-                        <div class="gradient-blue rounded-2xl p-5 lg:p-6 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden">
+                        <div class="gradient-soft rounded-2xl p-5 lg:p-6 text-white shadow-xl shadow-primary/20 relative overflow-hidden">
                             <div class="absolute -top-12 -right-12 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                             <div class="relative z-10">
                                 <div class="flex items-center gap-2 mb-3">
                                     <div class="w-8 h-8 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center">
                                         <i class="fas fa-wallet text-xs"></i>
                                     </div>
-                                    <span class="text-[10px] font-extrabold text-blue-100 uppercase tracking-widest">Saldo Saat Ini</span>
+                                    <span class="text-[10px] font-extrabold text-emerald-100 uppercase tracking-widest">Saldo Saat Ini</span>
                                 </div>
                                 <p class="text-2xl lg:text-3xl font-black text-white mb-3 break-all">
                                     Rp {{ number_format($nasabah->rekening->saldo ?? 0, 0, ',', '.') }}
                                 </p>
                                 <div class="pt-3 border-t border-white/20 flex items-center justify-between text-xs">
-                                    <span class="text-blue-100 font-medium">Status Rekening</span>
-                                    <span class="font-extrabold px-2.5 py-1 rounded-full {{ $nasabah->status == 'aktif' ? 'bg-mint text-white' : 'bg-red-500 text-white' }}">
+                                    <span class="text-emerald-100 font-medium">Status Rekening</span>
+                                    <span class="font-extrabold px-2.5 py-1 rounded-full {{ $nasabah->status == 'aktif' ? 'bg-accent text-primaryDark' : 'bg-red-500 text-white' }}">
                                         {{ ucfirst($nasabah->status) }}
                                     </span>
                                 </div>
@@ -180,7 +182,7 @@
                         <!-- Info Card -->
                         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 flex items-start gap-3">
                             <div class="w-8 h-8 bg-mintLight rounded-xl flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-info-circle text-forest text-xs"></i>
+                                <i class="fas fa-info-circle text-primary text-xs"></i>
                             </div>
                             <p class="text-[11px] text-slate-500 leading-relaxed">
                                 NISN dan No. Rekening tidak dapat diubah. Hubungi admin jika ada kesalahan input data identitas.
@@ -217,7 +219,7 @@
                                 <div class="mb-6">
                                     <div class="flex items-center gap-3 mb-5">
                                         <div class="w-10 h-10 bg-mintLight rounded-xl flex items-center justify-center">
-                                            <i class="fas fa-id-card text-forest"></i>
+                                            <i class="fas fa-id-card text-primary"></i>
                                         </div>
                                         <div>
                                             <h3 class="text-sm font-extrabold text-slate-900">Informasi Identitas</h3>
@@ -235,7 +237,7 @@
                                                 <i class="fas fa-lock absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                                             </div>
                                             <p class="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1">
-                                                <i class="fas fa-info-circle text-mint"></i> NISN tidak dapat diubah
+                                                <i class="fas fa-info-circle text-primary"></i> NISN tidak dapat diubah
                                             </p>
                                         </div>
 
@@ -248,7 +250,7 @@
                                                 <i class="fas fa-lock absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                                             </div>
                                             <p class="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1">
-                                                <i class="fas fa-info-circle text-mint"></i> No. Rekening tidak dapat diubah
+                                                <i class="fas fa-info-circle text-primary"></i> No. Rekening tidak dapat diubah
                                             </p>
                                         </div>
 
@@ -256,7 +258,7 @@
                                         <div class="md:col-span-2">
                                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Nama Lengkap</label>
                                             <input type="text" name="nama" id="inputNama" value="{{ old('nama', $nasabah->nama) }}" required
-                                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all">
+                                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary focus:bg-white transition-all">
                                         </div>
 
                                         <input type="hidden" name="username" value="{{ $nasabah->user->username ?? '' }}">
@@ -266,7 +268,7 @@
                                         <div class="md:col-span-2">
                                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Alamat</label>
                                             <textarea name="alamat" id="inputAlamat" rows="3" required
-                                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all resize-y">{{ old('alamat', $nasabah->alamat) }}</textarea>
+                                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary focus:bg-white transition-all resize-y">{{ old('alamat', $nasabah->alamat) }}</textarea>
                                         </div>
 
                                         <input type="hidden" name="kategori" value="{{ $nasabah->kategori }}">
@@ -278,7 +280,7 @@
                                 <div class="mb-6">
                                     <div class="flex items-center gap-3 mb-5">
                                         <div class="w-10 h-10 bg-mintLight rounded-xl flex items-center justify-center">
-                                            <i class="fas fa-shield-alt text-forest"></i>
+                                            <i class="fas fa-shield-alt text-primary"></i>
                                         </div>
                                         <div>
                                             <h3 class="text-sm font-extrabold text-slate-900">Pengaturan Akun</h3>
@@ -301,7 +303,7 @@
                                         <div>
                                             <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Status Akun</label>
                                             <select name="status" id="inputStatus" required
-                                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-mint/30 focus:border-mint focus:bg-white transition-all cursor-pointer">
+                                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary focus:bg-white transition-all cursor-pointer">
                                                 <option value="aktif" {{ $nasabah->status == 'aktif' ? 'selected' : '' }}>Aktif</option>
                                                 <option value="nonaktif" {{ $nasabah->status == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
                                             </select>
@@ -314,7 +316,7 @@
                                     <a href="{{ route('operator.nasabah.index') }}" class="px-5 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors text-center">
                                         Batal
                                     </a>
-                                    <button type="button" onclick="openModal()" class="px-6 py-2.5 bg-mint hover:bg-forest text-white rounded-xl text-sm font-extrabold shadow-md shadow-mint/20 transition-colors flex items-center justify-center gap-2">
+                                    <button type="button" onclick="openModal()" class="px-6 py-2.5 bg-primary hover:bg-primaryDark text-white rounded-xl text-sm font-extrabold shadow-md shadow-primary/20 transition-colors flex items-center justify-center gap-2">
                                         <i class="fas fa-save text-xs"></i> Simpan Perubahan
                                     </button>
                                 </div>
@@ -328,10 +330,10 @@
 
     <!-- ═══ MODAL KONFIRMASI EDIT ═══ -->
     <div id="confirmModal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4">
-        <div class="absolute inset-0 bg-forestDark/60 backdrop-blur-sm backdrop-in" onclick="closeModal()"></div>
+        <div class="absolute inset-0 bg-primaryDark/60 backdrop-blur-sm backdrop-in" onclick="closeModal()"></div>
 
         <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden modal-in">
-            <div class="gradient-mint px-6 py-6 text-white relative overflow-hidden">
+            <div class="gradient-primary px-6 py-6 text-white relative overflow-hidden">
                 <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                 <div class="relative z-10 flex items-center gap-4">
                     <div class="w-12 h-12 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center flex-shrink-0">
@@ -351,7 +353,7 @@
                 </div>
                 <div class="flex justify-between items-center py-2.5 border-b border-slate-100 gap-3">
                     <span class="text-xs text-slate-500 font-semibold flex-shrink-0">No. Rekening</span>
-                    <span class="text-sm font-extrabold text-forest font-mono text-right truncate">{{ $nasabah->rekening->no_rek ?? '-' }}</span>
+                    <span class="text-sm font-extrabold text-primary font-mono text-right truncate">{{ $nasabah->rekening->no_rek ?? '-' }}</span>
                 </div>
                 <div class="flex justify-between items-center py-2.5 border-b border-slate-100 gap-3">
                     <span class="text-xs text-slate-500 font-semibold flex-shrink-0">Nama Lengkap</span>
@@ -363,7 +365,7 @@
                 </div>
                 <div class="flex justify-between items-center py-2.5 border-b border-slate-100 gap-3">
                     <span class="text-xs text-slate-500 font-semibold flex-shrink-0">Status Akun</span>
-                    <span id="modalStatus" class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase bg-mintLight text-forest border border-mint/30">-</span>
+                    <span id="modalStatus" class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase bg-mintLight text-primary border border-primary/30">-</span>
                 </div>
                 <div class="flex justify-between items-center pt-3 bg-amber-50 rounded-xl px-4 py-3 border border-amber-200">
                     <span class="text-xs text-amber-800 font-extrabold flex items-center gap-1.5">
@@ -377,7 +379,7 @@
                 <button type="button" onclick="closeModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-sm transition-colors">
                     Batal
                 </button>
-                <button type="button" onclick="submitForm()" class="flex-1 py-3 bg-mint hover:bg-forest text-white rounded-xl font-extrabold text-sm transition-colors flex items-center justify-center gap-2 shadow-md shadow-mint/20">
+                <button type="button" onclick="submitForm()" class="flex-1 py-3 bg-primary hover:bg-primaryDark text-white rounded-xl font-extrabold text-sm transition-colors flex items-center justify-center gap-2 shadow-md shadow-primary/20">
                     <i class="fas fa-check text-xs"></i> Ya, Simpan
                 </button>
             </div>

@@ -35,15 +35,15 @@
         ::-webkit-scrollbar-track { background: #FAFAFA; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
 
-        /* Variasi Gradient yang TIDAK MONOTON */
+        /* HANYA BAGIAN INI YANG DIUBAH (Warna dibuat lebih terang, dari #15803d/#166534 menjadi #16a34a/#15803d) */
         .gradient-primary { 
-            background: linear-gradient(135deg, #15803d 0%, #166534 100%); 
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); 
             box-shadow: 0 12px 28px -6px rgba(21, 128, 61, 0.25); 
         }
+        
         .gradient-soft { 
             background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%); 
         }
-        /* ⬇️ INI YANG SEMULANYA HILANG — WAJIB ADA KARENA DIPAKAI DI SIDEBAR & AVATAR ⬇️ */
         .gradient-vibrant { 
             background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%); 
         }
@@ -74,12 +74,20 @@
 </head>
 <body class="bg-bgMain text-slate-800 antialiased selection:bg-mintLight selection:text-primary">
 
-    <!-- Mobile Sidebar Backdrop -->
+    @php
+        $photoPath = auth()->user()->nasabah->photo ?? null;
+        $photoUrl = null;
+        if ($photoPath) {
+            if (file_exists(storage_path('app/public/' . $photoPath))) {
+                $photoUrl = asset('storage/' . $photoPath);
+            }
+        }
+    @endphp
+
     <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-primaryDark/50 backdrop-blur-sm z-30 hidden lg:hidden transition-opacity"></div>
 
     <div class="flex flex-col lg:flex-row min-h-screen">
 
-        <!-- SIDEBAR -->
         <aside id="sidebar" class="w-64 bg-white border-r border-slate-200/80 flex flex-col fixed inset-y-0 left-0 z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl shadow-slate-200/50">
             <div class="p-5 border-b border-slate-100 flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -133,7 +141,6 @@
             </div>
         </aside>
 
-        <!-- TOP NAVBAR MOBILE -->
         <div class="lg:hidden bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm w-full">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 gradient-soft rounded-xl flex items-center justify-center text-white shadow-sm shadow-primary/30">
@@ -156,10 +163,8 @@
             </div>
         </div>
 
-        <!-- MAIN CONTENT AREA -->
         <main class="flex-1 lg:ml-64 p-4 sm:p-6 lg:p-8 min-w-0">
 
-            <!-- HEADER -->
             <header class="mb-6 lg:mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                 <div class="min-w-0">
                     <div class="flex items-center gap-2 text-xs font-bold text-slate-400 mb-1">
@@ -182,7 +187,6 @@
                     </p>
                 </div>
 
-                <!-- Profil Desktop -->
                 <div class="hidden lg:flex items-center gap-3 pt-1 flex-shrink-0">
                     <a href="{{ route('nasabah.notifikasi.index') }}" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:text-primary hover:border-primary transition-all relative shadow-sm">
                         <i class="far fa-bell text-base"></i>
@@ -198,9 +202,9 @@
                             {{ auth()->user()->nasabah->kategori ?? 'Siswa' }}
                         </p>
                     </div>
-                    <div class="w-10 h-10 rounded-xl overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
-                        @if(auth()->user()->nasabah && auth()->user()->nasabah->photo)
-                            <img src="{{ asset('storage/' . auth()->user()->nasabah->photo) }}" alt="Profile" class="w-full h-full object-cover">
+                    <div class="w-11 h-11 rounded-full overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
+                        @if($photoUrl)
+                            <img src="{{ $photoUrl }}" alt="Profile" class="w-full h-full object-cover">
                         @else
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         @endif
@@ -208,7 +212,6 @@
                 </div>
             </header>
 
-            <!-- SECTION 1: RINGKASAN REKENING -->
             <div class="mb-8">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest">Ringkasan Rekening</h3>
@@ -217,7 +220,6 @@
 
                 <div class="grid grid-cols-1 {{ auth()->user()->nasabah->kategori == 'guru' ? 'lg:grid-cols-2' : 'lg:grid-cols-1' }} gap-4 sm:gap-5">
 
-                    <!-- KARTU 1: TABUNGAN UTAMA -->
                     <div class="gradient-primary rounded-2xl p-5 sm:p-6 text-white relative overflow-hidden flex flex-col justify-between lg:min-h-[210px] hover-lift group">
                         <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
                         <div class="flex justify-between items-start relative z-10 gap-3">
@@ -251,7 +253,6 @@
                         </div>
                     </div>
 
-                    <!-- KARTU 2: FASILITAS PINJAMAN GURU -->
                     @if(auth()->user()->nasabah->kategori == 'guru')
                         <div class="card-peminjaman rounded-2xl p-5 sm:p-6 relative overflow-hidden flex flex-col justify-between lg:min-h-[260px] hover-lift group">
                             <div class="flex justify-between items-start gap-3 relative z-10">
@@ -294,7 +295,6 @@
                 </div>
             </div>
 
-            <!-- SECTION 2: AKSES CEPAT -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                 <a href="{{ route('nasabah.penarikan.create') }}" class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-xl shadow-slate-200/50 hover-lift flex items-center justify-between group">
                     <div class="flex items-center gap-4">
@@ -338,7 +338,6 @@
                 @endif
             </div>
 
-            <!-- SECTION 3B: STATUS PENGAJUAN REALTIME -->
             <div class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-xl shadow-slate-200/50 mb-8">
                 <div class="flex items-center justify-between mb-4 gap-3">
                     <div class="flex items-center gap-2 min-w-0">
@@ -397,7 +396,6 @@
                 @endif
             </div>
 
-            <!-- SECTION 4: RIWAYAT TRANSAKSI TERBARU -->
             <div class="bg-white rounded-2xl border border-slate-200/60 shadow-xl shadow-slate-200/50 overflow-hidden">
                 <div class="p-5 border-b border-slate-100 flex justify-between items-center gap-3">
                     <div class="min-w-0">
@@ -417,9 +415,17 @@
                                 $isTabungan = ($transaksi->tipe ?? null) === 'tabungan';
                                 $isAngsuran = ($transaksi->tipe ?? null) === 'angsuran';
 
-                                $isSetoran = $isTabungan && ($transaksi->id_jenis_transaksi ?? null) == 1;
-                                $isPenarikan = $isTabungan && ($transaksi->id_jenis_transaksi ?? null) == 2;
+                                $isBagiHasil = $isTabungan && str_contains(
+                                    strtolower(trim($transaksi->keterangan ?? '')),
+                                    'bagi hasil'
+                                );
 
+                                $isSetoran = $isTabungan
+                                    && ($transaksi->id_jenis_transaksi ?? null) == 1
+                                    && !$isBagiHasil;
+
+                                $isPenarikan = $isTabungan
+                                    && ($transaksi->id_jenis_transaksi ?? null) == 2;
                                 $statusClass = 'bg-slate-100 text-slate-700 border-slate-200';
                                 if (in_array($transaksi->status, ['berhasil', 'disetujui'])) $statusClass = 'bg-mintLight text-primary border-primary/30';
                                 elseif ($transaksi->status === 'pending') $statusClass = 'bg-amber-50 text-amber-800 border-amber-200';
@@ -427,6 +433,7 @@
 
                                 if ($isPeminjaman) { $label = 'Pengajuan Peminjaman'; $icon = 'hand-holding-usd'; $iconBgClass = 'bg-primary text-white'; $amountClass = 'text-primary'; $sign = ''; }
                                 elseif ($isAngsuran) { $label = 'Pembayaran Cicilan'; $icon = 'check-circle'; $iconBgClass = 'bg-mintLight text-primary'; $amountClass = 'text-red-600'; $sign = '-'; }
+                                elseif ($isBagiHasil) { $label = 'Bagi Hasil Tabungan'; $icon = 'gift'; $iconBgClass = 'bg-mintLight text-primary'; $amountClass = 'text-primary'; $sign = '+'; }
                                 elseif ($isSetoran) { $label = 'Setoran Tabungan'; $icon = 'arrow-down'; $iconBgClass = 'bg-mintLight text-primary'; $amountClass = 'text-primary'; $sign = '+'; }
                                 elseif ($isPenarikan) { $label = 'Penarikan Saldo'; $icon = 'arrow-up'; $iconBgClass = 'bg-red-50 text-red-600'; $amountClass = 'text-red-600'; $sign = '-'; }
                                 else { $label = 'Transaksi'; $icon = 'receipt'; $iconBgClass = 'bg-slate-100 text-slate-600'; $amountClass = 'text-slate-800'; $sign = ''; }

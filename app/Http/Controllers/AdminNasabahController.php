@@ -5,9 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Nasabah;
 use App\Models\DetailTabungan;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use App\Models\RekeningTabungan;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AdminNasabahController extends Controller
 {
+    
     public function index()
     {
         $nasabahs = Nasabah::with(['user', 'rekening'])
@@ -17,7 +22,7 @@ class AdminNasabahController extends Controller
                 '=',
                 'rekening_tabungan.id_nasabah'
             )
-            ->orderBy('rekening_tabungan.no_rek', 'asc')
+            ->orderBy('nasabah.id_nasabah', 'desc')
             ->select('nasabah.*')
             ->paginate(10);
 
@@ -227,4 +232,135 @@ class AdminNasabahController extends Controller
             ], 500);
         }
     }
+
+    
+    public function pindahkanSaldo($idNasabah)
+    {
+        DB::beginTransaction();
+
+        try {
+            $rekening = RekeningTabungan::where('id_nasabah', $idNasabah)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$rekening) {
+                DB::rollBack();
+
+                return back()->with('error', 'Rekening nasabah tidak ditemukan.');
+            }
+
+            if ((int) $rekening->saldo !== 10000) {
+                DB::rollBack();
+
+                return back()->with(
+                    'error',
+                    'Saldo harus tepat Rp10.000. Saldo saat ini Rp' .
+                    number_format($rekening->saldo, 0, ',', '.') . '.'
+                );
+            }
+
+            $akunPendapatan = DB::table('akun')
+                ->where('kode_akun', '4-1100')
+                ->where('nama_akun', 'Pendapatan Usaha')
+                ->first();
+
+            if (!$akunPendapatan) {
+                DB::rollBack();
+
+                return back()->with(
+                    'error',
+                    'Akun Pendapatan Usaha tidak ditemukan.'
+                );
+            }
+
+            /*
+            * Catat sebagai transaksi khusus.
+            * Jenis transaksi 2 dipakai karena saldo tabungan berkurang.
+            * Laporan akan membedakannya berdasarkan keterangan.
+            */
+            DB::table('detail_tabungan')->insert([
+                'no_rek' => $rekening->no_rek,
+                'id_petugas' => null,
+                'id_jenis_transaksi' => 2,
+                'jumlah' => 10000,
+                'tanggal_transaksi' => now(),
+                'status' => 'berhasil',
+                'keterangan' => 'Pemindahan saldo mengendap ke Pendapatan Usaha',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Kosongkan saldo rekening nasabah.
+            $rekening->saldo = 0;
+            $rekening->save();
+
+            DB::commit();
+
+            return back()->with(
+                'success',
+                'Saldo Rp10.000 berhasil dipindahkan ke Pendapatan Usaha. Rekening sekarang bersaldo Rp0 dan siap ditutup.'
+            );
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            report($e);
+
+            return back()->with(
+                'error',
+                'Gagal memindahkan saldo. Periksa log Laravel untuk detail kesalahannya.'
+            );
+        }
+    }
+
+
+    
+    public function destroy($idNasabah)
+    {
+        DB::beginTransaction();
+
+        try {
+            $nasabah = Nasabah::where('id_nasabah', $idNasabah)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $rekening = \App\Models\RekeningTabungan::where(
+                'id_nasabah',
+                $nasabah->id_nasabah
+            )->lockForUpdate()->first();
+
+            if ($rekening && (float) $rekening->saldo > 0) {
+                DB::rollBack();
+
+                return back()->with(
+                    'error',
+                    'Rekening belum bisa ditutup karena saldo masih Rp ' .
+                    number_format($rekening->saldo, 0, ',', '.') .
+                    '. Selesaikan saldo terlebih dahulu.'
+                );
+            }
+
+            // Nonaktifkan nasabah, JANGAN hapus riwayat transaksi.
+            $nasabah->status = 'nonaktif';
+            $nasabah->save();
+
+            DB::commit();
+
+            return redirect()
+                ->route('admin.nasabah.index')
+                ->with(
+                    'success',
+                    'Rekening berhasil ditutup. Riwayat transaksi tetap tersimpan.'
+                );
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return back()->with(
+                'error',
+                'Gagal menutup rekening: ' . $e->getMessage()
+            );
+        }
+    }
+
 }

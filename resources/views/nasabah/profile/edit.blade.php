@@ -36,7 +36,8 @@
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
 
-        .gradient-primary { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
+        /* HANYA BAGIAN INI YANG DIUBAH: Warna dijadikan lebih cerah & fresh */
+        .gradient-primary { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); }
         .gradient-soft { background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%); }
         .gradient-vibrant { background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%); }
 
@@ -175,7 +176,7 @@
                     </p>
                 </div>
 
-                <!-- Profil Desktop -->
+                <!-- Profil Desktop (PREVIEW FOTO DI SINI) -->
                 <div class="hidden lg:flex items-center gap-3 pt-1 flex-shrink-0">
                     <a href="{{ route('nasabah.notifikasi.index') }}" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:text-primary hover:border-primary transition-all relative shadow-sm">
                         <i class="far fa-bell text-base"></i>
@@ -191,12 +192,10 @@
                             {{ auth()->user()->nasabah->kategori ?? 'Siswa' }}
                         </p>
                     </div>
-                    <div class="w-10 h-10 rounded-xl overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
-                        @if($photoUrl)
-                            <img src="{{ $photoUrl }}" alt="Profile" class="w-full h-full object-cover">
-                        @else
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                        @endif
+                    <!-- ID navAvatarPreview & navAvatarInitial UNTUK JS PREVIEW -->
+                    <div class="w-11 h-11 rounded-full overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0 relative">
+                        <span id="navAvatarInitial" class="@if($photoUrl) hidden @endif">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                        <img id="navAvatarPreview" src="{{ $photoUrl ?? '' }}" alt="Profile" class="w-full h-full object-cover absolute inset-0 @if(!$photoUrl) hidden @endif">
                     </div>
                 </div>
             </header>
@@ -221,21 +220,33 @@
                             @csrf
                             @method('PATCH')
 
-                            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8 p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
-                                <div class="relative group">
-                                    @if($photoUrl)
-                                        <img src="{{ $photoUrl }}" alt="Foto Profile" class="w-20 h-20 rounded-2xl object-cover border-2 border-white shadow-md">
-                                    @else
-                                        <div class="w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center border-2 border-white shadow-md text-slate-400">
-                                            <i class="fas fa-user text-2xl"></i>
-                                        </div>
-                                    @endif
+                            <!-- BAGIAN FOTO PROFILE YANG DIROMBAK -->
+                            <div class="flex flex-col sm:flex-row items-center gap-6 mb-8 p-6 bg-slate-50/50 rounded-2xl border border-slate-100">
+                                <!-- Avatar Preview (Bulat & Gede) -->
+                                <div class="relative group shrink-0">
+                                    <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-white shadow-xl bg-slate-100 flex items-center justify-center text-slate-400 relative">
+                                        <i class="fas fa-user text-4xl @if($photoUrl) hidden @endif" id="avatarPlaceholder"></i>
+                                        <img id="avatarPreview" src="{{ $photoUrl ?? '' }}" alt="Foto Profile" class="w-full h-full object-cover absolute inset-0 @if(!$photoUrl) hidden @endif">
+                                    </div>
                                 </div>
 
-                                <div class="flex-1">
-                                    <label class="block text-xs font-black text-slate-900 mb-1.5">Foto Profile</label>
-                                    <input type="file" name="photo" id="inputPhoto" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-primary file:text-white hover:file:bg-primaryDark cursor-pointer transition-all">
-                                    <p class="text-[11px] text-slate-400 mt-1.5">Format: JPG, PNG, JPEG. Maksimal ukuran 2MB.</p>
+                                <!-- Input File & Tombol Custom -->
+                                <div class="flex-1 text-center sm:text-left w-full">
+                                    <label class="block text-sm font-black text-slate-900 mb-2">Foto Profil</label>
+                                    
+                                    <div class="mt-1 flex flex-col sm:flex-row justify-center sm:justify-start items-center gap-3">
+                                        <!-- Tombol Pilih Foto (Memanggil Input File) -->
+                                        <label for="inputPhoto" class="cursor-pointer bg-primary hover:bg-primaryDark text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md shadow-primary/20 inline-flex items-center gap-2">
+                                            <i class="fas fa-camera"></i> Pilih Foto
+                                        </label>
+                                        
+                                        <!-- Input File Asli (Disembunyikan) -->
+                                        <input type="file" name="photo" id="inputPhoto" class="hidden" accept="image/jpeg,image/png,image/jpg">
+                                        
+                                        <!-- Nama File (Muncul saat dipilih) -->
+                                        <span class="text-xs text-slate-500 font-medium truncate max-w-[150px] sm:max-w-xs" id="fileName">Belum ada file dipilih</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400 mt-2">Format: JPG, PNG, JPEG. Maksimal ukuran 2MB.</p>
                                 </div>
                             </div>
 
@@ -472,6 +483,40 @@
             sidebar.classList.toggle('-translate-x-full');
             backdrop.classList.toggle('hidden');
         }
+
+        /* LIVE PREVIEW FOTO PROFIL */
+        document.getElementById('inputPhoto').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const fileNameDisplay = document.getElementById('fileName');
+            
+            if (file) {
+                fileNameDisplay.textContent = file.name;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // 1. Update foto besar di form
+                    const avatarPreview = document.getElementById('avatarPreview');
+                    const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+                    
+                    avatarPreview.src = e.target.result;
+                    avatarPreview.classList.remove('hidden');
+                    avatarPlaceholder.classList.add('hidden');
+
+                    // 2. Update foto kecil di navbar kanan atas
+                    const navAvatarPreview = document.getElementById('navAvatarPreview');
+                    const navAvatarInitial = document.getElementById('navAvatarInitial');
+                    
+                    if (navAvatarPreview && navAvatarInitial) {
+                        navAvatarPreview.src = e.target.result;
+                        navAvatarPreview.classList.remove('hidden');
+                        navAvatarInitial.classList.add('hidden');
+                    }
+                }
+                reader.readAsDataURL(file);
+            } else {
+                fileNameDisplay.textContent = 'Belum ada file dipilih';
+            }
+        });
 
         /* TOGGLE PASSWORD VISIBILITY */
         function togglePass(inputId, btn) {

@@ -320,34 +320,47 @@ class NasabahController extends Controller
         }
     }
 
+    
     public function destroy($id)
     {
-        $nasabah = Nasabah::findOrFail($id);
+        $nasabah = Nasabah::with('rekening')->findOrFail($id);
 
-        if ($nasabah->rekening) {
-            $adaTransaksi = DetailTabungan::where(
-                'no_rek',
-                $nasabah->rekening->no_rek
-            )->exists();
-
-            if ($adaTransaksi) {
-                return redirect()
-                    ->back()
-                    ->with(
-                        'error',
-                        'Nasabah tidak dapat dihapus karena sudah memiliki transaksi tabungan.'
-                    );
-            }
+        // Nasabah hanya bisa dihapus jika saldo rekening Rp0.
+        if ($nasabah->rekening && (float) $nasabah->rekening->saldo > 0) {
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Nasabah tidak dapat dihapus karena transaksi masih tersedia.'
+                );
         }
 
         DB::beginTransaction();
 
         try {
             $username = $nasabah->username;
+            $noRek = $nasabah->rekening
+                ? $nasabah->rekening->no_rek
+                : null;
 
-            $nasabah->rekening()->delete();
+            // Hapus notifikasi terkait nasabah terlebih dahulu jika
+            // tabel notifikasi memiliki relasi ke data nasabah.
+            if ($nasabah->rekening) {
+                // Hapus riwayat transaksi rekening agar tidak menghalangi
+                // penghapusan rekening karena foreign key.
+                DetailTabungan::where('no_rek', $noRek)->delete();
+
+                $nasabah->rekening()->delete();
+            }
+
+            // Hapus notifikasi yang masih terhubung ke nasabah.
+            DB::table('notifikasi')
+                ->where('id_nasabah', $nasabah->id_nasabah)
+                ->delete();
+
             $nasabah->delete();
 
+            // Hapus akun login nasabah.
             User::where('username', $username)->delete();
 
             DB::commit();
@@ -355,12 +368,17 @@ class NasabahController extends Controller
             return redirect()
                 ->route('operator.nasabah.index')
                 ->with('success', 'Nasabah berhasil dihapus.');
+
         } catch (\Throwable $e) {
             DB::rollBack();
 
             return redirect()
                 ->back()
-                ->with('error', 'Gagal menghapus nasabah: ' . $e->getMessage());
+                ->with(
+                    'error',
+                    'Gagal menghapus nasabah: ' . $e->getMessage()
+                );
         }
     }
+
 }

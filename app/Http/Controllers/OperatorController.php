@@ -52,12 +52,24 @@ class OperatorController extends Controller
             })
             ->count();
 
-        // sertakan data jenis transaksi dan nama nasabahnya biar bisa ditampilkan
+        // sertakan data jenis transaksi dan nama nasabahnya biar bisa ditampilkan        
         $transaksiTerkini = DetailTabungan::with([
             'jenisTransaksi',
             'rekening.nasabah'
         ])
             ->where('status', '!=', 'pending')
+            ->where(function ($query) {
+                $query->whereNull('keterangan')
+                    ->orWhere(function ($q) {
+                        $q->whereRaw(
+                            'LOWER(keterangan) NOT LIKE ?',
+                            ['%biaya buku tabungan%']
+                        )->whereRaw(
+                            'LOWER(keterangan) NOT LIKE ?',
+                            ['%pembayaran buku tabungan%']
+                        );
+                    });
+            })
             ->orderBy('tanggal_transaksi', 'desc')
             ->take(8)
             ->get();
