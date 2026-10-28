@@ -6,6 +6,7 @@ use App\Models\Peminjaman;
 use App\Models\Nasabah;
 use App\Models\Angsuran; 
 use App\Models\RekeningTabungan; 
+use App\Models\DetailTabungan; // TAMBAHAN: Untuk menghitung saldo kas
 use App\Http\Controllers\NotifikasiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -96,6 +97,19 @@ class OperatorPeminjamanController extends Controller
             'jumlah_pinjaman.min' => 'Minimal pinjaman adalah Rp 50.000.',
             'tanggal_jatuh_tempo.after' => 'Tanggal jatuh tempo harus setelah tanggal pinjam.',
         ]);
+
+        // ==========================================
+        // VALIDASI SALDO KAS BMT
+        // ==========================================
+        $saldoKas = $this->hitungSaldoKasBMT();
+        
+        if ($request->jumlah_pinjaman > $saldoKas) {
+            return back()->withInput()->with('error', 
+                'Gagal menyimpan peminjaman! Jumlah pinjaman (Rp ' . number_format($request->jumlah_pinjaman, 0, ',', '.') . 
+                ') melebihi saldo kas BMT yang tersedia (Rp ' . number_format($saldoKas, 0, ',', '.') . '). ' .
+                'Kekurangan: Rp ' . number_format($request->jumlah_pinjaman - $saldoKas, 0, ',', '.')
+            );
+        }
 
         DB::beginTransaction();
 
@@ -433,12 +447,48 @@ class OperatorPeminjamanController extends Controller
     // tampilkan form input peminjaman baru
     public function create()
     {
+        // Hitung saldo kas BMT (sama seperti di AdminLaporanController)
+        $saldoKas = $this->hitungSaldoKasBMT();
+        
         $nasabahs = Nasabah::with(['user', 'rekening'])
             ->where('kategori', 'guru')
             ->where('status', 'aktif')
             ->orderBy('nama', 'asc')
             ->get();
 
-        return view('operator.peminjaman.create', compact('nasabahs'));
+        return view('operator.peminjaman.create', compact('nasabahs', 'saldoKas'));
+    }
+
+    // ==========================================
+    // HELPER: Hitung Saldo Kas BMT
+    // ==========================================
+    private function hitungSaldoKasBMT()
+    {
+        // 1. Total Setoran (Kas Masuk)
+        $setoran = DetailTabungan::where('id_jenis_transaksi', 1)
+            ->where('status', '!=', 'pending')
+            ->sum('jumlah');
+        
+        // 2. Total Penarikan (Kas Keluar)
+        $penarikan = DetailTabungan::where('id_jenis_transaksi', 2)
+            ->where('status', '!=', 'pending')
+            ->sum('jumlah');
+        
+        // 3. Total Biaya Buku (Kas Masuk)
+        $biayaBuku = DetailTabungan::where('keterangan', 'like', '%biaya buku%')
+            ->where('status', 'berhasil')
+            ->sum('jumlah');
+        
+        // 4. Total Angsuran Masuk (Pokok + Jasa)
+        $angsuran = Angsuran::sum(DB::raw('jumlah_pokok + jumlah_jasa'));
+        
+        // 5. Total Pinjaman yang Sudah Cair (Kas Keluar = Jumlah - Provisi)
+        $pinjamanCair = Peminjaman::where('status_verifikasi', 'disetujui')
+            ->sum(DB::raw('jumlah_pinjaman - (jumlah_pinjaman * 0.01)'));
+        
+        // Rumus: (Setoran + Angsuran + Biaya Buku) - (Penarikan + Pinjaman Cair)
+        $saldoKas = ($setoran + $angsuran + $biayaBuku) - ($penarikan + $pinjamanCair);
+        
+        return max(0, $saldoKas);
     }
 }
