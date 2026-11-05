@@ -1,4 +1,12 @@
-
+@php
+    $sudahDiproses = $sudahDiproses ?? false;
+    $periodeBelumSelesai = $periodeBelumSelesai ?? false;
+    $simulasiPembagian = $simulasiPembagian ?? [];
+    $nasabahs = $nasabahs ?? collect();
+    $periodeStr = $periodeStr ?? now()->format('Y-m');
+    $totalJasaMasuk = $totalJasaMasuk ?? 0;
+    $danaDibagikan = $danaDibagikan ?? 0;
+@endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>

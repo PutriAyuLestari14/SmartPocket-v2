@@ -10,13 +10,13 @@ class OperatorController extends Controller
 {
     public function index()
     {
-        // hitung total semua nasabah yang terdaftar di sistem
+        // Hitung total semua nasabah yang terdaftar di sistem
         $totalNasabah = Nasabah::count();
 
-        // hitung total saldo tabungan
+        // Hitung total saldo tabungan
         $totalSaldoTabungan = RekeningTabungan::sum('saldo');
 
-        // hitung pendapatan buku tabungan
+        // Hitung jumlah buku tabungan yang berhasil dibayarkan
         $jumlahBuku = DetailTabungan::where('status', 'berhasil')
             ->whereHas('jenisTransaksi', function ($q) {
                 $q->whereRaw('LOWER(TRIM(setoran)) = ?', ['setoran']);
@@ -26,83 +26,134 @@ class OperatorController extends Controller
 
         $pendapatanBuku = $jumlahBuku * 5000;
 
-        // hitung saldo kas bmt
+        // Hitung saldo kas BMT
         $totalSaldo = $totalSaldoTabungan;
 
-        // hitung berapa banyak transaksi yang terjadi tepat hari ini
+        // Hitung transaksi hari ini
         $transaksiHariIni = DetailTabungan::whereDate(
             'tanggal_transaksi',
             today()
         )->count();
 
-        // hitung total transaksi dari awal minggu sampai akhir minggu ini
+        // Hitung transaksi minggu ini
         $transaksiMingguIni = DetailTabungan::whereBetween(
             'tanggal_transaksi',
             [
                 now()->startOfWeek(),
-                now()->endOfWeek()
+                now()->endOfWeek(),
             ]
         )->count();
 
-        // hitung khusus penarikan yang masih nunggu verifikasi (status pending)
+        // Hitung penarikan yang masih menunggu verifikasi
         $penarikanPending = DetailTabungan::where('status', 'pending')
             ->whereHas('jenisTransaksi', function ($q) {
-                // cek kolom penarikan di tabel jenis transaksi
-                $q->whereRaw('LOWER(TRIM(penarikan)) = ?', ['penarikan']);
+                $q->whereRaw(
+                    'LOWER(TRIM(penarikan)) = ?',
+                    ['penarikan']
+                );
             })
             ->count();
 
-        // sertakan data jenis transaksi dan nama nasabahnya biar bisa ditampilkan        
-        $transaksiTerkini = DetailTabungan::with([
+        /*
+        |--------------------------------------------------------------------------
+        | Transaksi terbaru untuk dashboard
+        |--------------------------------------------------------------------------
+        */
+
+        // Ambil transaksi yang bukan pending beserta relasinya
+        $detailTabungan = DetailTabungan::with([
             'jenisTransaksi',
-            'rekening.nasabah'
+            'rekening.nasabah',
         ])
             ->where('status', '!=', 'pending')
-            ->where(function ($query) {
-                $query->whereNull('keterangan')
-                    ->orWhere(function ($q) {
-                        $q->whereRaw(
-                            'LOWER(keterangan) NOT LIKE ?',
-                            ['%biaya buku tabungan%']
-                        )->whereRaw(
-                            'LOWER(keterangan) NOT LIKE ?',
-                            ['%pembayaran buku tabungan%']
-                        );
-                    });
-            })
             ->orderBy('tanggal_transaksi', 'desc')
-            ->take(8)
             ->get();
 
-        // hitung total uang masuk (setoran) di bulan dan tahun ini
+        // Kenali transaksi biaya buku tabungan
+        $adalahBiayaBuku = function ($item) {
+            $keterangan = strtolower(trim($item->keterangan ?? ''));
+
+            return str_contains($keterangan, 'biaya buku tabungan')
+                || str_contains($keterangan, 'pembayaran buku tabungan');
+        };
+
+        // Transaksi tabungan biasa tidak memasukkan biaya buku
+        $transaksiTabungan = $detailTabungan->filter(
+            function ($item) use ($adalahBiayaBuku) {
+                return !$adalahBiayaBuku($item);
+            }
+        );
+
+        // Biaya buku yang berhasil ditampilkan sebagai Pendapatan Lain-lain
+        $transaksiPendapatan = $detailTabungan
+            ->filter(function ($item) use ($adalahBiayaBuku) {
+                return $item->status === 'berhasil'
+                    && $adalahBiayaBuku($item);
+            })
+            ->map(function ($item) {
+                return (object) [
+                    'id' => 'buku-' . $item->id,
+                    'id_jenis_transaksi' => null,
+                    'jumlah' => 5000,
+                    'tanggal_transaksi' => $item->tanggal_transaksi,
+                    'status' => 'berhasil',
+                    'keterangan' => 'Biaya Buku Tabungan',
+                    'rekening' => $item->rekening,
+                    'jenisTransaksi' => null,
+                    'is_pendapatan_lain_lain' => true,
+                ];
+            });
+
+        // Gabungkan transaksi biasa dan Pendapatan Lain-lain
+        $transaksiTerkini = $transaksiTabungan
+            ->concat($transaksiPendapatan)
+            ->sortByDesc(function ($item) {
+                return $item->tanggal_transaksi;
+            })
+            ->take(8)
+            ->values();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Statistik setoran dan penarikan bulan ini
+        |--------------------------------------------------------------------------
+        */
+
+        // Hitung total setoran bulan ini
         $totalSetoranBulanIni = DetailTabungan::whereMonth(
             'tanggal_transaksi',
             now()->month
         )
-        ->whereYear(
-            'tanggal_transaksi',
-            now()->year
-        )
-        ->whereHas('jenisTransaksi', function ($q) {
-            $q->whereRaw('LOWER(TRIM(setoran)) = ?', ['setoran']);
-        })
-        ->sum('jumlah');
+            ->whereYear(
+                'tanggal_transaksi',
+                now()->year
+            )
+            ->whereHas('jenisTransaksi', function ($q) {
+                $q->whereRaw(
+                    'LOWER(TRIM(setoran)) = ?',
+                    ['setoran']
+                );
+            })
+            ->sum('jumlah');
 
-        // hitung total uang keluar (penarikan) di bulan dan tahun ini
+        // Hitung total penarikan bulan ini
         $totalPenarikanBulanIni = DetailTabungan::whereMonth(
             'tanggal_transaksi',
             now()->month
         )
-        ->whereYear(
-            'tanggal_transaksi',
-            now()->year
-        )
-        ->whereHas('jenisTransaksi', function ($q) {
-            $q->whereRaw('LOWER(TRIM(penarikan)) = ?', ['penarikan']);
-        })
-        ->sum('jumlah');
+            ->whereYear(
+                'tanggal_transaksi',
+                now()->year
+            )
+            ->whereHas('jenisTransaksi', function ($q) {
+                $q->whereRaw(
+                    'LOWER(TRIM(penarikan)) = ?',
+                    ['penarikan']
+                );
+            })
+            ->sum('jumlah');
 
-        // kirim semua data statistik ini ke halaman view dashboard operator
+        // Kirim data ke halaman Dashboard Operator
         return view('operator.dashboard', [
             'totalNasabah' => $totalNasabah,
             'totalSaldo' => $totalSaldo,

@@ -89,7 +89,7 @@
                 </a>
 
                 <a href="{{ route('admin.saldo.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
-                    <i class="fas fa-wallet w-5 text-center text-slate-400"></i> Update Saldo
+                    <i class="fas fa-wallet w-5 text-center text-slate-400"></i> Bagi Hasil
                 </a>
 
                 <a href="{{ route('admin.laporan.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl text-sm font-semibold transition-all">
@@ -293,11 +293,32 @@
                                         <p class="text-xs font-semibold text-slate-600 line-clamp-2">{{ $n->alamat }}</p>
                                     </div>
                                 @endif
+                                
                                 <!-- MOBILE ACTION -->
-                                <button onclick="openMutasiNasabah({{ $n->id_nasabah }}, '{{ addslashes($n->nama ?? '-') }}', '{{ addslashes($n->rekening->no_rek ?? '-') }}')"
-                                    class="w-full py-2.5 bg-emerald-50 hover:bg-primary hover:text-white text-primary rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-colors">
-                                    <i class="fas fa-eye text-[10px]"></i> Lihat Mutasi
-                                </button>
+                                <div class="flex gap-2 mt-3">
+                                    <button onclick="openMutasiNasabah({{ $n->id_nasabah }}, '{{ addslashes($n->nama ?? '-') }}', '{{ addslashes($n->rekening->no_rek ?? '-') }}')"
+                                        class="flex-1 py-2 bg-emerald-50 hover:bg-primary hover:text-white text-primary rounded-xl flex items-center justify-center gap-1.5 text-[11px] font-bold transition-colors">
+                                        <i class="fas fa-eye text-[10px]"></i> Mutasi
+                                    </button>
+                                    
+                                    <form action="{{ route('admin.nasabah.pindahkanSaldo', $n->id_nasabah) }}" method="POST" onsubmit="return confirm('Yakin memindahkan saldo mengendap ke Pendapatan Usaha?')" class="flex-1">
+                                        @csrf
+                                        <button type="submit" class="w-full py-2 bg-amber-50 hover:bg-amber-500 hover:text-white text-amber-600 rounded-xl flex items-center justify-center gap-1.5 text-[11px] font-bold transition-colors" title="Pindahkan Saldo">
+                                            <i class="fas fa-wallet text-[10px]"></i> Saldo
+                                        </button>
+                                    </form>
+
+                                    @if($n->status === 'aktif')
+                                        <form action="{{ route('admin.nasabah.destroy', $n->id_nasabah) }}" method="POST" onsubmit="return confirm('⚠️ PERINGATAN!\n\nApakah Anda yakin ingin menghapus nasabah ini?\n\nNama: {{ $n->nama }}\nNo. Rek: {{ $n->rekening->no_rek ?? '-' }}\n\nData yang dihapus tidak dapat dikembalikan!')" class="flex-1">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="w-full py-2 bg-red-50 hover:bg-red-600 hover:text-white text-red-600 rounded-xl flex items-center justify-center gap-1.5 text-[11px] font-bold transition-colors" title="Tutup Rekening">
+                                                <i class="fas fa-trash text-[10px]"></i> Hapus
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+
                             </div>
                         @empty
                             <div class="px-4 py-16 text-center">

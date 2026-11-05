@@ -224,8 +224,8 @@
                             <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-4 border border-white/30">
                                 <i class="fas fa-wallet text-white text-xl"></i>
                             </div>
-                            <p class="text-[10px] text-emerald-100 font-black uppercase tracking-wider mb-1">Total Saldo Kas</p>
-                            <p class="text-1xl lg:text-2xl font-black text-white break-all leading-tight">Rp {{ number_format($totalSaldo ?? 0, 0, ',', '.') }}</p>
+                            <p class="text-[10px] text-emerald-100 font-black uppercase tracking-wider mb-1">Total Saldo Tabungan</p>
+                            <p class="text-1xl lg:text-2xl font-black text-white break-all leading-tight">Rp {{ number_format($totalSaldoTabungan ?? 0, 0, ',', '.') }}</p>
                         </div>
                     </div>
                 </div>

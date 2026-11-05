@@ -10,19 +10,8 @@ use Illuminate\Http\Request;
 
 class AdminLaporanController extends Controller
 {
-    public function index(Request $request)
+    private function hitungLaporanNeraca($tanggalMulai, $tanggalSelesai)
     {
-        // ambil periode laporan
-        $periode = $request->periode ?? now()->format('Y-m');
-
-        $tanggalMulai = Carbon::createFromFormat(
-            'Y-m',
-            $periode
-        )->startOfMonth();
-
-        $tanggalSelesai = $tanggalMulai->copy()->endOfMonth();
-
-        // daftar 6 akun smartpocket
         $akun = [
             '1-1100' => [
                 'kode' => '1-1100',
@@ -80,13 +69,16 @@ class AdminLaporanController extends Controller
             ],
         ];
 
-        // ambil transaksi sebelum periode
+        // =========================================================
+        // 1. TRANSAKSI SEBELUM PERIODE: SALDO AWAL
+        // =========================================================
+
         $tabunganSebelum = DetailTabungan::where(
             'tanggal_transaksi',
             '<',
             $tanggalMulai
         )
-            ->where('status', '!=', 'pending')
+            ->where('status', 'berhasil')
             ->get();
 
         $pinjamanSebelum = Peminjaman::where(
@@ -105,51 +97,47 @@ class AdminLaporanController extends Controller
 
         foreach ($tabunganSebelum as $transaksi) {
             $jumlah = (float) $transaksi->jumlah;
+            $keteranganAsli = strtolower(
+                trim($transaksi->keterangan ?? '')
+            );
 
-            $keteranganAsli = strtolower(trim($transaksi->keterangan ?? ''));
-
-            // Pencatatan biaya buku pada saldo awal
+            // Pendapatan biaya buku tabungan
             if (
-                str_contains($keteranganAsli, 'biaya buku tabungan')
-                || str_contains($keteranganAsli, 'pembayaran buku tabungan')
+                str_contains($keteranganAsli, 'biaya buku tabungan') ||
+                str_contains($keteranganAsli, 'pembayaran buku tabungan')
             ) {
-                if ($transaksi->id_jenis_transaksi == 2) {
-                    // Biaya dipotong langsung dari saldo tabungan
-                    $akun['2-2100']['awal_debit'] += $jumlah;
-                } else {
-                    // Biaya dibayar sebagai uang masuk ke Kas
-                    $akun['1-1100']['awal_debit'] += $jumlah;
-                }
-
+                $akun['1-1100']['awal_debit'] += $jumlah;
                 $akun['4-1300']['awal_kredit'] += $jumlah;
 
                 continue;
             }
 
-            // TAMBAHAN: pemindahan saldo ke Pendapatan Usaha
-            if (str_contains(
-                $keteranganAsli,
-                'pemindahan saldo mengendap ke pendapatan usaha'
-            )) {
+            // Pemindahan saldo mengendap ke pendapatan usaha
+            if (
+                str_contains(
+                    $keteranganAsli,
+                    'pemindahan saldo mengendap ke pendapatan usaha'
+                )
+            ) {
                 $akun['2-2100']['awal_debit'] += $jumlah;
                 $akun['4-1100']['awal_kredit'] += $jumlah;
 
                 continue;
             }
 
-            // Setoran
-            if ($transaksi->id_jenis_transaksi == 1) {
+            // Setoran tabungan
+            if ((int) $transaksi->id_jenis_transaksi === 1) {
                 $akun['1-1100']['awal_debit'] += $jumlah;
                 $akun['2-2100']['awal_kredit'] += $jumlah;
             }
-
-            // Penarikan
-            elseif ($transaksi->id_jenis_transaksi == 2) {
+            // Penarikan tabungan
+            elseif ((int) $transaksi->id_jenis_transaksi === 2) {
                 $akun['2-2100']['awal_debit'] += $jumlah;
                 $akun['1-1100']['awal_kredit'] += $jumlah;
             }
         }
 
+        // Peminjaman sebelum periode
         foreach ($pinjamanSebelum as $pinjaman) {
             $jumlahPinjaman = (float) $pinjaman->jumlah_pinjaman;
             $provisi = $jumlahPinjaman * 0.01;
@@ -160,6 +148,7 @@ class AdminLaporanController extends Controller
             $akun['4-1200']['awal_kredit'] += $provisi;
         }
 
+        // Angsuran sebelum periode
         foreach ($angsuranSebelum as $angsuran) {
             $pokok = (float) $angsuran->jumlah_pokok;
             $jasa = (float) $angsuran->jumlah_jasa;
@@ -169,21 +158,25 @@ class AdminLaporanController extends Controller
             $akun['4-1100']['awal_kredit'] += $jasa;
         }
 
-        // SALDO AKHIR BULAN SEBELUMNYA MENJADI SALDO AWAL BULAN INI
+        // Normalisasi saldo awal berdasarkan saldo bersih
         foreach ($akun as &$item) {
             $saldoBersih = $item['awal_debit'] - $item['awal_kredit'];
 
             $item['awal_debit'] = max($saldoBersih, 0);
             $item['awal_kredit'] = max(-$saldoBersih, 0);
         }
+
         unset($item);
 
-        // ambil transaksi pada periode yang dipilih
+        // =========================================================
+        // 2. TRANSAKSI PERIODE BERJALAN: MUTASI
+        // =========================================================
+
         $tabungan = DetailTabungan::whereBetween(
             'tanggal_transaksi',
             [$tanggalMulai, $tanggalSelesai]
         )
-            ->where('status', '!=', 'pending')
+            ->where('status', 'berhasil')
             ->get();
 
         $peminjaman = Peminjaman::where(
@@ -201,87 +194,74 @@ class AdminLaporanController extends Controller
             [$tanggalMulai, $tanggalSelesai]
         )->get();
 
-        // hitung mutasi tabungan
         foreach ($tabungan as $transaksi) {
             $jumlah = (float) $transaksi->jumlah;
+            $keteranganAsli = strtolower(
+                trim($transaksi->keterangan ?? '')
+            );
 
-            $keteranganAsli = strtolower(trim($transaksi->keterangan ?? ''));
-
-            // Pencatatan biaya buku tabungan
+            // Pendapatan biaya buku tabungan Rp5.000
             if (
-                str_contains($keteranganAsli, 'biaya buku tabungan')
-                || str_contains($keteranganAsli, 'pembayaran buku tabungan')
+                str_contains($keteranganAsli, 'biaya buku tabungan') ||
+                str_contains($keteranganAsli, 'pembayaran buku tabungan')
             ) {
-                if ($transaksi->id_jenis_transaksi == 2) {
-                    // Biaya dipotong langsung dari saldo tabungan
-                    $akun['2-2100']['mutasi_debit'] += $jumlah;
-                } else {
-                    // Biaya dibayar sebagai uang masuk ke Kas
-                    $akun['1-1100']['mutasi_debit'] += $jumlah;
-                }
-
+                $akun['1-1100']['mutasi_debit'] += $jumlah;
                 $akun['4-1300']['mutasi_kredit'] += $jumlah;
 
                 continue;
             }
 
-            // TAMBAHAN: pemindahan saldo ke Pendapatan Usaha
-            if (str_contains(
-                $keteranganAsli,
-                'pemindahan saldo mengendap ke pendapatan usaha'
-            )) {
+            // Pemindahan saldo mengendap ke pendapatan usaha
+            if (
+                str_contains(
+                    $keteranganAsli,
+                    'pemindahan saldo mengendap ke pendapatan usaha'
+                )
+            ) {
                 $akun['2-2100']['mutasi_debit'] += $jumlah;
                 $akun['4-1100']['mutasi_kredit'] += $jumlah;
 
                 continue;
             }
 
-            // setoran
-            if ($transaksi->id_jenis_transaksi == 1) {
+            // Setoran tabungan
+            if ((int) $transaksi->id_jenis_transaksi === 1) {
                 $akun['1-1100']['mutasi_debit'] += $jumlah;
                 $akun['2-2100']['mutasi_kredit'] += $jumlah;
             }
-
-            // penarikan
-            elseif ($transaksi->id_jenis_transaksi == 2) {
+            // Penarikan tabungan
+            elseif ((int) $transaksi->id_jenis_transaksi === 2) {
                 $akun['2-2100']['mutasi_debit'] += $jumlah;
                 $akun['1-1100']['mutasi_kredit'] += $jumlah;
             }
         }
 
-        // hitung mutasi pinjaman
+        // Peminjaman periode berjalan
         foreach ($peminjaman as $pinjaman) {
             $jumlahPinjaman = (float) $pinjaman->jumlah_pinjaman;
             $provisi = $jumlahPinjaman * 0.01;
             $kasDikeluarkan = $jumlahPinjaman - $provisi;
 
-            // piutang bertambah
             $akun['1-1200']['mutasi_debit'] += $jumlahPinjaman;
-
-            // kas keluar
             $akun['1-1100']['mutasi_kredit'] += $kasDikeluarkan;
-
-            // pendapatan provisi
             $akun['4-1200']['mutasi_kredit'] += $provisi;
         }
 
-        // hitung mutasi angsuran
+        // Angsuran periode berjalan
         foreach ($angsuran as $item) {
             $pokok = (float) $item->jumlah_pokok;
             $jasa = (float) $item->jumlah_jasa;
 
-            // kas masuk
             $akun['1-1100']['mutasi_debit'] += $pokok + $jasa;
-
-            // piutang berkurang
             $akun['1-1200']['mutasi_kredit'] += $pokok;
-
-            // pendapatan jasa
             $akun['4-1100']['mutasi_kredit'] += $jasa;
         }
 
-        // hitung saldo akhir
-        foreach ($akun as $kode => &$item) {
+        // =========================================================
+        // 3. HITUNG SALDO AKHIR
+        // =========================================================
+
+        foreach ($akun as &$item) {
             if ($item['normal'] === 'debit') {
                 $saldo =
                     $item['awal_debit']
@@ -289,13 +269,8 @@ class AdminLaporanController extends Controller
                     + $item['mutasi_debit']
                     - $item['mutasi_kredit'];
 
-                if ($saldo >= 0) {
-                    $item['akhir_debit'] = $saldo;
-                    $item['akhir_kredit'] = 0;
-                } else {
-                    $item['akhir_debit'] = 0;
-                    $item['akhir_kredit'] = abs($saldo);
-                }
+                $item['akhir_debit'] = $saldo >= 0 ? $saldo : 0;
+                $item['akhir_kredit'] = $saldo < 0 ? abs($saldo) : 0;
             } else {
                 $saldo =
                     $item['awal_kredit']
@@ -303,240 +278,80 @@ class AdminLaporanController extends Controller
                     + $item['mutasi_kredit']
                     - $item['mutasi_debit'];
 
-                if ($saldo >= 0) {
-                    $item['akhir_debit'] = 0;
-                    $item['akhir_kredit'] = $saldo;
-                } else {
-                    $item['akhir_debit'] = abs($saldo);
-                    $item['akhir_kredit'] = 0;
-                }
-            }
-        }
-
-        unset($item);
-
-        // hitung total
-        $totalAwalDebit = collect($akun)->sum('awal_debit');
-        $totalAwalKredit = collect($akun)->sum('awal_kredit');
-        $totalMutasiDebit = collect($akun)->sum('mutasi_debit');
-        $totalMutasiKredit = collect($akun)->sum('mutasi_kredit');
-        $totalAkhirDebit = collect($akun)->sum('akhir_debit');
-        $totalAkhirKredit = collect($akun)->sum('akhir_kredit');
-
-        // kirim data ke halaman laporan
-        return view('admin.laporan.index', compact(
-            'periode',
-            'tanggalMulai',
-            'tanggalSelesai',
-            'akun',
-            'totalAwalDebit',
-            'totalAwalKredit',
-            'totalMutasiDebit',
-            'totalMutasiKredit',
-            'totalAkhirDebit',
-            'totalAkhirKredit'
-        ));
-    }
-
-    public function exportNeraca(Request $request)
-    {
-        // --- LOGIKA DATA (SAMA PERSIS SEPERTI METHOD index) ---
-        $periode = $request->periode ?? now()->format('Y-m');
-
-        $tanggalMulai = Carbon::createFromFormat('Y-m', $periode)->startOfMonth();
-        $tanggalSelesai = $tanggalMulai->copy()->endOfMonth();
-
-        $akun = [
-            '1-1100' => ['kode' => '1-1100', 'nama' => 'Kas', 'normal' => 'debit', 'awal_debit' => 0, 'awal_kredit' => 0, 'mutasi_debit' => 0, 'mutasi_kredit' => 0],
-            '1-1200' => ['kode' => '1-1200', 'nama' => 'Piutang', 'normal' => 'debit', 'awal_debit' => 0, 'awal_kredit' => 0, 'mutasi_debit' => 0, 'mutasi_kredit' => 0],
-            '2-2100' => ['kode' => '2-2100', 'nama' => 'Tabungan', 'normal' => 'kredit', 'awal_debit' => 0, 'awal_kredit' => 0, 'mutasi_debit' => 0, 'mutasi_kredit' => 0],
-            '4-1100' => ['kode' => '4-1100', 'nama' => 'Pendapatan Usaha', 'normal' => 'kredit', 'awal_debit' => 0, 'awal_kredit' => 0, 'mutasi_debit' => 0, 'mutasi_kredit' => 0],
-            '4-1200' => ['kode' => '4-1200', 'nama' => 'Pendapatan Provisi', 'normal' => 'kredit', 'awal_debit' => 0, 'awal_kredit' => 0, 'mutasi_debit' => 0, 'mutasi_kredit' => 0],
-            '4-1300' => ['kode' => '4-1300', 'nama' => 'Pendapatan Lain-lain', 'normal' => 'kredit', 'awal_debit' => 0, 'awal_kredit' => 0, 'mutasi_debit' => 0, 'mutasi_kredit' => 0],
-        ];
-
-        // Saldo Awal
-        $tabunganSebelum = DetailTabungan::where('tanggal_transaksi', '<', $tanggalMulai)->where('status', '!=', 'pending')->get();
-        $pinjamanSebelum = Peminjaman::where('tanggal_ajuan', '<', $tanggalMulai)->where('status_verifikasi', 'disetujui')->get();
-        $angsuranSebelum = Angsuran::where('tanggal_pembayaran', '<', $tanggalMulai)->get();
-
-        foreach ($tabunganSebelum as $transaksi) {
-            $jumlah = (float) $transaksi->jumlah;
-
-            $keteranganAsli = strtolower(trim($transaksi->keterangan ?? ''));
-
-            // Pencatatan biaya buku pada saldo awal
-            if (
-                str_contains($keteranganAsli, 'biaya buku tabungan')
-                || str_contains($keteranganAsli, 'pembayaran buku tabungan')
-            ) {
-                if ($transaksi->id_jenis_transaksi == 2) {
-                    // Biaya dipotong langsung dari saldo tabungan
-                    $akun['2-2100']['awal_debit'] += $jumlah;
-                } else {
-                    // Biaya dibayar sebagai uang masuk ke Kas
-                    $akun['1-1100']['awal_debit'] += $jumlah;
-                }
-
-                $akun['4-1300']['awal_kredit'] += $jumlah;
-
-                continue;
-            }
-
-            // TAMBAHAN: pemindahan saldo ke Pendapatan Usaha
-            if (str_contains(
-                $keteranganAsli,
-                'pemindahan saldo mengendap ke pendapatan usaha'
-            )) {
-                $akun['2-2100']['awal_debit'] += $jumlah;
-                $akun['4-1100']['awal_kredit'] += $jumlah;
-
-                continue;
-            }
-
-            if ($transaksi->id_jenis_transaksi == 1) {
-                $akun['1-1100']['awal_debit'] += $jumlah;
-                $akun['2-2100']['awal_kredit'] += $jumlah;
-            } elseif ($transaksi->id_jenis_transaksi == 2) {
-                $akun['2-2100']['awal_debit'] += $jumlah;
-                $akun['1-1100']['awal_kredit'] += $jumlah;
-            }
-        }
-
-        foreach ($pinjamanSebelum as $pinjaman) {
-            $jumlahPinjaman = (float) $pinjaman->jumlah_pinjaman;
-            $provisi = $jumlahPinjaman * 0.01;
-            $kasDikeluarkan = $jumlahPinjaman - $provisi;
-
-            $akun['1-1200']['awal_debit'] += $jumlahPinjaman;
-            $akun['1-1100']['awal_kredit'] += $kasDikeluarkan;
-            $akun['4-1200']['awal_kredit'] += $provisi;
-        }
-
-        foreach ($angsuranSebelum as $angsuran) {
-            $pokok = (float) $angsuran->jumlah_pokok;
-            $jasa = (float) $angsuran->jumlah_jasa;
-
-            $akun['1-1100']['awal_debit'] += $pokok + $jasa;
-            $akun['1-1200']['awal_kredit'] += $pokok;
-            $akun['4-1100']['awal_kredit'] += $jasa;
-        }
-
-        // SALDO AKHIR BULAN SEBELUMNYA MENJADI SALDO AWAL BULAN INI
-        foreach ($akun as &$item) {
-            $saldoBersih = $item['awal_debit'] - $item['awal_kredit'];
-
-            $item['awal_debit'] = max($saldoBersih, 0);
-            $item['awal_kredit'] = max(-$saldoBersih, 0);
-        }
-        unset($item);
-
-        // Mutasi Periode
-        $tabungan = DetailTabungan::whereBetween('tanggal_transaksi', [$tanggalMulai, $tanggalSelesai])->where('status', '!=', 'pending')->get();
-        $peminjaman = Peminjaman::where('status_verifikasi', 'disetujui')->whereBetween('tanggal_ajuan', [$tanggalMulai, $tanggalSelesai])->get();
-        $angsuran = Angsuran::whereBetween('tanggal_pembayaran', [$tanggalMulai, $tanggalSelesai])->get();
-
-        foreach ($tabungan as $transaksi) {
-            $jumlah = (float) $transaksi->jumlah;
-
-            $keteranganAsli = strtolower(trim($transaksi->keterangan ?? ''));
-
-            // Pencatatan biaya buku tabungan
-            if (
-                str_contains($keteranganAsli, 'biaya buku tabungan')
-                || str_contains($keteranganAsli, 'pembayaran buku tabungan')
-            ) {
-                if ($transaksi->id_jenis_transaksi == 2) {
-                    // Biaya dipotong langsung dari saldo tabungan
-                    $akun['2-2100']['mutasi_debit'] += $jumlah;
-                } else {
-                    // Biaya dibayar sebagai uang masuk ke Kas
-                    $akun['1-1100']['mutasi_debit'] += $jumlah;
-                }
-
-                $akun['4-1300']['mutasi_kredit'] += $jumlah;
-
-                continue;
-            }
-
-            // TAMBAHAN: pemindahan saldo ke Pendapatan Usaha
-            if (str_contains(
-                $keteranganAsli,
-                'pemindahan saldo mengendap ke pendapatan usaha'
-            )) {
-                $akun['2-2100']['mutasi_debit'] += $jumlah;
-                $akun['4-1100']['mutasi_kredit'] += $jumlah;
-
-                continue;
-            }
-
-            if ($transaksi->id_jenis_transaksi == 1) {
-                $akun['1-1100']['mutasi_debit'] += $jumlah;
-                $akun['2-2100']['mutasi_kredit'] += $jumlah;
-            } elseif ($transaksi->id_jenis_transaksi == 2) {
-                $akun['2-2100']['mutasi_debit'] += $jumlah;
-                $akun['1-1100']['mutasi_kredit'] += $jumlah;
-            }
-        }
-
-        foreach ($peminjaman as $pinjaman) {
-            $jumlahPinjaman = (float) $pinjaman->jumlah_pinjaman;
-            $provisi = $jumlahPinjaman * 0.01;
-            $kasDikeluarkan = $jumlahPinjaman - $provisi;
-
-            $akun['1-1200']['mutasi_debit'] += $jumlahPinjaman;
-            $akun['1-1100']['mutasi_kredit'] += $kasDikeluarkan;
-            $akun['4-1200']['mutasi_kredit'] += $provisi;
-        }
-
-        foreach ($angsuran as $item) {
-            $pokok = (float) $item->jumlah_pokok;
-            $jasa = (float) $item->jumlah_jasa;
-
-            $akun['1-1100']['mutasi_debit'] += $pokok + $jasa;
-            $akun['1-1200']['mutasi_kredit'] += $pokok;
-            $akun['4-1100']['mutasi_kredit'] += $jasa;
-        }
-
-        // Hitung Saldo Akhir
-        foreach ($akun as $kode => &$item) {
-            if ($item['normal'] === 'debit') {
-                $saldo = $item['awal_debit'] - $item['awal_kredit'] + $item['mutasi_debit'] - $item['mutasi_kredit'];
-                $item['akhir_debit'] = $saldo >= 0 ? $saldo : 0;
-                $item['akhir_kredit'] = $saldo < 0 ? abs($saldo) : 0;
-            } else {
-                $saldo = $item['awal_kredit'] - $item['awal_debit'] + $item['mutasi_kredit'] - $item['mutasi_debit'];
                 $item['akhir_debit'] = $saldo < 0 ? abs($saldo) : 0;
                 $item['akhir_kredit'] = $saldo >= 0 ? $saldo : 0;
             }
         }
+
         unset($item);
 
-        $totalAwalDebit = collect($akun)->sum('awal_debit');
-        $totalAwalKredit = collect($akun)->sum('awal_kredit');
-        $totalMutasiDebit = collect($akun)->sum('mutasi_debit');
-        $totalMutasiKredit = collect($akun)->sum('mutasi_kredit');
-        $totalAkhirDebit = collect($akun)->sum('akhir_debit');
-        $totalAkhirKredit = collect($akun)->sum('akhir_kredit');
-        // --- AKHIR LOGIKA DATA ---
+        return [
+            'akun' => $akun,
+            'totalAwalDebit' => collect($akun)->sum('awal_debit'),
+            'totalAwalKredit' => collect($akun)->sum('awal_kredit'),
+            'totalMutasiDebit' => collect($akun)->sum('mutasi_debit'),
+            'totalMutasiKredit' => collect($akun)->sum('mutasi_kredit'),
+            'totalAkhirDebit' => collect($akun)->sum('akhir_debit'),
+            'totalAkhirKredit' => collect($akun)->sum('akhir_kredit'),
+        ];
+    }
+
+    public function index(Request $request)
+    {
+        $periode = $request->periode ?? now()->format('Y-m');
+
+        $tanggalMulai = Carbon::createFromFormat(
+            'Y-m',
+            $periode
+        )->startOfMonth();
+
+        $tanggalSelesai = $tanggalMulai->copy()->endOfMonth();
+
+        $data = $this->hitungLaporanNeraca(
+            $tanggalMulai,
+            $tanggalSelesai
+        );
+
+        return view(
+            'admin.laporan.index',
+            array_merge(
+                compact('periode', 'tanggalMulai', 'tanggalSelesai'),
+                $data
+            )
+        );
+    }
+
+    public function exportNeraca(Request $request)
+    {
+        $periode = $request->periode ?? now()->format('Y-m');
+
+        $tanggalMulai = Carbon::createFromFormat(
+            'Y-m',
+            $periode
+        )->startOfMonth();
+
+        $tanggalSelesai = $tanggalMulai->copy()->endOfMonth();
+
+        $data = $this->hitungLaporanNeraca(
+            $tanggalMulai,
+            $tanggalSelesai
+        );
 
         $headers = [
             'Content-Type' => 'application/vnd.ms-excel',
-            'Content-Disposition' => 'attachment; filename="Neraca_BMT_' . $periode . '.xls"',
+            'Content-Disposition' =>
+                'attachment; filename="Neraca_BMT_' . $periode . '.xls"',
             'Pragma' => 'no-cache',
         ];
 
-        return response()->view('admin.laporan.export-neraca', compact(
-            'periode',
-            'tanggalMulai',
-            'tanggalSelesai',
-            'akun',
-            'totalAwalDebit',
-            'totalAwalKredit',
-            'totalMutasiDebit',
-            'totalMutasiKredit',
-            'totalAkhirDebit',
-            'totalAkhirKredit'
-        ))->withHeaders($headers);
+        return response()
+            ->view(
+                'admin.laporan.export-neraca',
+                array_merge(
+                    compact('periode', 'tanggalMulai', 'tanggalSelesai'),
+                    $data
+                )
+            )
+            ->withHeaders($headers);
     }
 }

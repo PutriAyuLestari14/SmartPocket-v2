@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -314,7 +315,6 @@
 
                             <div class="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
 
-                                
                                 @if($isBagiHasil)
                                     <div class="w-11 h-11 bg-mintLight text-primary rounded-xl flex items-center justify-center font-bold flex-shrink-0">
                                         <i class="fas fa-gift text-base"></i>
@@ -322,14 +322,13 @@
 
                                     <div class="min-w-0 flex-1">
                                         <p class="text-sm font-bold text-primary leading-snug truncate">
-                                            {{ $trx->keterangan ?: 'Bagi Hasil Tabungan' }}
+                                            Bagi Hasil
                                         </p>
 
                                         <p class="text-[11px] font-semibold text-slate-400 mt-0.5">
-                                            {{ \Carbon\Carbon::parse($trx->tanggal_transaksi)->translatedFormat('d M Y') }}
+                                            {{ \Carbon\Carbon::parse($trx->tanggal_transaksi)->translatedFormat('F Y') }}
                                         </p>
                                     </div>
-
 
                                 @elseif($isSetoran)
                                     <div class="w-11 h-11 bg-mintLight text-primary rounded-xl flex items-center justify-center font-bold flex-shrink-0">
