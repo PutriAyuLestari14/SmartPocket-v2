@@ -34,7 +34,6 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
         
-        /* Variasi Gradient yang TIDAK MONOTON */
         .gradient-primary { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
         .gradient-mint { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); }
         .gradient-soft { background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%); }
@@ -122,7 +121,10 @@
                 <div class="flex items-center gap-2">
                     <a href="{{ route('operator.notifikasi.index') }}" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 relative active:scale-95 transition-transform shadow-sm">
                         <i class="far fa-bell text-base"></i>
-                        <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
+                        @php $pendingNotif = \App\Models\DetailTabungan::where('status', 'pending')->count(); @endphp
+                        @if($pendingNotif > 0)
+                            <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
+                        @endif
                     </a>
                     <button onclick="toggleSidebar()" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-700 active:scale-95 transition-transform shadow-sm">
                         <i class="fas fa-bars text-base"></i>
@@ -177,13 +179,9 @@
                             <p class="text-[10px] font-bold text-slate-400 mt-0.5">Operator</p>
                         </div>
                         
-                        <!-- ========================================== -->
-                        <!-- HANYA BAGIAN INI YANG DIUBAH (ROUNDED-FULL) -->
-                        <!-- ========================================== -->
                         <div class="w-11 h-11 rounded-full overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
                             {{ strtoupper(substr(auth()->user()->petugas->nama_lengkap ?? auth()->user()->name, 0, 1)) }}
                         </div>
-                        <!-- ========================================== -->
 
                     </div>
                 </header>
@@ -203,7 +201,7 @@
                                 <i class="fas fa-users text-white text-xl"></i>
                             </div>
                             <p class="text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1">Nasabah Aktif</p>
-                            <p class="text-1xl lg:text-2xl font-black text-slate-900">{{ $nasabahAktif ?? 0 }}</p>
+                            <p class="text-xl lg:text-2xl font-black text-slate-900">{{ $nasabahAktif ?? 0 }}</p>
                         </div>
                     </div>
 
@@ -214,7 +212,7 @@
                                 <i class="fas fa-user-plus text-white text-xl"></i>
                             </div>
                             <p class="text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1">Baru (Bln Ini)</p>
-                            <p class="text-1xl lg:text-2xl font-black text-slate-900">{{ $nasabahBaru ?? 0 }}</p>
+                            <p class="text-xl lg:text-2xl font-black text-slate-900">{{ $nasabahBaru ?? 0 }}</p>
                         </div>
                     </div>
 
@@ -225,7 +223,7 @@
                                 <i class="fas fa-wallet text-white text-xl"></i>
                             </div>
                             <p class="text-[10px] text-emerald-100 font-black uppercase tracking-wider mb-1">Total Saldo Kas</p>
-                            <p class="text-1xl lg:text-2xl font-black text-white break-all leading-tight">Rp {{ number_format($totalSaldo ?? 0, 0, ',', '.') }}</p>
+                            <p class="text-xl lg:text-2xl font-black text-white break-all leading-tight">Rp {{ number_format($totalSaldo ?? 0, 0, ',', '.') }}</p>
                         </div>
                     </div>
                 </div>
@@ -277,8 +275,9 @@
                             <tbody class="divide-y divide-slate-100">
                                 @forelse($nasabahs as $n)
                                 <tr class="hover:bg-mintLight/20 transition-colors">
-                                    <td class="px-6 py-4 text-xs font-mono font-black text-slate-600">{{ $n->rekening->no_rek ?? '-' }}</td>
-                                    <td class="px-6 py-4 text-xs text-slate-600 font-medium">{{ $n->user->username ?? '-' }}</td>
+                                    <!-- PERBAIKAN: Menggunakan ?? agar aman baik dari Eloquent maupun Database View -->
+                                    <td class="px-6 py-4 text-xs font-mono font-black text-slate-600">{{ $n->rekening->no_rek ?? $n->no_rek ?? '-' }}</td>
+                                    <td class="px-6 py-4 text-xs text-slate-600 font-medium">{{ $n->user->username ?? $n->username ?? '-' }}</td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-mintLight to-emerald-100 flex items-center justify-center flex-shrink-0">
@@ -287,7 +286,7 @@
                                             <span class="text-sm font-bold text-slate-900">{{ $n->nama }}</span>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-sm font-black text-slate-900">Rp {{ number_format($n->rekening->saldo ?? 0, 0, ',', '.') }}</td>
+                                    <td class="px-6 py-4 text-sm font-black text-slate-900">Rp {{ number_format($n->rekening->saldo ?? $n->saldo ?? 0, 0, ',', '.') }}</td>
                                     <td class="px-6 py-4">
                                         @if($n->status == 'aktif')
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-mintLight text-primary rounded-xl text-[10px] font-black border border-primary/20">
@@ -333,7 +332,7 @@
                                         </div>
                                         <div class="min-w-0 flex-1">
                                             <p class="text-sm font-bold text-slate-900 truncate">{{ $n->nama }}</p>
-                                            <p class="text-[10px] text-slate-500 font-mono truncate font-medium">{{ $n->rekening->no_rek ?? '-' }}</p>
+                                            <p class="text-[10px] text-slate-500 font-mono truncate font-medium">{{ $n->rekening->no_rek ?? $n->no_rek ?? '-' }}</p>
                                         </div>
                                     </div>
                                     @if($n->status == 'aktif')
@@ -350,11 +349,11 @@
                                 <div class="grid grid-cols-2 gap-2 mb-3">
                                     <div class="bg-slate-50 rounded-xl px-3 py-2">
                                         <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">NIS/NIP</p>
-                                        <p class="text-xs font-bold text-slate-700 truncate">{{ $n->user->username ?? '-' }}</p>
+                                        <p class="text-xs font-bold text-slate-700 truncate">{{ $n->user->username ?? $n->username ?? '-' }}</p>
                                     </div>
                                     <div class="bg-mintLight rounded-xl px-3 py-2">
                                         <p class="text-[9px] font-bold text-primary uppercase tracking-wider mb-0.5">Saldo</p>
-                                        <p class="text-xs font-black text-primary truncate">Rp {{ number_format($n->rekening->saldo ?? 0, 0, ',', '.') }}</p>
+                                        <p class="text-xs font-black text-primary truncate">Rp {{ number_format($n->rekening->saldo ?? $n->saldo ?? 0, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
 

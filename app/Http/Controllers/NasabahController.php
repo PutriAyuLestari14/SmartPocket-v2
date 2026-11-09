@@ -15,61 +15,52 @@ use Illuminate\Support\Facades\DB;
 class NasabahController extends Controller
 {
     public function index(Request $request)
-    {
-        $query = Nasabah::with(['user', 'rekening']);
+{
+    // MENGGUNAKAN VIEW DATABASE (v_data_lengkap_nasabah)
+    $query = DB::table('v_data_lengkap_nasabah');
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-
-            $query->where(function ($q) use ($search) {
-                $q->where('nama', 'like', '%' . $search . '%')
-                    ->orWhere('username', 'like', '%' . $search . '%')
-                    ->orWhere('no_rek', 'like', '%' . $search . '%');
-            });
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        $nasabahs = $query->latest('id_nasabah')
-            ->paginate(10)
-            ->withQueryString();
-
-        $totalNasabah = Nasabah::count();
-        $nasabahAktif = Nasabah::where('status', 'aktif')->count();
-        $nasabahNonaktif = Nasabah::where('status', '!=', 'aktif')->count();
-
-        $nasabahBaru = Nasabah::whereMonth('tanggal_daftar', now()->month)
-            ->whereYear('tanggal_daftar', now()->year)
-            ->count();
-
-        $totalSaldoTabungan = RekeningTabungan::sum('saldo');
-
-        $jumlahBuku = DetailTabungan::where('status', 'berhasil')
-            ->whereHas('jenisTransaksi', function ($q) {
-                $q->whereRaw('LOWER(TRIM(setoran)) = ?', ['setoran']);
-            })
-            ->whereRaw('LOWER(keterangan) LIKE ?', ['%buku tabungan%'])
-            ->count();
-
-        $pendapatanBuku = $jumlahBuku * 5000;
-        $totalSaldo = $totalSaldoTabungan;
-
-        return view('operator.nasabah.index', compact(
-            'nasabahs',
-            'totalNasabah',
-            'nasabahAktif',
-            'nasabahNonaktif',
-            'nasabahBaru',
-            'totalSaldo'
-        ));
+    // Filter pencarian
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('nama', 'like', '%' . $search . '%')
+              ->orWhere('username', 'like', '%' . $search . '%')
+              ->orWhere('no_rek', 'like', '%' . $search . '%');
+        });
     }
 
-    public function create()
-    {
-        return view('operator.nasabah.create');
+    // Filter status
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
     }
+
+    // Pagination
+    $nasabahs = $query->orderBy('id_nasabah', 'desc')
+        ->paginate(10)
+        ->withQueryString();
+
+    // MENGGUNAKAN STORED PROCEDURE (sp_ringkasan_nasabah)
+    $ringkasan = DB::select('CALL sp_ringkasan_nasabah()');
+    
+    $totalNasabah = $ringkasan[0]->total_semua ?? 0;
+    $nasabahAktif = $ringkasan[0]->total_aktif ?? 0;
+    $nasabahNonaktif = $totalNasabah - $nasabahAktif;
+    $totalSaldo = $ringkasan[0]->total_uang_beredar ?? 0;
+
+    // Hitung nasabah baru bulan ini
+    $nasabahBaru = Nasabah::whereMonth('tanggal_daftar', now()->month)
+        ->whereYear('tanggal_daftar', now()->year)
+        ->count();
+
+    return view('operator.nasabah.index', compact(
+        'nasabahs',
+        'totalNasabah',
+        'nasabahAktif',
+        'nasabahNonaktif',
+        'nasabahBaru',
+        'totalSaldo'
+    ));
+}
 
     public function store(Request $request)
 {
@@ -302,8 +293,43 @@ class NasabahController extends Controller
 
     
     public function destroy($id)
-    {
-    
+{
+    $nasabah = Nasabah::findOrFail($id);
+
+    // Cek apakah nasabah punya riwayat transaksi
+    $adaTransaksi = DetailTabungan::where('no_rek', $nasabah->no_rek)->exists();
+
+    if ($adaTransaksi) {
+        return redirect()->back()->with('error', 
+            'Nasabah tidak dapat dihapus karena sudah memiliki riwayat transaksi.');
     }
+
+    DB::beginTransaction();
+
+    try {
+        $username = $nasabah->username;
+        
+        // Hapus rekening terlebih dahulu
+        $nasabah->rekening()->delete();
+        
+        // Hapus data nasabah
+        $nasabah->delete();
+        
+        // Hapus akun user login
+        User::where('username', $username)->delete();
+
+        DB::commit();
+
+        return redirect()
+            ->route('operator.nasabah.index')
+            ->with('success', 'Nasabah berhasil dihapus.');
+    } catch (\Throwable $e) {
+        DB::rollBack();
+
+        return redirect()
+            ->back()
+            ->with('error', 'Gagal menghapus nasabah: ' . $e->getMessage());
+    }
+}
 
 }

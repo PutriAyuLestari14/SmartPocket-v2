@@ -34,7 +34,6 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
         
-        /* Variasi Gradient yang TIDAK MONOTON */
         .gradient-primary { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
         .gradient-mint { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); }
         .gradient-soft { background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%); }
@@ -157,7 +156,7 @@
                     </div>
                 </header>
                 
-                <!-- Error -->
+                <!-- Error & Success Messages -->
                 @if ($errors->any())
                     <div class="p-4 bg-red-50 border border-red-200 rounded-2xl">
                         <div class="flex items-start gap-3">
@@ -193,6 +192,24 @@
                         <p class="text-sm font-bold text-red-700 pt-1">{{ session('error') }}</p>
                     </div>
                 @endif
+
+                <!-- PERBAIKAN 1: Info Saldo Kas BMT -->
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-4 lg:p-5 mb-5 lg:mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 flex-shrink-0">
+                            <i class="fas fa-vault text-white text-xl"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs text-blue-700 font-bold uppercase tracking-wider mb-0.5">Saldo Kas BMT Tersedia</p>
+                            <p class="text-2xl font-black text-blue-900" id="saldoKasDisplay">
+                                Rp {{ number_format($saldoKas ?? 0, 0, ',', '.') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PERBAIKAN 2: Warning Box (Hidden by default) -->
+                <div id="warningSaldo" class="hidden mb-5 lg:mb-6"></div>
 
                 <!-- Form -->
                 <form id="formPeminjaman" action="{{ route('operator.peminjaman.store') }}" method="POST">
@@ -474,6 +491,9 @@
 
     <script>
         let currentSaldo = 0;
+        
+        // PERBAIKAN 3: Ambil nilai saldo kas dari PHP
+        const saldoKas = {{ $saldoKas ?? 0 }};
 
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -557,6 +577,51 @@
             document.getElementById('tanggalJatuhTempo').value = `${year}-${month}-${day}`;
         }
 
+        /* PERBAIKAN 4: Helper format rupiah untuk JS */
+        function formatRupiah(angka) {
+            return Number(angka).toLocaleString('id-ID');
+        }
+
+        /* PERBAIKAN 5: Validasi Real-time Saldo Kas */
+        document.getElementById('nominal').addEventListener('input', function() {
+            const jumlah = parseInt(this.value) || 0;
+            const warningBox = document.getElementById('warningSaldo');
+            
+            if (jumlah > saldoKas) {
+                warningBox.classList.remove('hidden');
+                warningBox.innerHTML = `
+                    <div class="p-4 bg-red-50 border-2 border-red-300 rounded-xl animate-pulse">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-white text-lg"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-black text-red-700">
+                                    ⚠️ PERINGATAN: Jumlah pinjaman melebihi saldo kas!
+                                </p>
+                                <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
+                                    <div class="bg-white rounded-lg px-3 py-2">
+                                        <p class="text-red-500 font-bold">Saldo Kas</p>
+                                        <p class="font-black text-red-700">Rp ${formatRupiah(saldoKas)}</p>
+                                    </div>
+                                    <div class="bg-white rounded-lg px-3 py-2">
+                                        <p class="text-red-500 font-bold">Pinjaman</p>
+                                        <p class="font-black text-red-700">Rp ${formatRupiah(jumlah)}</p>
+                                    </div>
+                                    <div class="bg-red-100 rounded-lg px-3 py-2">
+                                        <p class="text-red-600 font-bold">Kekurangan</p>
+                                        <p class="font-black text-red-800">Rp ${formatRupiah(jumlah - saldoKas)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                warningBox.classList.add('hidden');
+            }
+        });
+
         /* EVENT */
         document.getElementById('nominal').addEventListener('input', updateSummary);
         document.getElementById('tenor').addEventListener('change', function () {
@@ -589,6 +654,12 @@
             if (tenor < 1 || tenor > 24) { alert('Tenor harus antara 1-24 bulan!'); return; }
             if (!tglPinjam) { alert('Tanggal pinjam wajib diisi!'); return; }
             if (!tglJatuhTempo) { alert('Tanggal jatuh tempo wajib diisi!'); return; }
+            
+            // PERBAIKAN 6: Validasi saldo kas di modal sebelum submit
+            if (nominal > saldoKas) {
+                alert(`⚠️ PERINGATAN!\n\nJumlah pinjaman (Rp ${formatRupiah(nominal)}) melebihi saldo kas BMT yang tersedia (Rp ${formatRupiah(saldoKas)}).\n\nKekurangan: Rp ${formatRupiah(nominal - saldoKas)}\n\nMohon hubungi admin untuk menambah saldo kas.`);
+                return; // Hentikan proses, jangan buka modal
+            }
 
             const formatTanggal = (tgl) => {
                 if (!tgl) return '-';
