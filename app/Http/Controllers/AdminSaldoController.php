@@ -177,14 +177,16 @@ class AdminSaldoController extends Controller
 
     // ... Method mutasiNasabah tetap sama seperti sebelumnya ...
     
-    public function mutasiNasabah(Request $request, $idNasabah)
+        public function mutasiNasabah(Request $request, $idNasabah)
     {
-         // ... (kode mutasiNasabah yang lama biarkan saja, tidak perlu diubah kecuali ada bug spesifik) ...
-         // Saya asumsikan kode mutasiNasabah kamu sudah benar sesuai logic bisnis sebelumnya.
-         
         $periode = $request->periode ?? now()->format('Y-m');
-        $tanggalMulai = Carbon::createFromFormat('Y-m-d', $periode . '-01')->startOfDay();
-        $tanggalSelesai = $tanggalMulai->copy()->endOfMonth()->endOfDay();
+        
+        try {
+            $tanggalMulai = Carbon::createFromFormat('Y-m', $periode)->startOfMonth()->startOfDay();
+            $tanggalSelesai = $tanggalMulai->copy()->endOfMonth()->endOfDay();
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Format periode tidak valid.']);
+        }
 
         $nasabah = Nasabah::with('rekening')->where('id_nasabah', $idNasabah)->firstOrFail();
         $rekening = $nasabah->rekening;
@@ -194,47 +196,50 @@ class AdminSaldoController extends Controller
         }
 
         $noRek = $rekening->no_rek;
-        $transaksi = DetailTabungan::where('no_rek', $noRek)
+
+        // 1. Ambil SEMUA transaksi rekening ini, diurutkan dari yang paling lama (PENTING!)
+        $semuaTransaksi = DetailTabungan::where('no_rek', $noRek)
             ->where('status', '!=', 'pending')
-            ->whereDate('tanggal_transaksi', '<=', $tanggalSelesai)
             ->orderBy('tanggal_transaksi', 'asc')
+            ->orderBy('created_at', 'asc') // Fallback jika tanggal sama
             ->get();
 
-        $saldoSekarang = (float) $rekening->saldo;
-        $transaksiSetelahBulan = DetailTabungan::where('no_rek', $noRek)
-            ->where('status', '!=', 'pending')
-            ->whereDate('tanggal_transaksi', '>', $tanggalSelesai)
-            ->get();
-
-        $pengaruhSetelahBulan = 0;
-        foreach ($transaksiSetelahBulan as $item) {
-            if ($item->id_jenis_transaksi == 1) $pengaruhSetelahBulan += (float) $item->jumlah;
-            elseif ($item->id_jenis_transaksi == 2) $pengaruhSetelahBulan -= (float) $item->jumlah;
+        // 2. Hitung Saldo Awal Bulan (Saldo sebelum tanggal 1 bulan yang dipilih)
+        $saldoAwalBulan = 0;
+        foreach ($semuaTransaksi as $item) {
+            $tglTransaksi = Carbon::parse($item->tanggal_transaksi);
+            
+            // Jika transaksi terjadi SEBELUM bulan yang dipilih, tambahkan/kurangi ke saldo awal
+            if ($tglTransaksi->lt($tanggalMulai)) {
+                if ($item->id_jenis_transaksi == 1) { // Setoran / Plus
+                    $saldoAwalBulan += (float) $item->jumlah;
+                } elseif ($item->id_jenis_transaksi == 2) { // Penarikan / Minus
+                    $saldoAwalBulan -= (float) $item->jumlah;
+                }
+            } else {
+                break; // Karena sudah diurutkan ASC, kita bisa berhenti saat mencapai bulan target
+            }
         }
 
-        $saldoAkhirBulan = $saldoSekarang - $pengaruhSetelahBulan;
-
-        $transaksiDalamBulan = $transaksi->filter(function ($item) use ($tanggalMulai, $tanggalSelesai) {
-            return Carbon::parse($item->tanggal_transaksi)->between($tanggalMulai, $tanggalSelesai);
+        // 3. Filter transaksi yang HANYA terjadi di dalam bulan yang dipilih
+        $transaksiBulanIni = $semuaTransaksi->filter(function ($item) use ($tanggalMulai, $tanggalSelesai) {
+            $tgl = Carbon::parse($item->tanggal_transaksi);
+            return $tgl->between($tanggalMulai, $tanggalSelesai);
         });
 
-        $pengaruhDalamBulan = 0;
-        foreach ($transaksiDalamBulan as $item) {
-            if ($item->id_jenis_transaksi == 1) $pengaruhDalamBulan += (float) $item->jumlah;
-            elseif ($item->id_jenis_transaksi == 2) $pengaruhDalamBulan -= (float) $item->jumlah;
-        }
-
-        $saldoAwalBulan = $saldoAkhirBulan - $pengaruhDalamBulan;
+        // 4. Loop per hari dalam bulan tersebut untuk membuat tampilan mutasi harian
+        $jumlahHari = $tanggalMulai->daysInMonth;
         $mutasi = [];
         $saldoBerjalan = $saldoAwalBulan;
-        $totalSaldoHarian = 0;
         $totalDebet = 0;
         $totalKredit = 0;
-        $jumlahHari = $tanggalMulai->daysInMonth;
+        $totalSaldoHarian = 0;
 
         for ($i = 0; $i < $jumlahHari; $i++) {
-            $tanggal = $tanggalMulai->copy()->addDays($i);
-            $transaksiHariIni = $transaksi->filter(fn($item) => Carbon::parse($item->tanggal_transaksi)->isSameDay($tanggal));
+            $tanggalLoop = $tanggalMulai->copy()->addDays($i);
+            
+            // Cari transaksi di hari ini
+            $transaksiHariIni = $transaksiBulanIni->filter(fn($item) => Carbon::parse($item->tanggal_transaksi)->isSameDay($tanggalLoop));
             
             $debetHariIni = 0;
             $kreditHariIni = 0;
@@ -245,20 +250,27 @@ class AdminSaldoController extends Controller
                 if ($item->id_jenis_transaksi == 2) $debetHariIni += $jumlah;
             }
 
+            // Update saldo berjalan (Maju kronologis)
             $saldoBerjalan = $saldoBerjalan + $kreditHariIni - $debetHariIni;
+            
             $totalDebet += $debetHariIni;
             $totalKredit += $kreditHariIni;
-            $totalSaldoHarian += $saldoBerjalan;
+            $totalSaldoHarian += $saldoBerjalan; // Akumulasi untuk hitung rata-rata
 
+            // Tentukan jenis transaksi untuk label
             $jenis = '-';
-            if ($kreditHariIni > 0 && $debetHariIni > 0) $jenis = 'setoran & penarikan';
-            elseif ($kreditHariIni > 0) $jenis = 'setoran';
-            elseif ($debetHariIni > 0) $jenis = 'penarikan';
+            if ($kreditHariIni > 0 && $debetHariIni > 0) {
+                $jenis = 'Setoran & Penarikan';
+            } elseif ($kreditHariIni > 0) {
+                $jenis = 'Setoran';
+            } elseif ($debetHariIni > 0) {
+                $jenis = 'Penarikan';
+            }
 
             $mutasi[] = [
                 'no_rek' => $noRek,
                 'nama' => $nasabah->nama,
-                'tanggal' => $tanggal->format('Y-m-d'),
+                'tanggal' => $tanggalLoop->format('Y-m-d'),
                 'jenis' => $jenis,
                 'debit' => $debetHariIni,
                 'kredit' => $kreditHariIni,
@@ -266,7 +278,9 @@ class AdminSaldoController extends Controller
             ];
         }
 
-        $rataRataSaldo = $jumlahHari > 0 ? $totalSaldoHarian / $jumlahHari : 0;
+        // Saldo akhir bulan adalah saldo berjalan di hari terakhir
+        $saldoAkhirBulan = $saldoBerjalan;
+        $rataRataSaldo = $jumlahHari > 0 ? ($totalSaldoHarian / $jumlahHari) : 0;
 
         return response()->json([
             'success' => true,

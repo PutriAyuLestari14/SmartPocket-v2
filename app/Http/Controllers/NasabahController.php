@@ -7,8 +7,6 @@ use App\Models\Nasabah;
 use App\Models\RekeningTabungan;
 use App\Models\DetailTabungan;
 use App\Models\NomorRekeningCounter;
-use App\Models\Peminjaman;
-use App\Models\Angsuran;
 use App\Http\Controllers\NotifikasiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -18,10 +16,8 @@ class NasabahController extends Controller
 {
     public function index(Request $request)
     {
-        // MENGGUNAKAN VIEW DATABASE (v_data_lengkap_nasabah)
         $query = DB::table('v_data_lengkap_nasabah');
 
-        // Filter pencarian
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -31,17 +27,14 @@ class NasabahController extends Controller
             });
         }
 
-        // Filter status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Pagination
         $nasabahs = $query->orderBy('id_nasabah', 'desc')
             ->paginate(10)
             ->withQueryString();
 
-        // MENGGUNAKAN STORED PROCEDURE (sp_ringkasan_nasabah)
         $ringkasan = DB::select('CALL sp_ringkasan_nasabah()');
         
         $totalNasabah = $ringkasan[0]->total_semua ?? 0;
@@ -49,184 +42,208 @@ class NasabahController extends Controller
         $nasabahNonaktif = $totalNasabah - $nasabahAktif;
         $totalSaldo = $ringkasan[0]->total_uang_beredar ?? 0;
 
-        // Hitung nasabah baru bulan ini
         $nasabahBaru = Nasabah::whereMonth('tanggal_daftar', now()->month)
             ->whereYear('tanggal_daftar', now()->year)
             ->count();
 
         return view('operator.nasabah.index', compact(
-            'nasabahs',
-            'totalNasabah',
-            'nasabahAktif',
-            'nasabahNonaktif',
-            'nasabahBaru',
-            'totalSaldo'
+            'nasabahs', 'totalNasabah', 'nasabahAktif', 'nasabahNonaktif', 'nasabahBaru', 'totalSaldo'
         ));
     }
 
-    public function store(Request $request)
+    public function create()
     {
-        $request->validate([
-            'username' => 'required|string|max:255|unique:users,username',
-            'nama' => 'required|string|max:255',
-            'kategori' => 'required|string|max:100',
-            'prefix' => 'required|string|max:10',
-            'alamat' => 'nullable|string',
-            'saldo' => 'nullable|numeric|min:0',
-            'tanggal_daftar' => 'required|date',
-            'status' => 'required|string',
-            'password' => 'nullable|string|min:6',
-            'buku_tabungan' => 'required|in:tidak,terpisah,potong',
-        ], [
-            'username.required' => 'NISN / NIP wajib diisi.',
-            'username.unique' => 'NISN / NIP ini sudah terdaftar. Gunakan nomor lain.',
-            'nama.required' => 'Nama lengkap wajib diisi.',
-            'kategori.required' => 'Jenis nasabah wajib dipilih.',
-            'prefix.required' => 'No. Rekening (prefix) wajib diisi.',
-            'saldo.numeric' => 'Saldo awal harus berupa angka.',
-            'saldo.min' => 'Saldo awal tidak boleh negatif.',
-            'tanggal_daftar.required' => 'Tanggal daftar wajib diisi.',
-            'status.required' => 'Status wajib dipilih.',
-            'password.min' => 'Password minimal 6 karakter.',
-            'buku_tabungan.required' => 'Pilihan buku tabungan wajib dipilih.',
+        return view('operator.nasabah.create');
+    }
+
+   public function store(Request $request)
+{
+    $request->validate([
+        'username' => 'required|string|max:255|unique:users,username',
+        'nama' => 'required|string|max:255',
+        'kategori' => 'required|string|max:100',
+        'prefix' => 'required|string|max:10',
+        'alamat' => 'nullable|string',
+        'saldo' => 'nullable|numeric|min:0',
+        'tanggal_daftar' => 'required|date',
+        'status' => 'required|string',
+        'password' => 'nullable|string|min:6',
+        'buku_tabungan' => 'required|in:tidak,terpisah,potong',
+    ], [
+        'username.required' => 'NISN / NIP wajib diisi.',
+        'username.unique' => 'NISN / NIP ini sudah terdaftar. Gunakan nomor lain.',
+        'nama.required' => 'Nama lengkap wajib diisi.',
+        'kategori.required' => 'Jenis nasabah wajib dipilih.',
+        'prefix.required' => 'No. Rekening (prefix) wajib diisi.',
+        'saldo.numeric' => 'Saldo awal harus berupa angka.',
+        'saldo.min' => 'Saldo awal tidak boleh negatif.',
+        'tanggal_daftar.required' => 'Tanggal daftar wajib diisi.',
+        'status.required' => 'Status wajib dipilih.',
+        'password.min' => 'Password minimal 6 karakter.',
+        'buku_tabungan.required' => 'Pilihan buku tabungan wajib dipilih.',
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+        $saldoAwal = (int) ($request->saldo ?? 0);
+        $biayaBuku = 5000;
+        $pilihanBuku = $request->buku_tabungan;
+
+        $totalDibayarNasabah = $saldoAwal;
+        $saldoAkhirRekening = $saldoAwal;
+
+        // 1. HITUNG SALDO AKHIR & TOTAL BAYAR BERDASARKAN PILIHAN BUKU
+        if ($pilihanBuku === 'terpisah') {
+            // Terpisah: Biaya buku DITAMBAH ke total bayar, TIDAK mengurangi saldo
+            $totalDibayarNasabah = $saldoAwal + $biayaBuku;
+            $saldoAkhirRekening = $saldoAwal; // SALDO TETAP UTUH
+        }
+
+        if ($pilihanBuku === 'potong') {
+            // Potong: Biaya buku SUDAH TERMASUK di saldo, mengurangi saldo
+            if ($saldoAwal < $biayaBuku) {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('error', 'Saldo awal minimal Rp 5.000 jika memilih potongan biaya buku.');
+            }
+            $saldoAkhirRekening = $saldoAwal - $biayaBuku; // SALDO BERKURANG
+        }
+
+        // 2. GENERATE NOMOR REKENING
+        $prefix = strtoupper(trim($request->prefix));
+        $counter = NomorRekeningCounter::where('prefix', $prefix)->lockForUpdate()->first();
+
+        if (!$counter) {
+            $counter = NomorRekeningCounter::create([
+                'prefix' => $prefix,
+                'nomor_terakhir' => 0,
+            ]);
+        }
+
+        $nextNumber = $counter->nomor_terakhir + 1;
+        $counter->update(['nomor_terakhir' => $nextNumber]);
+        $noRek = $prefix . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+
+        // 3. BUAT DATA USER, NASABAH, DAN REKENING
+        $user = User::create([
+            'username' => $request->username,
+            'name' => $request->nama,
+            'password' => Hash::make($request->password ?? 'nasabah123'),
+            'role' => 'nasabah',
         ]);
 
-        DB::beginTransaction();
+        $nasabah = Nasabah::create([
+            'username' => $user->username,
+            'no_rek' => $noRek,
+            'nama' => $request->nama,
+            'kategori' => $request->kategori,
+            'alamat' => $request->alamat,
+            'tanggal_daftar' => $request->tanggal_daftar,
+            'status' => $request->status,
+        ]);
 
-        try {
-            $saldoAwal = (int) ($request->saldo ?? 0);
-            $biayaBuku = 5000;
+        RekeningTabungan::create([
+            'no_rek' => $noRek,
+            'id_nasabah' => $nasabah->id_nasabah,
+            'saldo' => $saldoAkhirRekening, 
+        ]);
 
-            $totalDibayarNasabah = $saldoAwal;
-            $saldoAkhirRekening = $saldoAwal;
+        // 4. CATAT TRANSAKSI DI DETAIL TABUNGAN
+        $petugas = auth()->user()->petugas;
+        if (!$petugas) {
+            throw new \RuntimeException('Data petugas yang sedang login tidak ditemukan.');
+        }
 
-            if ($request->buku_tabungan === 'terpisah') {
-                $totalDibayarNasabah = $saldoAwal + $biayaBuku;
-            }
-
-            if ($request->buku_tabungan === 'potong') {
-                if ($saldoAwal < $biayaBuku) {
-                    DB::rollBack();
-                    return redirect()->back()->withInput()->with('error', 'Saldo awal harus minimal Rp 5.000 jika biaya buku dipotong dari saldo.');
-                }
-                $saldoAkhirRekening = $saldoAwal - $biayaBuku;
-            }
-
-            $prefix = strtoupper(trim($request->prefix));
-            $counter = NomorRekeningCounter::where('prefix', $prefix)->lockForUpdate()->first();
-
-            if (!$counter) {
-                $counter = NomorRekeningCounter::create([
-                    'prefix' => $prefix,
-                    'nomor_terakhir' => 0,
-                ]);
-            }
-
-            $nextNumber = $counter->nomor_terakhir + 1;
-            $counter->update(['nomor_terakhir' => $nextNumber]);
-
-            $noRek = $prefix . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
-
-            $user = User::create([
-                'username' => $request->username,
-                'name' => $request->nama,
-                'password' => Hash::make($request->password ?? 'nasabah123'),
-                'role' => 'nasabah',
-            ]);
-
-            $nasabah = Nasabah::create([
-                'username' => $user->username,
-                'no_rek' => $noRek,
-                'nama' => $request->nama,
-                'kategori' => $request->kategori,
-                'alamat' => $request->alamat,
-                'tanggal_daftar' => $request->tanggal_daftar,
-                'status' => $request->status,
-            ]);
-
-            RekeningTabungan::create([
-                'no_rek' => $noRek,
-                'id_nasabah' => $nasabah->id_nasabah,
-                'saldo' => $saldoAkhirRekening,
-            ]);
-
-            // Catat Setoran Saldo Awal
-            if ($saldoAwal > 0) {
-                $jenisSetoran = DB::table('jenis_transaksi')->where('setoran', 'setoran')->first();
-                if ($jenisSetoran) {
-                    $petugas = auth()->user()->petugas;
-                    if (!$petugas) throw new \RuntimeException('Data petugas yang sedang login tidak ditemukan.');
-
-                    DetailTabungan::create([
-                        'no_rek' => $noRek,
-                        'id_petugas' => $petugas->id_petugas,
-                        'id_jenis_transaksi' => $jenisSetoran->id_jenis_transaksi,
-                        'jumlah' => $saldoAwal,
-                        'tanggal_transaksi' => now('Asia/Jakarta'),
-                        'status' => 'berhasil',
-                        'keterangan' => 'Saldo Awal',
-                    ]);
-
-                    NotifikasiController::kirim(
-                        $nasabah->id_nasabah,
-                        'Setoran Awal Berhasil',
-                        'Setoran awal sebesar Rp ' . number_format($saldoAwal, 0, ',', '.') . ' telah berhasil dicatat.',
-                        'setoran'
-                    );
-                }
-            }
-
-            // Catat Pendapatan Buku Tabungan (Terpisah)
-            if ($request->buku_tabungan === 'terpisah') {
-                $jenisBiaya = DB::table('jenis_transaksi')->where('setoran', 'setoran')->first();
-                if (!$jenisBiaya) throw new \RuntimeException('Jenis transaksi untuk pencatatan biaya buku tidak ditemukan.');
-                
-                $petugas = auth()->user()->petugas;
-                if (!$petugas) throw new \RuntimeException('Data petugas yang sedang login tidak ditemukan.');
-
+        // A. Catat Setoran Awal (Jika saldo > 0)
+        if ($saldoAwal > 0) {
+            $jenisSetoran = DB::table('jenis_transaksi')
+                ->where(function($q) {
+                    $q->whereRaw('LOWER(TRIM(setoran)) = ?', ['setoran'])
+                      ->orWhere('setoran', 'Setoran');
+                })
+                ->first();
+            
+            if ($jenisSetoran) {
                 DetailTabungan::create([
                     'no_rek' => $noRek,
                     'id_petugas' => $petugas->id_petugas,
-                    'id_jenis_transaksi' => $jenisBiaya->id_jenis_transaksi,
-                    'jumlah' => $biayaBuku,
+                    'id_jenis_transaksi' => $jenisSetoran->id_jenis_transaksi,
+                    'jumlah' => $saldoAwal,
                     'tanggal_transaksi' => now('Asia/Jakarta'),
                     'status' => 'berhasil',
-                    'keterangan' => 'Pembayaran Buku Tabungan',
+                    'keterangan' => 'Saldo Awal',
                 ]);
+
+                NotifikasiController::kirim(
+                    $nasabah->id_nasabah,
+                    'Setoran Awal Berhasil',
+                    'Setoran awal sebesar Rp ' . number_format($saldoAwal, 0, ',', '.') . ' telah berhasil dicatat.',
+                    'setoran'
+                );
             }
-
-            // Catat Potongan Biaya Buku dari Saldo Awal
-            if ($request->buku_tabungan === 'potong') {
-                $jenisBiaya = DB::table('jenis_transaksi')->where('penarikan', 'penarikan')->first();
-                if (!$jenisBiaya) {
-                    $jenisBiaya = DB::table('jenis_transaksi')->orderBy('id_jenis_transaksi', 'asc')->skip(1)->first();
-                }
-
-                if ($jenisBiaya) {
-                    $petugas = auth()->user()->petugas;
-                    if (!$petugas) throw new \RuntimeException('Data petugas yang sedang login tidak ditemukan.');
-
-                    DetailTabungan::create([
-                        'no_rek' => $noRek,
-                        'id_petugas' => $petugas->id_petugas,
-                        'id_jenis_transaksi' => $jenisBiaya->id_jenis_transaksi,
-                        'jumlah' => $biayaBuku,
-                        'tanggal_transaksi' => now('Asia/Jakarta'),
-                        'status' => 'berhasil',
-                        'keterangan' => 'Potongan Biaya Buku Tabungan',
-                    ]);
-                }
-            }
-
-            DB::commit();
-
-            return redirect()->route('operator.nasabah.index')->with('success', 'Nasabah berhasil ditambahkan. Total pembayaran Rp ' . number_format($totalDibayarNasabah, 0, ',', '.') . ', saldo akhir rekening Rp ' . number_format($saldoAkhirRekening, 0, ',', '.') . '.');
-
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return redirect()->back()->withInput()->with('error', 'Gagal menambahkan nasabah: ' . $e->getMessage());
         }
+
+        // B. Catat Biaya Buku - LOGIKA YANG BENAR
+        if ($pilihanBuku === 'terpisah') {
+            // TERPISAH: TIDAK catat di detail_tabungan!
+            // Biaya buku adalah pembayaran di luar rekening nasabah
+            // Saldo tetap utuh = 500.000
+            // (Biaya buku bisa dicatat di tabel pendapatan BMT jika perlu)
+        }
+
+        if ($pilihanBuku === 'potong') {
+            // POTONG: Catat sebagai PENARIKAN di detail_tabungan
+            // Ini akan mengurangi saldo dari 500.000 jadi 495.000
+            $jenisBiaya = DB::table('jenis_transaksi')
+                ->where(function($q) {
+                    $q->whereRaw('LOWER(TRIM(penarikan)) = ?', ['penarikan'])
+                      ->orWhere('penarikan', 'Penarikan');
+                })
+                ->first();
+
+            // FALLBACK: Paksa pakai ID 2
+            if (!$jenisBiaya) {
+                $jenisBiaya = DB::table('jenis_transaksi')->find(2);
+            }
+
+            if (!$jenisBiaya) {
+                throw new \RuntimeException('Gagal menemukan jenis transaksi Penarikan (ID 2) di database!');
+            }
+
+            DetailTabungan::create([
+                'no_rek' => $noRek,
+                'id_petugas' => $petugas->id_petugas,
+                'id_jenis_transaksi' => $jenisBiaya->id_jenis_transaksi,
+                'jumlah' => $biayaBuku,
+                'tanggal_transaksi' => now('Asia/Jakarta'),
+                'status' => 'berhasil',
+                'keterangan' => 'Potongan Biaya Buku Tabungan',
+            ]);
+        }
+
+        DB::commit();
+
+        $pesan = 'Nasabah berhasil ditambahkan. ';
+        
+        if ($pilihanBuku === 'terpisah') {
+            $pesan .= 'Total dibayar: Rp ' . number_format($totalDibayarNasabah, 0, ',', '.') . ' ';
+            $pesan .= '(Termasuk biaya buku Rp 5.000 terpisah). ';
+            $pesan .= 'Saldo masuk rekening: Rp ' . number_format($saldoAkhirRekening, 0, ',', '.') . '.';
+        } elseif ($pilihanBuku === 'potong') {
+            $pesan .= 'Total dibayar: Rp ' . number_format($totalDibayarNasabah, 0, ',', '.') . '. ';
+            $pesan .= 'Saldo masuk rekening: Rp ' . number_format($saldoAkhirRekening, 0, ',', '.') . ' ';
+            $pesan .= '(Sudah dipotong biaya buku Rp 5.000).';
+        } else {
+            $pesan .= 'Saldo masuk rekening: Rp ' . number_format($saldoAkhirRekening, 0, ',', '.') . '.';
+        }
+
+        return redirect()->route('operator.nasabah.index')->with('success', $pesan);
+
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        return redirect()->back()->withInput()->with('error', 'Gagal menambahkan nasabah: ' . $e->getMessage());
     }
+}
 
     public function edit($id)
     {
@@ -277,7 +294,6 @@ class NasabahController extends Controller
     {
         $nasabah = Nasabah::findOrFail($id);
 
-        // Cek apakah nasabah punya riwayat transaksi
         $adaTransaksi = DetailTabungan::where('no_rek', $nasabah->no_rek)->exists();
 
         if ($adaTransaksi) {
@@ -289,13 +305,8 @@ class NasabahController extends Controller
         try {
             $username = $nasabah->username;
             
-            // Hapus rekening terlebih dahulu
             $nasabah->rekening()->delete();
-            
-            // Hapus data nasabah
             $nasabah->delete();
-            
-            // Hapus akun user login
             User::where('username', $username)->delete();
 
             DB::commit();
