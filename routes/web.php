@@ -23,7 +23,8 @@ use App\Http\Controllers\OperatorLaporanController;
 use App\Http\Controllers\OperatorSetoranController; 
 use App\Http\Controllers\OperatorPenarikanController; 
 use App\Http\Controllers\OperatorPembayaranController;
-use App\Http\Controllers\OperatorNotifikasiController; 
+use App\Http\Controllers\OperatorNotifikasiController;
+use App\Http\Controllers\OperatorPencairanController; 
 
 // ⬇️ TAMBAHKAN IMPORT INI DI ATAS ⬇️
 use App\Http\Controllers\AdminUpdateSaldoController; 
@@ -106,6 +107,17 @@ Route::get('/', function () {
 
         // transaksi riwayat
         Route::get('/transaksi', [TransaksiController::class, 'index'])->name('operator.transaksi.index');
+
+        //pencairan
+        Route::get('/pencairan', [
+            OperatorPencairanController::class,
+            'index'
+        ])->name('operator.pencairan.index');
+
+        Route::post('/pencairan/{id}/cairkan', [
+            OperatorPencairanController::class,
+            'cairkan'
+        ])->name('operator.pencairan.cairkan');
 
         // laporan
         Route::get('/laporan', [OperatorLaporanController::class, 'index'])->name('operator.laporan.index');

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -164,15 +165,10 @@
                             </p>
                             <p class="text-[10px] font-bold text-slate-400 mt-0.5">Operator</p>
                         </div>
-                        
-                        <!-- ========================================== -->
-                        <!-- HANYA BAGIAN INI YANG DIUBAH (ROUNDED-FULL) -->
-                        <!-- ========================================== -->
+
                         <div class="w-11 h-11 rounded-full overflow-hidden gradient-vibrant text-white font-black text-sm flex items-center justify-center border-2 border-white shadow-lg shadow-primary/20 flex-shrink-0">
                             {{ strtoupper(substr(auth()->user()->petugas->nama_lengkap ?? auth()->user()->name, 0, 1)) }}
                         </div>
-                        <!-- ========================================== -->
-
                     </div>
                 </header>
 
@@ -216,13 +212,21 @@
                             <tbody class="divide-y divide-slate-100">
                                 @forelse($transaksi as $item)
                                     @php
-                                        $isPendapatanLainLain = $item->is_pendapatan_lain_lain ?? false;
-                                        $isSetoran = !$isPendapatanLainLain && $item->id_jenis_transaksi == 1;
-                                        $isPenarikan = !$isPendapatanLainLain && $item->id_jenis_transaksi == 2;
+                                        $isPendapatanLainLain = (bool) ($item->is_pendapatan_lain_lain ?? false);
+                                        $keteranganTransaksi = strtolower(trim((string) ($item->keterangan ?? '')));
+
+                                        // Pendapatan Lain-lain dan Bagi Hasil adalah kategori berbeda.
+                                        $isBagiHasil = !$isPendapatanLainLain
+                                            && str_contains($keteranganTransaksi, 'bagi hasil');
+
+                                        $isSetoran = !$isPendapatanLainLain && (int) $item->id_jenis_transaksi === 1;
+                                        $isPenarikan = !$isPendapatanLainLain && (int) $item->id_jenis_transaksi === 2;
+
                                         $amountFormatted = 'Rp ' . number_format($item->jumlah, 0, ',', '.');
 
                                         $statusClass = 'bg-slate-100 text-slate-700';
                                         $statusText = ucfirst($item->status);
+
                                         if ($item->status == 'berhasil') {
                                             $statusClass = 'bg-emerald-100 text-emerald-700';
                                         } elseif ($item->status == 'pending') {
@@ -230,18 +234,29 @@
                                         } elseif (in_array($item->status, ['ditolak', 'gagal'])) {
                                             $statusClass = 'bg-red-100 text-red-700';
                                         }
+
+                                        $tanggalTransaksi = \Carbon\Carbon::parse($item->tanggal_transaksi);
                                     @endphp
 
                                     <tr class="hover:bg-mintLight/20 transition-colors">
+                                        <!-- Waktu transaksi -->
                                         <td class="px-6 py-4 align-middle">
-                                            <p class="text-sm font-black text-slate-900">
-                                                {{ $item->tanggal_transaksi->copy()->timezone('Asia/Jakarta')->format('H:i') }} WIB
-                                            </p>
-                                            <p class="text-[10px] text-slate-400 mt-0.5 font-medium">
-                                                {{ $item->tanggal_transaksi->format('d M Y') }}
-                                            </p>
+                                            @if($isBagiHasil)
+                                                <p class="text-sm font-black text-slate-900">Bagi Hasil</p>
+                                                <p class="text-[10px] text-slate-400 mt-0.5 font-medium">
+                                                    {{ $tanggalTransaksi->locale('id')->translatedFormat('F Y') }}
+                                                </p>
+                                            @else
+                                                <p class="text-sm font-black text-slate-900">
+                                                    {{ $tanggalTransaksi->copy()->timezone('Asia/Jakarta')->format('H:i') }} WIB
+                                                </p>
+                                                <p class="text-[10px] text-slate-400 mt-0.5 font-medium">
+                                                    {{ $tanggalTransaksi->format('d M Y') }}
+                                                </p>
+                                            @endif
                                         </td>
 
+                                        <!-- Nasabah -->
                                         <td class="px-6 py-4 align-middle">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-mintLight to-emerald-100 flex items-center justify-center flex-shrink-0">
@@ -260,22 +275,34 @@
                                             </div>
                                         </td>
 
+                                        <!-- Jenis transaksi -->
                                         <td class="px-6 py-4 align-middle">
-                                            @if($isPendapatanLainLain)
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-700 rounded-xl text-[10px] font-black border border-amber-200">
-                                                    <i class="fas fa-coins text-[8px]"></i> Pendapatan Lain-lain
+                                            @if($isBagiHasil)
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-black border border-amber-200">
+                                                    <i class="fas fa-coins text-[8px]"></i>
+                                                    Bagi Hasil
+                                                </span>
+                                            @elseif($isPendapatanLainLain)
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-black border border-blue-200">
+                                                    <i class="fas fa-wallet text-[8px]"></i>
+                                                    Pendapatan Lain-lain
                                                 </span>
                                             @elseif($isSetoran)
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-mintLight text-primary rounded-xl text-[10px] font-black border border-primary/20">
                                                     <i class="fas fa-arrow-down text-[8px]"></i> Setoran
                                                 </span>
-                                            @else
+                                            @elseif($isPenarikan)
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-700 rounded-xl text-[10px] font-black border border-rose-200">
                                                     <i class="fas fa-arrow-up text-[8px]"></i> Penarikan
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-700 rounded-xl text-[10px] font-black border border-slate-200">
+                                                    <i class="fas fa-exchange-alt text-[8px]"></i> Lainnya
                                                 </span>
                                             @endif
                                         </td>
 
+                                        <!-- Tarik -->
                                         <td class="px-6 py-4 text-right align-middle">
                                             @if($isPenarikan)
                                                 <span class="text-sm font-black text-rose-600">{{ $amountFormatted }}</span>
@@ -284,6 +311,7 @@
                                             @endif
                                         </td>
 
+                                        <!-- Setor -->
                                         <td class="px-6 py-4 text-right align-middle">
                                             @if($isSetoran)
                                                 <span class="text-sm font-black text-primary">{{ $amountFormatted }}</span>
@@ -292,14 +320,16 @@
                                             @endif
                                         </td>
 
+                                        <!-- Pendapatan -->
                                         <td class="px-6 py-4 text-right align-middle">
                                             @if($isPendapatanLainLain)
-                                                <span class="text-sm font-black text-amber-600">{{ $amountFormatted }}</span>
+                                                <span class="text-sm font-black text-blue-600">{{ $amountFormatted }}</span>
                                             @else
                                                 <span class="text-slate-300 text-sm font-medium">—</span>
                                             @endif
                                         </td>
 
+                                        <!-- Status -->
                                         <td class="px-6 py-4 text-center align-middle">
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 {{ $statusClass }} rounded-xl text-[10px] font-black border">
                                                 @if($item->status == 'berhasil')
@@ -332,13 +362,20 @@
                     <div class="md:hidden divide-y divide-slate-100">
                         @forelse($transaksi as $item)
                             @php
-                                $isPendapatanLainLain = $item->is_pendapatan_lain_lain ?? false;
-                                $isSetoran = !$isPendapatanLainLain && $item->id_jenis_transaksi == 1;
-                                $isPenarikan = !$isPendapatanLainLain && $item->id_jenis_transaksi == 2;
+                                $isPendapatanLainLain = (bool) ($item->is_pendapatan_lain_lain ?? false);
+                                $keteranganTransaksi = strtolower(trim((string) ($item->keterangan ?? '')));
+
+                                $isBagiHasil = !$isPendapatanLainLain
+                                    && str_contains($keteranganTransaksi, 'bagi hasil');
+
+                                $isSetoran = !$isPendapatanLainLain && (int) $item->id_jenis_transaksi === 1;
+                                $isPenarikan = !$isPendapatanLainLain && (int) $item->id_jenis_transaksi === 2;
+
                                 $amountFormatted = 'Rp ' . number_format($item->jumlah, 0, ',', '.');
 
                                 $statusClass = 'bg-slate-100 text-slate-700 border-slate-200';
                                 $statusText = ucfirst($item->status);
+
                                 if ($item->status == 'berhasil') {
                                     $statusClass = 'bg-mintLight text-primary border-primary/20';
                                 } elseif ($item->status == 'pending') {
@@ -346,6 +383,8 @@
                                 } elseif (in_array($item->status, ['ditolak', 'gagal'])) {
                                     $statusClass = 'bg-rose-50 text-rose-700 border-rose-200';
                                 }
+
+                                $tanggalTransaksi = \Carbon\Carbon::parse($item->tanggal_transaksi);
                             @endphp
 
                             <div class="p-4 active:bg-slate-50 transition-colors">
@@ -380,27 +419,41 @@
 
                                 <div class="flex justify-between items-end gap-3">
                                     <div>
-                                        @if($isPendapatanLainLain)
-                                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 rounded-lg text-[10px] font-black border border-amber-200">
-                                                <i class="fas fa-coins text-[8px]"></i> Pendapatan Lain-lain
+                                        @if($isBagiHasil)
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 text-amber-700 rounded-lg text-[10px] font-black border border-amber-200">
+                                                <i class="fas fa-coins text-[8px]"></i> Bagi Hasil
+                                            </span>
+                                        @elseif($isPendapatanLainLain)
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-lg text-[10px] font-black border border-blue-200">
+                                                <i class="fas fa-wallet text-[8px]"></i> Pendapatan Lain-lain
                                             </span>
                                         @elseif($isSetoran)
                                             <span class="inline-flex items-center gap-1 px-2 py-1 bg-mintLight text-primary rounded-lg text-[10px] font-black border border-primary/20">
                                                 <i class="fas fa-arrow-down text-[8px]"></i> Setoran
                                             </span>
-                                        @else
+                                        @elseif($isPenarikan)
                                             <span class="inline-flex items-center gap-1 px-2 py-1 bg-rose-50 text-rose-700 rounded-lg text-[10px] font-black border border-rose-200">
                                                 <i class="fas fa-arrow-up text-[8px]"></i> Penarikan
                                             </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-slate-50 text-slate-700 rounded-lg text-[10px] font-black border border-slate-200">
+                                                <i class="fas fa-exchange-alt text-[8px]"></i> Lainnya
+                                            </span>
                                         @endif
 
-                                        <p class="text-[10px] text-slate-400 mt-1.5 font-bold">
-                                            {{ $item->tanggal_transaksi->copy()->timezone('Asia/Jakarta')->format('H:i') }} WIB
-                                            · {{ $item->tanggal_transaksi->format('d M Y') }}
-                                        </p>
+                                        @if($isBagiHasil)
+                                            <p class="text-[10px] text-slate-400 mt-1.5 font-bold">
+                                                {{ $tanggalTransaksi->locale('id')->translatedFormat('F Y') }}
+                                            </p>
+                                        @else
+                                            <p class="text-[10px] text-slate-400 mt-1.5 font-bold">
+                                                {{ $tanggalTransaksi->copy()->timezone('Asia/Jakarta')->format('H:i') }} WIB
+                                                · {{ $tanggalTransaksi->format('d M Y') }}
+                                            </p>
+                                        @endif
                                     </div>
 
-                                    <p class="text-sm font-black {{ $isPendapatanLainLain ? 'text-amber-600' : ($isSetoran ? 'text-primary' : 'text-rose-600') }} whitespace-nowrap">
+                                    <p class="text-sm font-black {{ $isPenarikan ? 'text-rose-600' : ($isPendapatanLainLain ? 'text-blue-600' : 'text-primary') }} whitespace-nowrap">
                                         {{ $isPenarikan ? '- ' : '+ ' }}{{ $amountFormatted }}
                                     </p>
                                 </div>
@@ -418,18 +471,17 @@
 
                     <!-- Pagination -->
                     @if(isset($transaksi) && $transaksi->hasPages())
-                    <div class="p-4 lg:p-5 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-3">
-                        <p class="text-[11px] text-slate-500 font-semibold">
-                            Menampilkan {{ $transaksi->firstItem() }}–{{ $transaksi->lastItem() }} dari {{ $transaksi->total() }} transaksi
-                        </p>
-                        <div class="flex gap-1">
-                            {{ $transaksi->links() }}
+                        <div class="p-4 lg:p-5 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-3">
+                            <p class="text-[11px] text-slate-500 font-semibold">
+                                Menampilkan {{ $transaksi->firstItem() }}–{{ $transaksi->lastItem() }} dari {{ $transaksi->total() }} transaksi
+                            </p>
+                            <div class="flex gap-1">
+                                {{ $transaksi->links() }}
+                            </div>
                         </div>
-                    </div>
                     @endif
 
                 </div>
-
             </div>
         </main>
     </div>
